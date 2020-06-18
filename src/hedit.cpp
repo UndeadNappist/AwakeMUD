@@ -20,8 +20,7 @@ extern int vnum_from_non_connected_zone(int vnum);
 extern char *cleanup(char *dest, const char *src);
 
 #define HT matrix[realcounter]
-void write_host_to_disk(int vnum)
-{
+void write_host_to_disk(int vnum) {
   long realcounter, counter;
   int zone = real_zone(vnum);
   FILE *fl;
@@ -31,8 +30,7 @@ void write_host_to_disk(int vnum)
 
   sprintf(buf, "%s/%d.host", MTX_PREFIX, vnum);
   fl = fopen(buf, "w+");
-  for (counter = zone_table[zone].number * 100;
-       counter <= zone_table[zone].top;
+  for (counter = zone_table[zone].number * 100; counter <= zone_table[zone].top;
        counter++) {
     realcounter = real_host(counter);
     if (realcounter >= 0) {
@@ -81,7 +79,6 @@ void write_host_to_disk(int vnum)
           fprintf(fl, "\t\tStep:\t%d\n", step->step);
           fprintf(fl, "\t\tAlert:\t%s\n", alerts[step->alert]);
           fprintf(fl, "\t\tIC:\t%ld\n", step->ic);
-
         }
       }
       fprintf(fl, "BREAK\n");
@@ -93,100 +90,115 @@ void write_host_to_disk(int vnum)
   write_index_file("host");
 }
 
-void hedit_disp_data_menu(struct descriptor_data *d)
-{
+void hedit_disp_data_menu(struct descriptor_data *d) {
   CLS(CH);
   send_to_char(CH, "^WHost: ^c%d^n\r\n", d->edit_number);
   send_to_char(CH, "^G1^Y) ^WHost: ^c%s^n\r\n", HOST->name);
   if (real_host(HOST->parent) > 0)
-    send_to_char(CH, "^G2^Y) ^WParent Host: ^c%s(%ld)^n\r\n", matrix[real_host(HOST->parent)].name, HOST->parent);
+    send_to_char(CH, "^G2^Y) ^WParent Host: ^c%s(%ld)^n\r\n",
+                 matrix[real_host(HOST->parent)].name, HOST->parent);
   else
     send_to_char(CH, "^G2^Y) ^WParent Host: ^cNowhere(0)^n\r\n");
   send_to_char(CH, "^G3^Y) ^WKeywords: ^c%s^n\r\n", HOST->keywords);
   send_to_char(CH, "^G4^Y) ^WDescription: ^c%s^n\r\n", HOST->desc);
-  send_to_char(CH, "^G5^Y) ^WSecurity: ^c%s-%d^c(%s)^n\r\n", host_sec[HOST->colour], HOST->security,
+  send_to_char(CH, "^G5^Y) ^WSecurity: ^c%s-%d^c(%s)^n\r\n",
+               host_sec[HOST->colour], HOST->security,
                intrusion[HOST->intrusion]);
   send_to_char(CH, "^G6^Y) ^WType: ^c%s^n\r\n", host_type[HOST->type]);
-  send_to_char(CH, "^G7^Y) ^WRatings: A(^c%d^N) C(^c%d^N) I(^c%d^N) F(^c%d^N) S(^c%d^N)\r\n",
-               HOST->stats[ACCESS][0], HOST->stats[CONTROL][0], HOST->stats[INDEX][0],
-               HOST->stats[FILES][0], HOST->stats[SLAVE][0]);
+  send_to_char(
+      CH,
+      "^G7^Y) ^WRatings: A(^c%d^N) C(^c%d^N) I(^c%d^N) F(^c%d^N) S(^c%d^N)\r\n",
+      HOST->stats[ACCESS][0], HOST->stats[CONTROL][0], HOST->stats[INDEX][0],
+      HOST->stats[FILES][0], HOST->stats[SLAVE][0]);
   send_to_char(CH, "^G8^Y) ^WSubsystem Extras\r\n");
   send_to_char(CH, "^G9^Y) ^WTrigger Steps^n\r\n");
   send_to_char(CH, "^G0^Y) ^WExits^n\r\n");
-  send_to_char(CH, "^GA^Y) ^WShutdown Start Text: ^c%s^n\r\n", HOST->shutdown_start);
-  send_to_char(CH, "^GB^Y) ^WShutdown Stop Text: ^c%s^n\r\n", HOST->shutdown_stop);
-  send_to_char("^Gq^Y) ^WQuit\r\n^Gx^Y) ^WQuit without saving\r\n^wEnter selection: ", CH);
+  send_to_char(CH, "^GA^Y) ^WShutdown Start Text: ^c%s^n\r\n",
+               HOST->shutdown_start);
+  send_to_char(CH, "^GB^Y) ^WShutdown Stop Text: ^c%s^n\r\n",
+               HOST->shutdown_stop);
+  send_to_char(
+      "^Gq^Y) ^WQuit\r\n^Gx^Y) ^WQuit without saving\r\n^wEnter selection: ",
+      CH);
   d->edit_mode = HEDIT_MAIN_MENU;
 }
 
-void hedit_disp_subsystem_extras(struct descriptor_data *d)
-{
-  send_to_char(CH, "^G1^Y) ^WAccess Scramble Rating: %2ld Access Trapdoor: %ld\r\n", HOST->stats[ACCESS][2], HOST->stats[ACCESS][5]);
-  send_to_char(CH, "^G2^Y) ^WControl Trapdoor: %ld\r\n", HOST->stats[CONTROL][5]);
+void hedit_disp_subsystem_extras(struct descriptor_data *d) {
+  send_to_char(CH,
+               "^G1^Y) ^WAccess Scramble Rating: %2ld Access Trapdoor: %ld\r\n",
+               HOST->stats[ACCESS][2], HOST->stats[ACCESS][5]);
+  send_to_char(CH, "^G2^Y) ^WControl Trapdoor: %ld\r\n",
+               HOST->stats[CONTROL][5]);
   send_to_char(CH, "^G3^Y) ^WIndex Trapdoor: %ld\r\n", HOST->stats[INDEX][5]);
-  send_to_char(CH, "^G4^Y) ^WFiles Scramble Rating: %2ld Files Trapdoor: %ld\r\n", HOST->stats[FILES][2], HOST->stats[FILES][5]);
-  send_to_char(CH, "^G5^Y) ^WSlave Scramble Rating: %2ld Slave Trapdoor: %ld\r\n", HOST->stats[SLAVE][2], HOST->stats[SLAVE][5]);
+  send_to_char(CH,
+               "^G4^Y) ^WFiles Scramble Rating: %2ld Files Trapdoor: %ld\r\n",
+               HOST->stats[FILES][2], HOST->stats[FILES][5]);
+  send_to_char(CH,
+               "^G5^Y) ^WSlave Scramble Rating: %2ld Slave Trapdoor: %ld\r\n",
+               HOST->stats[SLAVE][2], HOST->stats[SLAVE][5]);
   send_to_char(CH, "^Gq^Y) ^WQuit\r\n^wEnter selection: ");
   d->edit_mode = HEDIT_EXTRA_MENU;
 }
 
-void hedit_disp_trigger_menu(struct descriptor_data *d)
-{
+void hedit_disp_trigger_menu(struct descriptor_data *d) {
   struct trigger_step *trigger;
   int i = 1;
   CLS(CH);
-  for (trigger = HOST->trigger; trigger; trigger = trigger->next)
-  {
-    send_to_char(CH, "^G%d^Y) ^WStep ^c%d^n Go to alert ^c%s^n Load IC ^c%s(%ld)^n\r\n",
-                 i, trigger->step, alerts[trigger->alert], trigger->ic ? ic_proto[real_ic(trigger->ic)].name : "None", trigger->ic);
+  for (trigger = HOST->trigger; trigger; trigger = trigger->next) {
+    send_to_char(
+        CH, "^G%d^Y) ^WStep ^c%d^n Go to alert ^c%s^n Load IC ^c%s(%ld)^n\r\n",
+        i, trigger->step, alerts[trigger->alert],
+        trigger->ic ? ic_proto[real_ic(trigger->ic)].name : "None",
+        trigger->ic);
     i++;
   }
-  send_to_char("\r\n^Ga^Y) ^WAdd new trigger\r\n^Gd^Y) ^WDelete a trigger\r\n^Gq^Y) ^WQuit\r\n^wEnter selection: ", CH);
+  send_to_char("\r\n^Ga^Y) ^WAdd new trigger\r\n^Gd^Y) ^WDelete a "
+               "trigger\r\n^Gq^Y) ^WQuit\r\n^wEnter selection: ",
+               CH);
   d->edit_mode = HEDIT_TRIGGER;
 }
 
-void hedit_disp_exit_menu(struct descriptor_data *d)
-{
+void hedit_disp_exit_menu(struct descriptor_data *d) {
   struct exit_data *exit;
   int i = 0;
   CLS(CH);
-  for (exit = HOST->exit; exit; exit = exit->next)
-  {
-    send_to_char(CH, "^G%d^Y) ^c%s^N(^c%ld^N) ^c%s^n%s: %s\r\n",
-                 i,
-                 (real_host(exit->host) >= 0 && exit->addresses) ? matrix[real_host(exit->host)].name : "Nowhere",
-                 exit->host,
-                 exit->addresses,
-                 exit->hidden ? " (hidden)" : "",
-                 (exit->roomstring && *(exit->roomstring)) ? exit->roomstring : "(none)");
+  for (exit = HOST->exit; exit; exit = exit->next) {
+    send_to_char(CH, "^G%d^Y) ^c%s^N(^c%ld^N) ^c%s^n%s: %s\r\n", i,
+                 (real_host(exit->host) >= 0 && exit->addresses)
+                     ? matrix[real_host(exit->host)].name
+                     : "Nowhere",
+                 exit->host, exit->addresses, exit->hidden ? " (hidden)" : "",
+                 (exit->roomstring && *(exit->roomstring)) ? exit->roomstring
+                                                           : "(none)");
     i++;
   }
-  send_to_char("\r\n^Ga^Y) ^WAdd new exit\r\n^Gd^Y) ^WDelete an exit\r\n^Gq^Y) ^WQuit\r\n^wEnter selection: ", CH);
+  send_to_char("\r\n^Ga^Y) ^WAdd new exit\r\n^Gd^Y) ^WDelete an exit\r\n^Gq^Y) "
+               "^WQuit\r\n^wEnter selection: ",
+               CH);
   d->edit_mode = HEDIT_EXIT;
-
 }
 
-void hedit_disp_rating_menu(struct descriptor_data *d)
-{
+void hedit_disp_rating_menu(struct descriptor_data *d) {
   CLS(CH);
-  send_to_char(CH, "^G1^Y) ^WAccess: ^c%d^n\r\n"
+  send_to_char(CH,
+               "^G1^Y) ^WAccess: ^c%d^n\r\n"
                "^G2^Y) ^WControl: ^c%d^n\r\n"
                "^G3^Y) ^WIndex: ^c%d^n\r\n"
                "^G4^Y) ^WFiles: ^c%d^n\r\n"
                "^G5^Y) ^WSlave: ^c%d^n\r\n"
                "^Gq^Y) ^WReturn to main^n\r\n"
-               "^wEnter selection: ", HOST->stats[ACCESS][0], HOST->stats[CONTROL][0], HOST->stats[INDEX][0], HOST->stats[FILES][0], HOST->stats[SLAVE][0]);
+               "^wEnter selection: ",
+               HOST->stats[ACCESS][0], HOST->stats[CONTROL][0],
+               HOST->stats[INDEX][0], HOST->stats[FILES][0],
+               HOST->stats[SLAVE][0]);
 
   d->edit_mode = HEDIT_RATINGS;
 }
 
-
-void hedit_parse(struct descriptor_data *d, const char *arg)
-{
+void hedit_parse(struct descriptor_data *d, const char *arg) {
   long number, host_num;
   int i = 0;
-  switch (d->edit_mode)
-  {
+  switch (d->edit_mode) {
   case HEDIT_CONFIRM_EDIT:
     switch (*arg) {
     case 'y':
@@ -211,61 +223,64 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
     switch (*arg) {
     case 'y':
     case 'Y': {
-        if (!vnum_from_non_connected_zone(d->edit_number)) {
-          sprintf(buf,"%s wrote new host #%ld",
-                  GET_CHAR_NAME(d->character), d->edit_number);
-          mudlog(buf, d->character, LOG_WIZLOG, TRUE);
-        }
-        host_num = real_host(d->edit_number);
-        if (host_num > 0) {
-          d->edit_host->icons = matrix[host_num].icons;
-          d->edit_host->alert = matrix[host_num].alert;
-          d->edit_host->file = matrix[host_num].file;
-          free_host(matrix + host_num);
-          matrix[host_num] = *d->edit_host;
-        } else {
-          int             counter;
-          int             counter2;
-          int             found = 0;
-          for (counter = 0; counter <= top_of_matrix; counter++) {
-            if (!found) {
-              /* check if current virtual is bigger than our virtual */
-              if (matrix[counter].vnum > d->edit_number) {
-                // now, zoom backwards through the list copying over
-                // TODO: Okay, but what if top_of_matrix == top_of_matrix_array - 1? SIGSEGV right? -LS
-                for (counter2 = top_of_matrix + 1; counter2 > counter; counter2--) {
-                  matrix[counter2] = matrix[counter2 - 1];
-                }
-                matrix[counter] = *(d->edit_host);
-                matrix[counter].vnum = d->edit_number;
-                found = TRUE;
-              }
-            } else {
-              struct matrix_icon *temp_icon;
-              for (temp_icon = matrix[counter].icons; temp_icon; temp_icon = temp_icon->next)
-                if (temp_icon->in_host != NOWHERE)
-                  temp_icon->in_host++;
-            }
-          }
-
-          /* if place not found, insert at end */
-          if (!found) {
-            matrix[top_of_matrix + 1] = *d->edit_host;
-            matrix[top_of_matrix + 1].vnum = d->edit_number;
-          }
-          top_of_matrix++;
-          host_num = real_host(d->edit_number);
-        }
-        send_to_char("Writing host to disk.\r\n", d->character);
-        write_host_to_disk(d->character->player_specials->saved.zonenum);
-        send_to_char("Saved.\r\n", CH);
-        Mem->ClearHost(d->edit_host);
-        d->edit_host = NULL;
-        PLR_FLAGS(d->character).RemoveBit(PLR_EDITING);
-        STATE(d) = CON_PLAYING;
-        send_to_char("Done.\r\n", d->character);
-        break;
+      if (!vnum_from_non_connected_zone(d->edit_number)) {
+        sprintf(buf, "%s wrote new host #%ld", GET_CHAR_NAME(d->character),
+                d->edit_number);
+        mudlog(buf, d->character, LOG_WIZLOG, TRUE);
       }
+      host_num = real_host(d->edit_number);
+      if (host_num > 0) {
+        d->edit_host->icons = matrix[host_num].icons;
+        d->edit_host->alert = matrix[host_num].alert;
+        d->edit_host->file = matrix[host_num].file;
+        free_host(matrix + host_num);
+        matrix[host_num] = *d->edit_host;
+      } else {
+        int counter;
+        int counter2;
+        int found = 0;
+        for (counter = 0; counter <= top_of_matrix; counter++) {
+          if (!found) {
+            /* check if current virtual is bigger than our virtual */
+            if (matrix[counter].vnum > d->edit_number) {
+              // now, zoom backwards through the list copying over
+              // TODO: Okay, but what if top_of_matrix == top_of_matrix_array -
+              // 1? SIGSEGV right? -LS
+              for (counter2 = top_of_matrix + 1; counter2 > counter;
+                   counter2--) {
+                matrix[counter2] = matrix[counter2 - 1];
+              }
+              matrix[counter] = *(d->edit_host);
+              matrix[counter].vnum = d->edit_number;
+              found = TRUE;
+            }
+          } else {
+            struct matrix_icon *temp_icon;
+            for (temp_icon = matrix[counter].icons; temp_icon;
+                 temp_icon = temp_icon->next)
+              if (temp_icon->in_host != NOWHERE)
+                temp_icon->in_host++;
+          }
+        }
+
+        /* if place not found, insert at end */
+        if (!found) {
+          matrix[top_of_matrix + 1] = *d->edit_host;
+          matrix[top_of_matrix + 1].vnum = d->edit_number;
+        }
+        top_of_matrix++;
+        host_num = real_host(d->edit_number);
+      }
+      send_to_char("Writing host to disk.\r\n", d->character);
+      write_host_to_disk(d->character->player_specials->saved.zonenum);
+      send_to_char("Saved.\r\n", CH);
+      Mem->ClearHost(d->edit_host);
+      d->edit_host = NULL;
+      PLR_FLAGS(d->character).RemoveBit(PLR_EDITING);
+      STATE(d) = CON_PLAYING;
+      send_to_char("Done.\r\n", d->character);
+      break;
+    }
     case 'n':
     case 'N':
       send_to_char("Host not saved, aborting.\r\n", d->character);
@@ -278,7 +293,8 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
       break;
     default:
       send_to_char("Invalid choice!\r\n", d->character);
-      send_to_char("Do you wish to save this host internally?\r\n", d->character);
+      send_to_char("Do you wish to save this host internally?\r\n",
+                   d->character);
       break;
     }
     break;
@@ -315,11 +331,11 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
     case '5':
       CLS(CH);
       send_to_char(CH, "1) Blue\r\n"
-                   "2) Green\r\n"
-                   "3) Orange\r\n"
-                   "4) Red\r\n"
-                   "5) Black\r\n"
-                   "Enter security level: ");
+                       "2) Green\r\n"
+                       "3) Orange\r\n"
+                       "4) Red\r\n"
+                       "5) Black\r\n"
+                       "Enter security level: ");
       d->edit_mode = HEDIT_SECURITY_COLOUR;
       break;
     case '6':
@@ -550,9 +566,9 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
       d->edit_host->security = number;
       CLS(CH);
       send_to_char(CH, "^G1^Y) ^WEasy^n\r\n"
-                   "^G2^Y) ^WModerate^n\r\n"
-                   "^G3^Y) ^WHard^n\r\n"
-                   "Enter intrusion difficulty: ");
+                       "^G2^Y) ^WModerate^n\r\n"
+                       "^G3^Y) ^WHard^n\r\n"
+                       "Enter intrusion difficulty: ");
       d->edit_mode = HEDIT_SECURITY_DIFF;
     }
     break;
@@ -623,7 +639,8 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
       hedit_disp_trigger_menu(d);
     } else {
       struct trigger_step *trigger, *temp;
-      for (trigger = HOST->trigger; trigger && number; trigger = trigger->next, number--)
+      for (trigger = HOST->trigger; trigger && number;
+           trigger = trigger->next, number--)
         break;
       if (!trigger) {
         send_to_char(CH, "Invalid choice!\r\n");
@@ -647,14 +664,16 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
       if (HOST->trigger)
         trigger->next = HOST->trigger;
       HOST->trigger = trigger;
-      send_to_char(CH, "Go to Alert (0 - No Change, 1 - Passive, 2 - Active): ");
+      send_to_char(CH,
+                   "Go to Alert (0 - No Change, 1 - Passive, 2 - Active): ");
       d->edit_mode = HEDIT_TRIGGER_ADD2;
     }
     break;
   case HEDIT_TRIGGER_ADD2:
     number = atoi(arg);
     if (number < 0 || number > 2)
-      send_to_char(CH, "Invalid choice!\r\nGo to Alert (0 - No Change, 1 - Passive, 2 - Active): ");
+      send_to_char(CH, "Invalid choice!\r\nGo to Alert (0 - No Change, 1 - "
+                       "Passive, 2 - Active): ");
     else {
       HOST->trigger->alert = number;
       send_to_char(CH, "Load IC (0 for none): ");
@@ -686,7 +705,7 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
         REMOVE_FROM_LIST(exit, HOST->exit, next);
         DELETE_ARRAY_IF_EXTANT(exit->addresses);
         DELETE_ARRAY_IF_EXTANT(exit->roomstring);
-        delete [] exit;
+        delete[] exit;
         hedit_disp_exit_menu(d);
       }
     }
@@ -703,7 +722,9 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
       if (HOST->exit)
         exit->next = HOST->exit;
       HOST->exit = exit;
-      send_to_char(CH, "Enter the addresses and keywords for this host, separated by spaces, with the first one being is its official address: ");
+      send_to_char(
+          CH, "Enter the addresses and keywords for this host, separated by "
+              "spaces, with the first one being is its official address: ");
       d->edit_mode = HEDIT_EXIT_ADD2;
     }
     break;
@@ -716,10 +737,13 @@ void hedit_parse(struct descriptor_data *d, const char *arg)
   case HEDIT_EXIT_ADD3:
     number = atoi(arg);
     if (number < 0 || number > 1) {
-      send_to_char(CH, "Invalid choice. Is the host hidden from the player when they LOOK in the host? (1 = yes, 0 = no): ");
+      send_to_char(CH, "Invalid choice. Is the host hidden from the player "
+                       "when they LOOK in the host? (1 = yes, 0 = no): ");
     } else {
-      d->edit_host->exit->hidden = (bool) number;
-      send_to_char(CH, "What's the host's icon look like? (ex: 'A glowing eye with a red border around it burns menacingly in the sky.'): \r\n");
+      d->edit_host->exit->hidden = (bool)number;
+      send_to_char(
+          CH, "What's the host's icon look like? (ex: 'A glowing eye with a "
+              "red border around it burns menacingly in the sky.'): \r\n");
       d->edit_mode = HEDIT_EXIT_ADD4;
     }
     break;

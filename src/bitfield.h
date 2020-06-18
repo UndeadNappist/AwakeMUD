@@ -9,12 +9,11 @@
 
 const dword ENDBIT = 127;
 #include "assert.h"
-class Bitfield
-{
+class Bitfield {
   typedef unsigned int bitfield_t;
   static const int BITFIELD_SIZE = 4;
   static const int bits_per_var = sizeof(bitfield_t) * 8;
-  static const int total_width = bits_per_var*BITFIELD_SIZE;
+  static const int total_width = bits_per_var * BITFIELD_SIZE;
 
   bitfield_t data[BITFIELD_SIZE];
 
@@ -27,10 +26,10 @@ public:
   bool IsSet(dword offset) const;
 
   bool AreAnySet(dword one, ...) const;
-  int  GetNumSet() const;
+  int GetNumSet() const;
 
   bool AreAnyShared(const Bitfield &test) const;
-  int  GetNumShared(const Bitfield &test) const;
+  int GetNumShared(const Bitfield &test) const;
 
   bool operator==(const Bitfield &test) const;
   bool operator!=(const Bitfield &test) const;
@@ -40,7 +39,7 @@ public:
   void Clear();
 
   void SetBit(dword offset);
-  void SetBits(dword one, ...);    // note: list _must_ be ENDBIT-terminated
+  void SetBits(dword one, ...); // note: list _must_ be ENDBIT-terminated
   void SetAll(const Bitfield &two);
 
   void RemoveBit(dword offset);
@@ -52,19 +51,16 @@ public:
 
   // conversion funcs
   //
-  const char *ToString() const;    // uses 8 internal buffers..
+  const char *ToString() const;     // uses 8 internal buffers..
   void FromString(const char *str); // non-'0' assumed to be set;
   // assumes leading '0's if length < expected
 
   // prints a comma-separated list of names
-  void PrintBits(char *dest, size_t dest_size,
-                 const char *names[], size_t name_cnt);
+  void PrintBits(char *dest, size_t dest_size, const char *names[],
+                 size_t name_cnt);
 
   // static TotalWidth() - total number of bits contained
-  static int TotalWidth()
-  {
-    return total_width;
-  }
+  static int TotalWidth() { return total_width; }
 };
 
 #endif // ifndef __bitfield_h__

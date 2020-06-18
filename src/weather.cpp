@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: weather.c                                     Part of CircleMUD *
-*  Usage: functions handling time and the weather                         *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: weather.c                                     Part of CircleMUD *
+ *  Usage: functions handling time and the weather                         *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include <stdio.h>
 #include <string.h>
@@ -24,17 +24,9 @@ extern struct time_info_data time_info;
 extern struct char_data *character_list;
 extern struct index_data *mob_index;
 
-const char *moon[] =
-  {
-    "new",
-    "waxing",
-    "full",
-    "waning",
-    "\n"
-  };
+const char *moon[] = {"new", "waxing", "full", "waning", "\n"};
 
-void another_hour(void)
-{
+void another_hour(void) {
   bool new_month = FALSE;
   struct char_data *ch, *next;
   const char *temp;
@@ -110,7 +102,8 @@ void another_hour(void)
   case 21:
     weather_info.sunlight = SUN_DARK;
     if (weather_info.sky == SKY_CLOUDLESS)
-      sprintf(buf, "^bThe night has begun. The moon is %s.^n\r\n",moon[weather_info.moonphase]);
+      sprintf(buf, "^bThe night has begun. The moon is %s.^n\r\n",
+              moon[weather_info.moonphase]);
     else
       sprintf(buf, "^LThe night has begun.^n\r\n");
 
@@ -143,19 +136,17 @@ void another_hour(void)
       }
     }
   }
-  if(time_info.day < 7)
+  if (time_info.day < 7)
     weather_info.moonphase = MOON_NEW;
-  else if(time_info.day > 7 && time_info.day < 14)
+  else if (time_info.day > 7 && time_info.day < 14)
     weather_info.moonphase = MOON_WAX;
-  else if(time_info.day > 14 && time_info.day < 21)
+  else if (time_info.day > 14 && time_info.day < 21)
     weather_info.moonphase = MOON_FULL;
   else
     weather_info.moonphase = MOON_WANE;
-
 }
 
-void another_minute(void)
-{
+void another_minute(void) {
   time_info.minute++;
 
   if (time_info.minute >= 60) {
@@ -164,8 +155,7 @@ void another_minute(void)
   }
 }
 
-void weather_change(void)
-{
+void weather_change(void) {
   PERF_PROF_SCOPE(pr_, __func__);
   int diff, change;
 

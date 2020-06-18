@@ -18,33 +18,19 @@
 #define NUM_OF_IC_TYPES 13
 extern char *cleanup(char *dest, const char *src);
 
-const char *crippler[4] =
-  {
-    "Bod",
-    "Evasion",
-    "Sensors",
-    "Masking"
-  };
+const char *crippler[4] = {"Bod", "Evasion", "Sensors", "Masking"};
 
-const char *tarbaby[4] =
-  {
-    "Operational",
-    "Offensive",
-    "Defensive",
-    "Special"
-  };
+const char *tarbaby[4] = {"Operational", "Offensive", "Defensive", "Special"};
 
 #define ICON ic_proto[realcounter]
-void write_ic_to_disk(int vnum)
-{
+void write_ic_to_disk(int vnum) {
   long realcounter, counter;
   int zone = real_zone(vnum);
   FILE *fl;
 
   sprintf(buf, "%s/%d.ic", MTX_PREFIX, vnum);
   fl = fopen(buf, "w+");
-  for (counter = zone_table[zone].number * 100;
-       counter <= zone_table[zone].top;
+  for (counter = zone_table[zone].number * 100; counter <= zone_table[zone].top;
        counter++) {
     realcounter = real_ic(counter);
     if (realcounter >= 0) {
@@ -70,27 +56,25 @@ void write_ic_to_disk(int vnum)
   fclose(fl);
   write_index_file("ic");
 }
-void icedit_disp_option_menu(struct descriptor_data *d)
-{
+void icedit_disp_option_menu(struct descriptor_data *d) {
   CLS(CH);
   for (int x = 1; x <= IC_TRAP; x += 2)
-    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n",
-                 x, ic_option[x], x + 1, x + 1 <= IC_TRAP ? ic_option[x + 1] : "");
+    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n", x, ic_option[x], x + 1,
+                 x + 1 <= IC_TRAP ? ic_option[x + 1] : "");
   IC->ic.options.PrintBits(buf1, MAX_STRING_LENGTH, ic_option, IC_TRAP + 1);
   send_to_char(CH, "IC Options: ^c%s^n\r\nEnter IC Option, 0 to quit: ", buf1);
   d->edit_mode = ICEDIT_OPTION_MENU;
 }
 
-void icedit_disp_menu(struct descriptor_data *d)
-{
+void icedit_disp_menu(struct descriptor_data *d) {
   CLS(CH);
   send_to_char(CH, "^WIC: ^c%d^n\r\n", d->edit_number);
   send_to_char(CH, "^G1^Y) ^WName: ^c%s^n\r\n", IC->name);
   send_to_char(CH, "^G2^Y) ^WRoomDesc: ^c%s^n\r\n", IC->look_desc);
   send_to_char(CH, "^G3^Y) ^WDescription: ^c%s^n\r\n", IC->long_desc);
-  send_to_char(CH, "^G4^Y) ^WType: ^c%s-%d^n\r\n", ic_type[IC->ic.type], IC->ic.rating);
-  switch(IC->ic.type)
-  {
+  send_to_char(CH, "^G4^Y) ^WType: ^c%s-%d^n\r\n", ic_type[IC->ic.type],
+               IC->ic.rating);
+  switch (IC->ic.type) {
   case 4:
   case 10:
     send_to_char(CH, "^G5^Y) ^WSubType: ^c%s^n\r\n", tarbaby[IC->ic.subtype]);
@@ -103,19 +87,22 @@ void icedit_disp_menu(struct descriptor_data *d)
   IC->ic.options.PrintBits(buf1, MAX_STRING_LENGTH, ic_option, IC_TRAP + 1);
   send_to_char(CH, "^G6^Y) ^WOptions: ^c%s^n\r\n", buf1);
   if (IC->ic.options.IsSet(IC_TRAP))
-    send_to_char(CH, "^G7^Y) ^WTrap IC: ^c%s (%ld)^n\r\n", real_ic(IC->ic.trap) > 0 ? ic_proto[real_ic(IC->ic.trap)].name : "Nothing", IC->ic.trap);
+    send_to_char(CH, "^G7^Y) ^WTrap IC: ^c%s (%ld)^n\r\n",
+                 real_ic(IC->ic.trap) > 0 ? ic_proto[real_ic(IC->ic.trap)].name
+                                          : "Nothing",
+                 IC->ic.trap);
   if (IC->ic.options.AreAnySet(IC_EX_OFFENSE, IC_EX_DEFENSE, ENDBIT))
     send_to_char(CH, "^G8^Y) ^WExpert Rating: ^c%d^n\r\n", IC->ic.expert);
-  send_to_char("^Gq^Y) ^WQuit\r\n^Gx^Y) ^WQuit without saving\r\n^wEnter selection: ", CH);
+  send_to_char(
+      "^Gq^Y) ^WQuit\r\n^Gx^Y) ^WQuit without saving\r\n^wEnter selection: ",
+      CH);
   d->edit_mode = ICEDIT_MAIN_MENU;
 }
 
-void icedit_parse(struct descriptor_data *d, const char *arg)
-{
+void icedit_parse(struct descriptor_data *d, const char *arg) {
   long number, ic_num;
   int i = 0;
-  switch (d->edit_mode)
-  {
+  switch (d->edit_mode) {
   case ICEDIT_CONFIRM_EDIT:
     switch (*arg) {
     case 'y':
@@ -140,85 +127,85 @@ void icedit_parse(struct descriptor_data *d, const char *arg)
     switch (*arg) {
     case 'y':
     case 'Y': {
-        ic_num = real_ic(d->edit_number);
-        if (ic_num > 0) {
-          struct matrix_icon *i, *temp;
-          for (i = icon_list; i; i = i->next)
-            if (i->number == ic_num) {
-              temp = Mem->GetIcon();
-              *temp = *i;
-              *i = *d->edit_icon;
-              i->in_host = temp->in_host;
-              i->next = temp->next;
-              i->next_in_host = temp->next_in_host;
-              Mem->ClearIcon(temp);
-            }
-          DELETE_ARRAY_IF_EXTANT(ic_proto[ic_num].name);
-          DELETE_ARRAY_IF_EXTANT(ic_proto[ic_num].look_desc);
-          DELETE_ARRAY_IF_EXTANT(ic_proto[ic_num].long_desc);
-          ic_proto[ic_num] = *d->edit_icon;
-        } else {
-          int             counter;
-          int             found = 0;
-          struct index_data *new_ic_index;
-          struct matrix_icon *new_ic_proto;
-          new_ic_index = new struct index_data[top_of_ic + 2];
-          new_ic_proto = new struct matrix_icon[top_of_ic + 2];
+      ic_num = real_ic(d->edit_number);
+      if (ic_num > 0) {
+        struct matrix_icon *i, *temp;
+        for (i = icon_list; i; i = i->next)
+          if (i->number == ic_num) {
+            temp = Mem->GetIcon();
+            *temp = *i;
+            *i = *d->edit_icon;
+            i->in_host = temp->in_host;
+            i->next = temp->next;
+            i->next_in_host = temp->next_in_host;
+            Mem->ClearIcon(temp);
+          }
+        DELETE_ARRAY_IF_EXTANT(ic_proto[ic_num].name);
+        DELETE_ARRAY_IF_EXTANT(ic_proto[ic_num].look_desc);
+        DELETE_ARRAY_IF_EXTANT(ic_proto[ic_num].long_desc);
+        ic_proto[ic_num] = *d->edit_icon;
+      } else {
+        int counter;
+        int found = 0;
+        struct index_data *new_ic_index;
+        struct matrix_icon *new_ic_proto;
+        new_ic_index = new struct index_data[top_of_ic + 2];
+        new_ic_proto = new struct matrix_icon[top_of_ic + 2];
 
-          sprintf(buf,"%s wrote new IC #%ld", GET_CHAR_NAME(CH), d->edit_number);
-          mudlog(buf, CH, LOG_WIZLOG, TRUE);
-          for (counter = 0; counter <= top_of_ic; counter++) {
-            if (!found) {
-              if (ic_index[counter].vnum > d->edit_number) {
-                new_ic_index[counter].vnum = d->edit_number;
-                new_ic_index[counter].number = 0;
-                new_ic_index[counter].func = NULL;
-                new_ic_proto[counter] = *(d->edit_icon);
-                new_ic_proto[counter].in_host = NOWHERE;
-                d->edit_icon->number = counter;
-                new_ic_proto[counter].number = counter;
-                found = TRUE;
-                new_ic_index[counter + 1] = ic_index[counter];
-                new_ic_proto[counter + 1] = ic_proto[counter];
-                new_ic_proto[counter + 1].number = counter + 1;
-              } else {
-                new_ic_proto[counter] = ic_proto[counter];
-                new_ic_index[counter] = ic_index[counter];
-              }
-            } else {
+        sprintf(buf, "%s wrote new IC #%ld", GET_CHAR_NAME(CH), d->edit_number);
+        mudlog(buf, CH, LOG_WIZLOG, TRUE);
+        for (counter = 0; counter <= top_of_ic; counter++) {
+          if (!found) {
+            if (ic_index[counter].vnum > d->edit_number) {
+              new_ic_index[counter].vnum = d->edit_number;
+              new_ic_index[counter].number = 0;
+              new_ic_index[counter].func = NULL;
+              new_ic_proto[counter] = *(d->edit_icon);
+              new_ic_proto[counter].in_host = NOWHERE;
+              d->edit_icon->number = counter;
+              new_ic_proto[counter].number = counter;
+              found = TRUE;
               new_ic_index[counter + 1] = ic_index[counter];
               new_ic_proto[counter + 1] = ic_proto[counter];
               new_ic_proto[counter + 1].number = counter + 1;
+            } else {
+              new_ic_proto[counter] = ic_proto[counter];
+              new_ic_index[counter] = ic_index[counter];
             }
+          } else {
+            new_ic_index[counter + 1] = ic_index[counter];
+            new_ic_proto[counter + 1] = ic_proto[counter];
+            new_ic_proto[counter + 1].number = counter + 1;
           }
-
-          if (!found) {
-            new_ic_index[top_of_ic + 1].vnum = d->edit_number;
-            new_ic_index[top_of_ic + 1].number = 0;
-            new_ic_index[top_of_ic + 1].func = NULL;
-
-            clear_icon(new_ic_proto + top_of_ic + 1);
-            new_ic_proto[top_of_ic + 1] = *(d->edit_icon);
-            new_ic_proto[top_of_ic + 1].in_host = NOWHERE;
-            new_ic_proto[top_of_ic + 1].number = top_of_ic + 1;
-            d->edit_icon->number = top_of_ic + 1;
-          }
-          top_of_ic++;
-          DELETE_ARRAY_IF_EXTANT(ic_proto);
-          DELETE_ARRAY_IF_EXTANT(ic_index);
-          ic_proto = new_ic_proto;
-          ic_index = new_ic_index;
         }
-        send_to_char("Writing IC to disk.\r\n", CH);
-        write_ic_to_disk(CH->player_specials->saved.zonenum);
-        send_to_char("Saved.\r\n", CH);
-        Mem->ClearIcon(d->edit_icon);
-        d->edit_icon = NULL;
-        PLR_FLAGS(CH).RemoveBit(PLR_EDITING);
-        STATE(d) = CON_PLAYING;
-        send_to_char("Done.\r\n", CH);
-        break;
+
+        if (!found) {
+          new_ic_index[top_of_ic + 1].vnum = d->edit_number;
+          new_ic_index[top_of_ic + 1].number = 0;
+          new_ic_index[top_of_ic + 1].func = NULL;
+
+          clear_icon(new_ic_proto + top_of_ic + 1);
+          new_ic_proto[top_of_ic + 1] = *(d->edit_icon);
+          new_ic_proto[top_of_ic + 1].in_host = NOWHERE;
+          new_ic_proto[top_of_ic + 1].number = top_of_ic + 1;
+          d->edit_icon->number = top_of_ic + 1;
+        }
+        top_of_ic++;
+        DELETE_ARRAY_IF_EXTANT(ic_proto);
+        DELETE_ARRAY_IF_EXTANT(ic_index);
+        ic_proto = new_ic_proto;
+        ic_index = new_ic_index;
       }
+      send_to_char("Writing IC to disk.\r\n", CH);
+      write_ic_to_disk(CH->player_specials->saved.zonenum);
+      send_to_char("Saved.\r\n", CH);
+      Mem->ClearIcon(d->edit_icon);
+      d->edit_icon = NULL;
+      PLR_FLAGS(CH).RemoveBit(PLR_EDITING);
+      STATE(d) = CON_PLAYING;
+      send_to_char("Done.\r\n", CH);
+      break;
+    }
     case 'n':
     case 'N':
       send_to_char("Icon not saved, aborting.\r\n", CH);
@@ -267,12 +254,12 @@ void icedit_parse(struct descriptor_data *d, const char *arg)
       for (i = 0; i < NUM_OF_IC_TYPES; i++)
         send_to_char(CH, "%d) %s\r\n", i + 1, ic_type[i]);
       send_to_char(CH, "Enter IC type: ");
-      d->edit_mode =  ICEDIT_TYPE;
+      d->edit_mode = ICEDIT_TYPE;
       break;
     case '5':
       CLS(CH);
-      if (d->edit_icon->ic.type != 0 && d->edit_icon->ic.type != 4 && d->edit_icon->ic.type != 8
-          && d->edit_icon->ic.type != 10) {
+      if (d->edit_icon->ic.type != 0 && d->edit_icon->ic.type != 4 &&
+          d->edit_icon->ic.type != 8 && d->edit_icon->ic.type != 10) {
         send_to_char("Invalid choice!\r\n", CH);
         icedit_disp_menu(d);
       } else {

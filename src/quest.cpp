@@ -1,10 +1,10 @@
 /* *************************************************************************
-*    file: quest.cc                                                        *
-*    author: Andrew Hynek                                                  *
-*    purpose: contains all autoquest functions and the online quest editor *
-*    Copyright (c) 1997, 1998 by Andrew Hynek                              *
-*    Copyright (c) 2001 The AwakeMUD Consortium                            *
-************************************************************************* */
+ *    file: quest.cc                                                        *
+ *    author: Andrew Hynek                                                  *
+ *    purpose: contains all autoquest functions and the online quest editor *
+ *    Copyright (c) 1997, 1998 by Andrew Hynek                              *
+ *    Copyright (c) 2001 The AwakeMUD Consortium                            *
+ ************************************************************************* */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,28 +32,28 @@ extern class objList ObjList;
 extern struct time_info_data time_info;
 extern int olc_state;
 extern bool perform_give(struct char_data *ch, struct char_data *vict,
-                           struct obj_data *obj);
+                         struct obj_data *obj);
 extern void add_follower(struct char_data *ch, struct char_data *leader);
 extern void free_quest(struct quest_data *quest);
 extern bool resize_qst_array(void);
 extern char *cleanup(char *, const char *);
-extern int perform_drop(struct char_data * ch, struct obj_data * obj, byte mode,
-                        const char *sname, struct room_data *random_donation_room);
+extern int perform_drop(struct char_data *ch, struct obj_data *obj, byte mode,
+                        const char *sname,
+                        struct room_data *random_donation_room);
 
 ACMD_CONST(do_say);
 ACMD_DECLARE(do_action);
 SPECIAL(johnson);
 ACMD_DECLARE(do_echo);
 
-#define QUEST          d->edit_quest
+#define QUEST d->edit_quest
 
-#define NUM_OBJ_LOADS            7
-#define NUM_MOB_LOADS            3
-#define NUM_OBJ_OBJECTIVES       8
-#define NUM_MOB_OBJECTIVES       5
+#define NUM_OBJ_LOADS 7
+#define NUM_MOB_LOADS 3
+#define NUM_OBJ_OBJECTIVES 8
+#define NUM_MOB_OBJECTIVES 5
 
-const char *obj_loads[] =
-  {
+const char *obj_loads[] = {
     "Do not load",
     "Give item to Johnson (who gives it to quester at start)",
     "Give item to a target",
@@ -61,98 +61,54 @@ const char *obj_loads[] =
     "Install item in a target",
     "Load at a location",
     "Load at host",
-    "\n"
-  };
+    "\n"};
 
-const char *mob_loads[] =
-  {
-    "Do not load",
-    "Load at a location",
-    "Load at/follow quester",
-    "\n"
-  };
+const char *mob_loads[] = {"Do not load", "Load at a location",
+                           "Load at/follow quester", "\n"};
 
-const char *obj_objectives[] =
-  {
-    "No objective",
-    "Return item to Johnson",
-    "Deliver item to a target",
-    "Deliver item to location",
-    "Destroy an item",
-    "Destroy as many items as possible",
-    "Return Paydata to Johnson",
-    "Upload to a host",
-    "\n"
-  };
+const char *obj_objectives[] = {"No objective",
+                                "Return item to Johnson",
+                                "Deliver item to a target",
+                                "Deliver item to location",
+                                "Destroy an item",
+                                "Destroy as many items as possible",
+                                "Return Paydata to Johnson",
+                                "Upload to a host",
+                                "\n"};
 
-const char *mob_objectives[] =
-  {
-    "No objective",
-    "Escort target to a location",
-    "Kill target",
-    "Kill as many targets as possible",
-    "Target hunts a different quest target",
-    "\n"
-  };
+const char *mob_objectives[] = {"No objective",
+                                "Escort target to a location",
+                                "Kill target",
+                                "Kill as many targets as possible",
+                                "Target hunts a different quest target",
+                                "\n"};
 
+const char *sol[] = {
+    "DNL",      "Johnson", "Give target", "Equip target", "Install target",
+    "Location", "\n"};
 
-const char *sol[] =
-  {
-    "DNL",
-    "Johnson",
-    "Give target",
-    "Equip target",
-    "Install target",
-    "Location",
-    "\n"
-  };
+const char *sml[] = {"DNL", "Location", "Follow quester", "\n"};
 
-const char *sml[] =
-  {
-    "DNL",
-    "Location",
-    "Follow quester",
-    "\n"
-  };
+const char *soo[] = {"none",        "return",       "to target", "to location",
+                     "destroy one", "destroy many", "\n"};
 
-const char *soo[] =
-  {
-    "none",
-    "return",
-    "to target",
-    "to location",
-    "destroy one",
-    "destroy many",
-    "\n"
-  };
-
-const char *smo[] =
-  {
-    "none",
-    "escort",
-    "kill one",
-    "kill many",
-    "hunt",
-    "\n"
-  };
+const char *smo[] = {"none", "escort", "kill one", "kill many", "hunt", "\n"};
 
 void end_quest(struct char_data *ch);
 
-void load_quest_targets(struct char_data *johnson, struct char_data *ch)
-{
+void load_quest_targets(struct char_data *johnson, struct char_data *ch) {
   struct obj_data *obj;
   struct char_data *mob;
   int i, j, room = -1, pos, num = GET_QUEST(ch), rnum = -1;
 
-  for (i = 0; i < quest_table[num].num_mobs; i++)
-  {
+  for (i = 0; i < quest_table[num].num_mobs; i++) {
     if (quest_table[num].mob[i].load == QML_LOCATION &&
         (rnum = real_mobile(quest_table[num].mob[i].vnum)) > -1 &&
         (room = real_room(quest_table[num].mob[i].l_data)) > -1) {
       mob = read_mobile(rnum, REAL);
       mob->mob_specials.quest_id = GET_IDNUM(ch);
       char_to_room(mob, &world[room]);
-      if(quest_table[num].mob[i].objective == QMO_LOCATION)
+      if (quest_table[num].mob[i].objective == QMO_LOCATION)
         add_follower(mob, ch);
       for (j = 0; j < quest_table[num].num_objs; j++)
         if (quest_table[num].obj[j].l_data == i &&
@@ -165,8 +121,9 @@ void load_quest_targets(struct char_data *johnson, struct char_data *ch)
             break;
           case QOL_TARMOB_E:
             pos = quest_table[num].obj[j].l_data2;
-            if (pos >= 0 && pos < NUM_WEARS && (!GET_EQ(mob, pos) ||
-                                                (pos == WEAR_WIELD && !GET_EQ(mob, WEAR_HOLD)))) {
+            if (pos >= 0 && pos < NUM_WEARS &&
+                (!GET_EQ(mob, pos) ||
+                 (pos == WEAR_WIELD && !GET_EQ(mob, WEAR_HOLD)))) {
               obj = read_object(rnum, REAL);
               obj->obj_flags.quest_id = GET_IDNUM(ch);
               equip_char(mob, obj, pos);
@@ -204,8 +161,9 @@ void load_quest_targets(struct char_data *johnson, struct char_data *ch)
             break;
           case QOL_TARMOB_E:
             pos = quest_table[num].obj[j].l_data2;
-            if (pos >= 0 && pos < NUM_WEARS && (!GET_EQ(mob, pos) ||
-                                                (pos == WEAR_WIELD && !GET_EQ(mob, WEAR_HOLD)))) {
+            if (pos >= 0 && pos < NUM_WEARS &&
+                (!GET_EQ(mob, pos) ||
+                 (pos == WEAR_WIELD && !GET_EQ(mob, WEAR_HOLD)))) {
               obj = read_object(rnum, REAL);
               obj->obj_flags.quest_id = GET_IDNUM(ch);
               equip_char(mob, obj, pos);
@@ -233,8 +191,7 @@ void load_quest_targets(struct char_data *johnson, struct char_data *ch)
 
   for (i = 0; i < quest_table[num].num_objs; i++)
     if ((rnum = real_object(quest_table[num].obj[i].vnum)) > -1)
-      switch (quest_table[num].obj[i].load)
-      {
+      switch (quest_table[num].obj[i].load) {
       case QOL_LOCATION:
         if ((room = real_room(quest_table[num].obj[i].l_data)) > -1) {
           obj = read_object(rnum, REAL);
@@ -260,7 +217,9 @@ void load_quest_targets(struct char_data *johnson, struct char_data *ch)
         obj_to_char(obj, johnson);
         if (!perform_give(johnson, ch, obj)) {
           char buf[512];
-          sprintf(buf, "Looks like your hands are full. You'll need %s for the run.", decapitalize_a_an(obj->text.name));
+          sprintf(buf,
+                  "Looks like your hands are full. You'll need %s for the run.",
+                  decapitalize_a_an(obj->text.name));
           do_say(johnson, buf, 0, 0);
           perform_drop(johnson, obj, SCMD_DROP, "drop", NULL);
         }
@@ -269,8 +228,7 @@ void load_quest_targets(struct char_data *johnson, struct char_data *ch)
       }
 }
 
-void extract_quest_targets(int num)
-{
+void extract_quest_targets(int num) {
   struct char_data *mob, *next;
   struct obj_data *obj, *next_obj;
   int i;
@@ -292,8 +250,7 @@ void extract_quest_targets(int num)
   ObjList.RemoveQuestObjs(num);
 }
 
-bool is_escortee(struct char_data *mob)
-{
+bool is_escortee(struct char_data *mob) {
   int i;
 
   if (!IS_NPC(mob) || !mob->master || IS_NPC(mob->master) ||
@@ -308,8 +265,7 @@ bool is_escortee(struct char_data *mob)
   return FALSE;
 }
 
-bool hunting_escortee(struct char_data *ch, struct char_data *vict)
-{
+bool hunting_escortee(struct char_data *ch, struct char_data *vict) {
   int i, num;
 
   if (!IS_NPC(ch) || !is_escortee(vict))
@@ -320,14 +276,15 @@ bool hunting_escortee(struct char_data *ch, struct char_data *vict)
   for (i = 0; i < quest_table[num].num_mobs; i++)
     if (quest_table[num].mob[i].vnum == GET_MOB_VNUM(ch) &&
         quest_table[num].mob[i].objective == QMO_KILL_ESCORTEE &&
-        quest_table[num].mob[quest_table[num].mob[i].o_data].vnum == GET_MOB_VNUM(vict))
+        quest_table[num].mob[quest_table[num].mob[i].o_data].vnum ==
+            GET_MOB_VNUM(vict))
       return TRUE;
 
   return FALSE;
 }
 
-bool check_quest_delivery(struct char_data *ch, struct char_data *mob, struct obj_data *obj)
-{
+bool check_quest_delivery(struct char_data *ch, struct char_data *mob,
+                          struct obj_data *obj) {
   if (!ch || IS_NPC(ch) || !IS_NPC(mob) || !GET_QUEST(ch))
     return FALSE;
   int vnum = GET_OBJ_VNUM(obj);
@@ -335,10 +292,10 @@ bool check_quest_delivery(struct char_data *ch, struct char_data *mob, struct ob
 
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_objs; i++)
     if (quest_table[GET_QUEST(ch)].obj[i].vnum == vnum)
-      switch (quest_table[GET_QUEST(ch)].obj[i].objective)
-      {
+      switch (quest_table[GET_QUEST(ch)].obj[i].objective) {
       case QOO_JOHNSON:
-        if (GET_MOB_SPEC(mob) && GET_MOB_SPEC(mob) == johnson && memory(mob, ch)) {
+        if (GET_MOB_SPEC(mob) && GET_MOB_SPEC(mob) == johnson &&
+            memory(mob, ch)) {
           ch->player_specials->obj_complete[i] = 1;
           return TRUE;
         }
@@ -350,7 +307,8 @@ bool check_quest_delivery(struct char_data *ch, struct char_data *mob, struct ob
         }
         break;
       case QOO_RETURN_PAY:
-        if (GET_MOB_SPEC(mob) && GET_MOB_SPEC(mob) == johnson && memory(mob, ch)) {
+        if (GET_MOB_SPEC(mob) && GET_MOB_SPEC(mob) == johnson &&
+            memory(mob, ch)) {
           if (GET_OBJ_VAL(obj, 3) == quest_table[GET_QUEST(ch)].obj[i].o_data)
             ch->player_specials->obj_complete[i] = 1;
           return TRUE;
@@ -359,8 +317,7 @@ bool check_quest_delivery(struct char_data *ch, struct char_data *mob, struct ob
   return FALSE;
 }
 
-void check_quest_delivery(struct char_data *ch, struct obj_data *obj)
-{
+void check_quest_delivery(struct char_data *ch, struct obj_data *obj) {
   if (!ch || IS_NPC(ch) || !GET_QUEST(ch))
     return;
 
@@ -369,22 +326,21 @@ void check_quest_delivery(struct char_data *ch, struct obj_data *obj)
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_objs; i++)
     if (quest_table[GET_QUEST(ch)].obj[i].objective == QOO_LOCATION &&
         GET_OBJ_VNUM(obj) == quest_table[GET_QUEST(ch)].obj[i].vnum &&
-        ch->in_room->number == quest_table[GET_QUEST(ch)].obj[i].o_data)
-    {
+        ch->in_room->number == quest_table[GET_QUEST(ch)].obj[i].o_data) {
       ch->player_specials->obj_complete[i] = 1;
       return;
     }
-  if (ch->persona && quest_table[GET_QUEST(ch)].obj[i].objective == QOO_UPLOAD &&
+  if (ch->persona &&
+      quest_table[GET_QUEST(ch)].obj[i].objective == QOO_UPLOAD &&
       GET_OBJ_VNUM(obj) == quest_table[GET_QUEST(ch)].obj[i].vnum &&
-      matrix[ch->persona->in_host].vnum == quest_table[GET_QUEST(ch)].obj[i].o_data)
-  {
+      matrix[ch->persona->in_host].vnum ==
+          quest_table[GET_QUEST(ch)].obj[i].o_data) {
     ch->player_specials->obj_complete[i] = 1;
     return;
   }
 }
 
-void check_quest_destination(struct char_data *ch, struct char_data *mob)
-{
+void check_quest_destination(struct char_data *ch, struct char_data *mob) {
   if (!ch || IS_NPC(ch) || !IS_NPC(mob) || !GET_QUEST(ch))
     return;
 
@@ -392,8 +348,7 @@ void check_quest_destination(struct char_data *ch, struct char_data *mob)
 
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_mobs; i++)
     if (quest_table[GET_QUEST(ch)].mob[i].objective == QMO_LOCATION &&
-        mob->in_room->number == quest_table[GET_QUEST(ch)].mob[i].o_data)
-    {
+        mob->in_room->number == quest_table[GET_QUEST(ch)].mob[i].o_data) {
       ch->player_specials->mob_complete[i] = 1;
       stop_follower(mob);
       do_say(mob, "Thanks for the escort.", 0, 0);
@@ -401,8 +356,7 @@ void check_quest_destination(struct char_data *ch, struct char_data *mob)
     }
 }
 
-void check_quest_destroy(struct char_data *ch, struct obj_data *obj)
-{
+void check_quest_destroy(struct char_data *ch, struct obj_data *obj) {
   if (!ch || IS_NPC(ch) || !GET_QUEST(ch))
     return;
 
@@ -410,8 +364,7 @@ void check_quest_destroy(struct char_data *ch, struct obj_data *obj)
 
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_objs; i++)
     if (GET_OBJ_VNUM(obj) == quest_table[GET_QUEST(ch)].obj[i].vnum)
-      switch (quest_table[GET_QUEST(ch)].obj[i].objective)
-      {
+      switch (quest_table[GET_QUEST(ch)].obj[i].objective) {
       case QOO_DSTRY_ONE:
       case QOO_DSTRY_MANY:
         ch->player_specials->obj_complete[i]++;
@@ -419,8 +372,7 @@ void check_quest_destroy(struct char_data *ch, struct obj_data *obj)
       }
 }
 
-void check_quest_kill(struct char_data *ch, struct char_data *victim)
-{
+void check_quest_kill(struct char_data *ch, struct char_data *victim) {
   if (!ch || IS_NPC(ch) || !GET_QUEST(ch) || !IS_NPC(victim))
     return;
 
@@ -428,8 +380,7 @@ void check_quest_kill(struct char_data *ch, struct char_data *victim)
 
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_mobs; i++)
     if (GET_MOB_VNUM(victim) == quest_table[GET_QUEST(ch)].mob[i].vnum)
-      switch (quest_table[GET_QUEST(ch)].mob[i].objective)
-      {
+      switch (quest_table[GET_QUEST(ch)].mob[i].objective) {
       case QMO_KILL_ONE:
       case QMO_KILL_MANY:
         ch->player_specials->mob_complete[i]++;
@@ -437,8 +388,7 @@ void check_quest_kill(struct char_data *ch, struct char_data *victim)
       }
 }
 
-void end_quest(struct char_data *ch)
-{
+void end_quest(struct char_data *ch) {
   if (IS_NPC(ch) || !GET_QUEST(ch))
     return;
 
@@ -446,14 +396,13 @@ void end_quest(struct char_data *ch)
 
   GET_QUEST(ch) = 0;
 
-  delete [] ch->player_specials->mob_complete;
-  delete [] ch->player_specials->obj_complete;
+  delete[] ch->player_specials->mob_complete;
+  delete[] ch->player_specials->obj_complete;
   ch->player_specials->mob_complete = NULL;
   ch->player_specials->obj_complete = NULL;
 }
 
-bool rep_too_high(struct char_data *ch, int num)
-{
+bool rep_too_high(struct char_data *ch, int num) {
   if (num < 0 || num > top_of_questt)
     return TRUE;
 
@@ -463,8 +412,7 @@ bool rep_too_high(struct char_data *ch, int num)
   return FALSE;
 }
 
-bool rep_too_low(struct char_data *ch, int num)
-{
+bool rep_too_low(struct char_data *ch, int num) {
   if (num < 0 || num > top_of_questt)
     return TRUE;
 
@@ -474,10 +422,10 @@ bool rep_too_low(struct char_data *ch, int num)
   return FALSE;
 }
 
-void reward(struct char_data *ch, struct char_data *johnson)
-{
+void reward(struct char_data *ch, struct char_data *johnson) {
   if (vnum_from_non_connected_zone(quest_table[GET_QUEST(ch)].vnum)) {
-    send_to_char(ch, "Quest reward suppressed due to this zone not being marked as connected to the game world.\r\n");
+    send_to_char(ch, "Quest reward suppressed due to this zone not being "
+                     "marked as connected to the game world.\r\n");
     end_quest(ch);
     return;
   }
@@ -487,8 +435,7 @@ void reward(struct char_data *ch, struct char_data *johnson)
   int i, nuyen = 0, karma = 0, num, all = 1, old;
 
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_objs; i++)
-    if (ch->player_specials->obj_complete[i])
-    {
+    if (ch->player_specials->obj_complete[i]) {
       if (quest_table[GET_QUEST(ch)].obj[i].objective == QOO_DSTRY_MANY) {
         nuyen += quest_table[GET_QUEST(ch)].obj[i].nuyen *
                  ch->player_specials->obj_complete[i];
@@ -501,8 +448,7 @@ void reward(struct char_data *ch, struct char_data *johnson)
     } else
       all = 0;
   for (i = 0; i < quest_table[GET_QUEST(ch)].num_mobs; i++)
-    if (ch->player_specials->mob_complete[i])
-    {
+    if (ch->player_specials->mob_complete[i]) {
       if (quest_table[GET_QUEST(ch)].mob[i].objective == QMO_KILL_MANY) {
         nuyen += quest_table[GET_QUEST(ch)].mob[i].nuyen *
                  ch->player_specials->mob_complete[i];
@@ -514,8 +460,7 @@ void reward(struct char_data *ch, struct char_data *johnson)
       }
     } else
       all = 0;
-  if (all)
-  {
+  if (all) {
     nuyen += quest_table[GET_QUEST(ch)].nuyen;
     karma += quest_table[GET_QUEST(ch)].karma;
     if ((num = real_object(quest_table[GET_QUEST(ch)].reward)) > 0) {
@@ -528,18 +473,21 @@ void reward(struct char_data *ch, struct char_data *johnson)
   }
   nuyen = negotiate(ch, johnson, 0, nuyen, 0, FALSE);
 
-  if (AFF_FLAGGED(ch, AFF_GROUP))
-  {
+  if (AFF_FLAGGED(ch, AFF_GROUP)) {
     num = 1;
     for (f = ch->followers; f; f = f->next)
-      if (AFF_FLAGGED(f->follower, AFF_GROUP) && !(rep_too_low(f->follower, GET_QUEST(ch)) || rep_too_high(f->follower, GET_QUEST(ch))))
+      if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
+          !(rep_too_low(f->follower, GET_QUEST(ch)) ||
+            rep_too_high(f->follower, GET_QUEST(ch))))
         num++;
 
     nuyen = (int)(nuyen / num);
     karma = (int)(karma / num);
 
     for (f = ch->followers; f; f = f->next)
-      if (AFF_FLAGGED(f->follower, AFF_GROUP) && !(rep_too_low(f->follower, GET_QUEST(ch)) || rep_too_high(f->follower, GET_QUEST(ch)))) {
+      if (AFF_FLAGGED(f->follower, AFF_GROUP) &&
+          !(rep_too_low(f->follower, GET_QUEST(ch)) ||
+            rep_too_high(f->follower, GET_QUEST(ch)))) {
         old = (int)(GET_KARMA(f->follower) / 100);
         GET_NUYEN(f->follower) += nuyen;
         GET_KARMA(f->follower) += karma;
@@ -556,35 +504,35 @@ void reward(struct char_data *ch, struct char_data *johnson)
   act("You give some nuyen to $N.", TRUE, johnson, 0, ch, TO_CHAR);
   sprintf(buf, "$n gives you %d nuyen.", nuyen);
   act(buf, FALSE, johnson, 0, ch, TO_VICT);
-  sprintf(buf, "You gain %.2f karma.\r\n", ((float) karma / 100));
+  sprintf(buf, "You gain %.2f karma.\r\n", ((float)karma / 100));
   send_to_char(buf, ch);
   end_quest(ch);
 }
 
 // Specify force_assignation to ensure that the NPC has a quest to hand out.
-void new_quest(struct char_data *mob, bool force_assignation=FALSE)
-{
+void new_quest(struct char_data *mob, bool force_assignation = FALSE) {
   int i, num = 0;
 
   for (i = 0; i <= top_of_questt; i++)
     if (quest_table[i].johnson == GET_MOB_VNUM(mob))
       num++;
 
-  if (num < 1)
-  {
+  if (num < 1) {
     if (mob_index[mob->nr].func == johnson)
       mob_index[mob->nr].func = mob_index[mob->nr].sfunc;
     mob_index[mob->nr].sfunc = NULL;
-    sprintf(buf, "Stripping Johnson status from %s (%ld) due to mob not having any quests to assign.",
+    sprintf(buf,
+            "Stripping Johnson status from %s (%ld) due to mob not having any "
+            "quests to assign.",
             GET_NAME(mob), GET_MOB_VNUM(mob));
     mudlog(buf, NULL, LOG_SYSLOG, true);
     return;
   }
 
-  for (i = 0;;)
-  {
+  for (i = 0;;) {
     if (quest_table[i].johnson == GET_MOB_VNUM(mob) &&
-        (force_assignation || (!number(0, num - 1) && !(num > 1 && GET_SPARE2(mob) == i)))) {
+        (force_assignation ||
+         (!number(0, num - 1) && !(num > 1 && GET_SPARE2(mob) == i)))) {
       GET_SPARE2(mob) = i;
       return;
     }
@@ -595,8 +543,7 @@ void new_quest(struct char_data *mob, bool force_assignation=FALSE)
   }
 }
 
-void handle_info(struct char_data *johnson)
-{
+void handle_info(struct char_data *johnson) {
   int allowed, pos, num, i, j;
   char speech[210];
 
@@ -609,24 +556,22 @@ void handle_info(struct char_data *johnson)
     allowed += 79;
 
   bool will_add_ellipses = TRUE;
-  if ((pos + allowed) < i)
-  {
+  if ((pos + allowed) < i) {
     for (i = pos + allowed; i > pos; i--)
-      if ((isspace(*(quest_table[num].info + i)) || *(quest_table[num].info + i) == '\r') &&
+      if ((isspace(*(quest_table[num].info + i)) ||
+           *(quest_table[num].info + i) == '\r') &&
           isprint(*(quest_table[num].info + i - 1)) &&
           !isspace(*(quest_table[num].info + i - 1)))
         break;
     GET_SPARE1(johnson) = i + 1;
-  } else
-  {
+  } else {
     if (!number(0, 9))
       new_quest(johnson);
     GET_SPARE1(johnson) = -1;
     will_add_ellipses = FALSE;
   }
 
-  for (j = 0; pos < i; pos++)
-  {
+  for (j = 0; pos < i; pos++) {
     if (*(quest_table[num].info + pos) == '\n')
       continue;
     if (*(quest_table[num].info + pos) == '\r')
@@ -635,7 +580,7 @@ void handle_info(struct char_data *johnson)
       speech[j] = *(quest_table[num].info + pos);
     j++;
   }
-  
+
   if (will_add_ellipses)
     for (int ellipses = 0; ellipses < 3; ellipses++)
       speech[j++] = '.';
@@ -645,19 +590,18 @@ void handle_info(struct char_data *johnson)
   do_say(johnson, speech, 0, 0);
 }
 
-SPECIAL(johnson)
-{
-  struct char_data *johnson = (struct char_data *) me, *temp = NULL;
+SPECIAL(johnson) {
+  struct char_data *johnson = (struct char_data *)me, *temp = NULL;
   int i, obj_complete = 0, mob_complete = 0, num, comm = CMD_JOB_NONE;
 
   if (!IS_NPC(johnson))
     return FALSE;
-  
+
   if (!GET_SPARE2(johnson)) {
     new_quest(johnson, TRUE);
     GET_SPARE1(johnson) = -1;
   }
-  
+
   if (!cmd) {
     if (GET_SPARE1(johnson) >= 0) {
       for (temp = johnson->in_room->people; temp; temp = temp->next_in_room)
@@ -680,14 +624,16 @@ SPECIAL(johnson)
   if (CMD_IS("say") || CMD_IS("'")) {
     if (str_str(argument, "quit"))
       comm = CMD_JOB_QUIT;
-    else if (str_str(argument, "collect") || str_str(argument, "complete") || str_str(argument, "done"))
+    else if (str_str(argument, "collect") || str_str(argument, "complete") ||
+             str_str(argument, "done"))
       comm = CMD_JOB_DONE;
     else if (str_str(argument, "work") || str_str(argument, "business") ||
              str_str(argument, "run") || str_str(argument, "shadowrun") ||
              str_str(argument, "job"))
       comm = CMD_JOB_START;
-    else if (str_str(argument, "yes") || str_str(argument, "accept") || str_str(argument, "yeah")
-            || str_str(argument, "sure") || str_str(argument, "okay"))
+    else if (str_str(argument, "yes") || str_str(argument, "accept") ||
+             str_str(argument, "yeah") || str_str(argument, "sure") ||
+             str_str(argument, "okay"))
       comm = CMD_JOB_YES;
     else if (strstr(argument, "no"))
       comm = CMD_JOB_NO;
@@ -702,313 +648,339 @@ SPECIAL(johnson)
     need_to_act = TRUE;
   } else
     return FALSE;
-  
+
   if (IS_ASTRAL(ch)) {
     send_to_char("Astral projections aren't really employable.\r\n", ch);
     return FALSE;
   }
-  
+
   if (IS_NPC(ch)) {
     send_to_char("NPCs don't get autoruns, go away.\r\n", ch);
     return FALSE;
   }
-  
+
   if (PRF_FLAGGED(ch, PRF_NOHASSLE)) {
-    send_to_char("You can't take runs with NOHASSLE turned on-- TOGGLE NOHASSLE to turn it off.\r\n", ch);
+    send_to_char("You can't take runs with NOHASSLE turned on-- TOGGLE "
+                 "NOHASSLE to turn it off.\r\n",
+                 ch);
     return FALSE;
   }
-  
+
   if (PRF_FLAGGED(ch, PRF_QUEST)) {
-    send_to_char("You can't take autoruns while questing-- TOGGLE QUEST to disable your questing flag, then try again.\r\n", ch);
+    send_to_char("You can't take autoruns while questing-- TOGGLE QUEST to "
+                 "disable your questing flag, then try again.\r\n",
+                 ch);
     return FALSE;
   }
-  
+
   if (AFF_FLAGGED(johnson, AFF_GROUP) && ch->master) {
-    send_to_char("I don't know how you ended up leading this Johnson around, but you can't take quests from your charmies.\r\n", ch);
+    send_to_char("I don't know how you ended up leading this Johnson around, "
+                 "but you can't take quests from your charmies.\r\n",
+                 ch);
     return FALSE;
   }
-  
-  // Hack to get around the fact that moving the failure check after the interact check would make you double-speak and double-act.
+
+  // Hack to get around the fact that moving the failure check after the
+  // interact check would make you double-speak and double-act.
   if (need_to_speak)
     do_say(ch, argument, 0, 0);
   if (need_to_act)
     do_action(ch, argument, cmd, 0);
-  
+
   switch (comm) {
-    case CMD_JOB_QUIT:
-      // Precondition: I cannot be talking right now.
-      if (GET_SPARE1(johnson) == 0) {
-        if (!memory(johnson, ch)) {
-          do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
-          return TRUE;
-        } else {
-          do_say(johnson, "I'm lookin' for a yes-or-no answer, chummer.", 0, 0);
-          return TRUE;
-        }
-      }
-      
-      // Precondition: You must be on a quest.
-      if (!GET_QUEST(ch)) {
-        do_say(johnson, "You're not even on a run right now.", 0, 0);
-        return TRUE;
-      }
-      
-      // Precondition: You must have gotten the quest from me.
+  case CMD_JOB_QUIT:
+    // Precondition: I cannot be talking right now.
+    if (GET_SPARE1(johnson) == 0) {
       if (!memory(johnson, ch)) {
-        do_say(johnson, "Whoever you got your job from, it wasn't me. What, do we all look alike to you?", 0 , 0);
+        do_say(johnson, "Hold on, I'm talking to someone else right now.", 0,
+               0);
+        return TRUE;
+      } else {
+        do_say(johnson, "I'm lookin' for a yes-or-no answer, chummer.", 0, 0);
         return TRUE;
       }
-      
-      // Drop the quest.
-      do_say(johnson, quest_table[GET_QUEST(ch)].quit, 0, 0);
-      end_quest(ch);
+    }
+
+    // Precondition: You must be on a quest.
+    if (!GET_QUEST(ch)) {
+      do_say(johnson, "You're not even on a run right now.", 0, 0);
+      return TRUE;
+    }
+
+    // Precondition: You must have gotten the quest from me.
+    if (!memory(johnson, ch)) {
+      do_say(johnson,
+             "Whoever you got your job from, it wasn't me. What, do we all "
+             "look alike to you?",
+             0, 0);
+      return TRUE;
+    }
+
+    // Drop the quest.
+    do_say(johnson, quest_table[GET_QUEST(ch)].quit, 0, 0);
+    end_quest(ch);
+    forget(johnson, ch);
+    return TRUE;
+  case CMD_JOB_DONE:
+    // Precondition: I cannot be talking right now.
+    if (GET_SPARE1(johnson) == 0) {
+      if (!memory(johnson, ch)) {
+        do_say(johnson, "Hold on, I'm talking to someone else right now.", 0,
+               0);
+        return TRUE;
+      } else {
+        do_say(johnson, "I'm lookin' for a yes-or-no answer, chummer.", 0, 0);
+        return TRUE;
+      }
+    }
+
+    // Precondition: You must be on a quest.
+    if (!GET_QUEST(ch)) {
+      do_say(johnson, "You're not even on a run right now.", 0, 0);
+      return TRUE;
+    }
+
+    // Precondition: You must have gotten the quest from me.
+    if (!memory(johnson, ch)) {
+      do_say(johnson,
+             "Whoever you got your job from, it wasn't me. What, do we all "
+             "look alike to you?",
+             0, 0);
+      return TRUE;
+    }
+
+    // Check for some form of completion-- even if one thing is done, we'll
+    // allow them to turn in the quest.
+    for (i = 0; i < quest_table[GET_QUEST(ch)].num_objs; i++)
+      if (ch->player_specials->obj_complete[i]) {
+        obj_complete = 1;
+        break;
+      }
+    for (i = 0; i < quest_table[GET_QUEST(ch)].num_mobs; i++)
+      if (ch->player_specials->mob_complete[i]) {
+        mob_complete = 1;
+        break;
+      }
+
+    // Process turnin of the quest. The reward() function handles the work here.
+    if (obj_complete || mob_complete) {
+      for (int i = QUEST_TIMER - 1; i > 0; i--)
+        GET_LQUEST(ch, i) = GET_LQUEST(ch, i - 1);
+      GET_LQUEST(ch, 0) = quest_table[GET_QUEST(ch)].vnum;
+      reward(ch, johnson);
+      do_say(johnson, quest_table[GET_QUEST(ch)].finish, 0, 0);
       forget(johnson, ch);
-      return TRUE;
-    case CMD_JOB_DONE:
-      // Precondition: I cannot be talking right now.
-      if (GET_SPARE1(johnson) == 0) {
-        if (!memory(johnson, ch)) {
-          do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
-          return TRUE;
-        } else {
-          do_say(johnson, "I'm lookin' for a yes-or-no answer, chummer.", 0, 0);
-          return TRUE;
-        }
-      }
-      
-      // Precondition: You must be on a quest.
-      if (!GET_QUEST(ch)) {
-        do_say(johnson, "You're not even on a run right now.", 0, 0);
-        return TRUE;
-      }
-      
-      // Precondition: You must have gotten the quest from me.
+    } else
+      do_say(johnson, "You haven't completed any of your objectives yet.", 0,
+             0);
+
+    return TRUE;
+  case CMD_JOB_START:
+    // Precondition: I cannot be talking right now.
+    if (GET_SPARE1(johnson) == 0) {
       if (!memory(johnson, ch)) {
-        do_say(johnson, "Whoever you got your job from, it wasn't me. What, do we all look alike to you?", 0 , 0);
+        do_say(johnson, "Hold on, I'm talking to someone else right now.", 0,
+               0);
+        return TRUE;
+      } else {
+        do_say(johnson, "I'm lookin' for a yes-or-no answer, chummer.", 0, 0);
         return TRUE;
       }
-      
-      // Check for some form of completion-- even if one thing is done, we'll allow them to turn in the quest.
-      for (i = 0; i < quest_table[GET_QUEST(ch)].num_objs; i++)
-        if (ch->player_specials->obj_complete[i]) {
-          obj_complete = 1;
-          break;
-        }
-      for (i = 0; i < quest_table[GET_QUEST(ch)].num_mobs; i++)
-        if (ch->player_specials->mob_complete[i]) {
-          mob_complete = 1;
-          break;
-        }
-      
-      // Process turnin of the quest. The reward() function handles the work here.
-      if (obj_complete || mob_complete) {
-        for (int i = QUEST_TIMER - 1; i > 0; i--)
-          GET_LQUEST(ch, i) = GET_LQUEST(ch, i - 1);
-        GET_LQUEST(ch, 0) = quest_table[GET_QUEST(ch)].vnum;
-        reward(ch, johnson);
-        do_say(johnson, quest_table[GET_QUEST(ch)].finish, 0, 0);
+    }
+
+    // Precondition: You may not have an active quest.
+    if (GET_QUEST(ch)) {
+      do_say(johnson, "Maybe when you've finished what you're doing.", 0, 0);
+      return TRUE;
+    }
+
+    // Precondition: You cannot be a flagged killer or a blacklisted character.
+    if (PLR_FLAGGED(ch, PLR_KILLER) || PLR_FLAGGED(ch, PLR_BLACKLIST)) {
+      do_say(johnson, "Word on the street is you can't be trusted.", 0, 0);
+      GET_SPARE1(johnson) = -1;
+      if (memory(johnson, ch))
         forget(johnson, ch);
-      } else
-        do_say(johnson, "You haven't completed any of your objectives yet.", 0, 0);
-      
-      return TRUE;
-    case CMD_JOB_START:
-      // Precondition: I cannot be talking right now.
-      if (GET_SPARE1(johnson) == 0) {
-        if (!memory(johnson, ch)) {
-          do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
-          return TRUE;
-        } else {
-          do_say(johnson, "I'm lookin' for a yes-or-no answer, chummer.", 0, 0);
-          return TRUE;
-        }
-      }
-      
-      // Precondition: You may not have an active quest.
-      if (GET_QUEST(ch)) {
-        do_say(johnson, "Maybe when you've finished what you're doing.", 0, 0);
-        return TRUE;
-      }
-      
-      // Precondition: You cannot be a flagged killer or a blacklisted character.
-      if (PLR_FLAGGED(ch, PLR_KILLER) || PLR_FLAGGED(ch, PLR_BLACKLIST)) {
-        do_say(johnson, "Word on the street is you can't be trusted.", 0, 0);
-        GET_SPARE1(johnson) = -1;
+    }
+
+    // If you've done this quest recently, you can't do it again until you do
+    // more.
+    for (int i = QUEST_TIMER - 1; i >= 0; i--)
+      if (GET_LQUEST(ch, i) == quest_table[GET_SPARE2(johnson)].vnum) {
+        do_say(johnson, quest_table[GET_SPARE2(johnson)].done, 0, 0);
         if (memory(johnson, ch))
           forget(johnson, ch);
-      }
-      
-      // If you've done this quest recently, you can't do it again until you do more.
-      for (int i = QUEST_TIMER - 1; i >= 0; i--)
-        if (GET_LQUEST(ch, i) == quest_table[GET_SPARE2(johnson)].vnum) {
-          do_say(johnson, quest_table[GET_SPARE2(johnson)].done, 0, 0);
-          if (memory(johnson, ch))
-            forget(johnson, ch);
-          return TRUE;
-        }
-      
-      // Reject high-rep characters.
-      if (rep_too_high(ch, GET_SPARE2(johnson))) {
-        do_say(johnson, "With rep as high as yours? I can't afford your rates for this one!", 0, 0);
-        GET_SPARE1(johnson) = -1;
-        if (memory(johnson, ch))
-          forget(johnson, ch);
-        return TRUE;
-      }
-      
-      // Reject low-rep characters.
-      if (rep_too_low(ch, GET_SPARE2(johnson))) {
-        do_say(johnson, "And just who are you?", 0, 0);
-        GET_SPARE1(johnson) = -1;
-        if (memory(johnson, ch))
-          forget(johnson, ch);
-        return TRUE;
-      }
-      
-      // Assign the quest.
-      GET_SPARE1(johnson) = 0;
-      do_say(johnson, quest_table[GET_SPARE2(johnson)].intro, 0, 0);
-      do_say(johnson, "Are you interested?", 0, 0);
-      if (!memory(johnson, ch))
-        remember(johnson, ch);
-      
-      return TRUE;
-    case CMD_JOB_YES:
-      // Precondition: If I'm not talking right now, don't react.
-      if (GET_SPARE1(johnson) == -1) {
-        return TRUE;
-      }
-      
-      // Precondition: If I have no memory of you, dismiss you.
-      if (!memory(johnson, ch)) {
-        do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
-        return TRUE;
-      }
-      
-      // Precondition: You may not have an active quest.
-      if (GET_QUEST(ch)) {
-        do_say(johnson, "Maybe when you've finished what you're doing.", 0, 0);
-        return TRUE;
-      }
-      
-      // Assign them the quest since they've accepted it.
-      GET_QUEST(ch) = GET_SPARE2(johnson);
-      ch->player_specials->obj_complete =
-        new sh_int[quest_table[GET_QUEST(ch)].num_objs];
-      ch->player_specials->mob_complete =
-        new sh_int[quest_table[GET_QUEST(ch)].num_mobs];
-      for (num = 0; num < quest_table[GET_QUEST(ch)].num_objs; num++)
-        ch->player_specials->obj_complete[num] = 0;
-      for (num = 0; num < quest_table[GET_QUEST(ch)].num_mobs; num++)
-        ch->player_specials->mob_complete[num] = 0;
-      
-      // Load up the quest's targets.
-      load_quest_targets(johnson, ch);
-      
-      // Go into my spiel.
-      handle_info(johnson);
-      
-      return TRUE;
-      
-    case CMD_JOB_NO:
-      // Precondition: If I'm not talking right now, don't react.
-      if (GET_SPARE1(johnson) == -1) {
         return TRUE;
       }
 
-      // Precondition: If I have no memory of you, dismiss you.
-      if (!memory(johnson, ch)) {
-        do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
-        return TRUE;
-      }
-      
-      // Decline the quest.
+    // Reject high-rep characters.
+    if (rep_too_high(ch, GET_SPARE2(johnson))) {
+      do_say(
+          johnson,
+          "With rep as high as yours? I can't afford your rates for this one!",
+          0, 0);
       GET_SPARE1(johnson) = -1;
-      GET_QUEST(ch) = 0;
-      forget(johnson, ch);
-      do_say(johnson, quest_table[GET_SPARE2(johnson)].decline, 0, 0);
+      if (memory(johnson, ch))
+        forget(johnson, ch);
       return TRUE;
-    default:
-      do_say(johnson, "Ugh, drank too much last night. Talk to me later when I've sobered up.", 0, 0);
-      sprintf(buf, "WARNING: Failed to evaluate Johnson tree and return successful message for Johnson '%s' (%ld). Values: comm = %d, spare1 = %ld, spare2 = %ld (maps to %ld)",
-              GET_NAME(johnson), GET_MOB_VNUM(johnson), comm, GET_SPARE1(johnson), GET_SPARE2(johnson), quest_table[GET_SPARE2(johnson)].vnum);
-      mudlog(buf, ch, LOG_SYSLOG, TRUE);
-      break;
+    }
+
+    // Reject low-rep characters.
+    if (rep_too_low(ch, GET_SPARE2(johnson))) {
+      do_say(johnson, "And just who are you?", 0, 0);
+      GET_SPARE1(johnson) = -1;
+      if (memory(johnson, ch))
+        forget(johnson, ch);
+      return TRUE;
+    }
+
+    // Assign the quest.
+    GET_SPARE1(johnson) = 0;
+    do_say(johnson, quest_table[GET_SPARE2(johnson)].intro, 0, 0);
+    do_say(johnson, "Are you interested?", 0, 0);
+    if (!memory(johnson, ch))
+      remember(johnson, ch);
+
+    return TRUE;
+  case CMD_JOB_YES:
+    // Precondition: If I'm not talking right now, don't react.
+    if (GET_SPARE1(johnson) == -1) {
+      return TRUE;
+    }
+
+    // Precondition: If I have no memory of you, dismiss you.
+    if (!memory(johnson, ch)) {
+      do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
+      return TRUE;
+    }
+
+    // Precondition: You may not have an active quest.
+    if (GET_QUEST(ch)) {
+      do_say(johnson, "Maybe when you've finished what you're doing.", 0, 0);
+      return TRUE;
+    }
+
+    // Assign them the quest since they've accepted it.
+    GET_QUEST(ch) = GET_SPARE2(johnson);
+    ch->player_specials->obj_complete =
+        new sh_int[quest_table[GET_QUEST(ch)].num_objs];
+    ch->player_specials->mob_complete =
+        new sh_int[quest_table[GET_QUEST(ch)].num_mobs];
+    for (num = 0; num < quest_table[GET_QUEST(ch)].num_objs; num++)
+      ch->player_specials->obj_complete[num] = 0;
+    for (num = 0; num < quest_table[GET_QUEST(ch)].num_mobs; num++)
+      ch->player_specials->mob_complete[num] = 0;
+
+    // Load up the quest's targets.
+    load_quest_targets(johnson, ch);
+
+    // Go into my spiel.
+    handle_info(johnson);
+
+    return TRUE;
+
+  case CMD_JOB_NO:
+    // Precondition: If I'm not talking right now, don't react.
+    if (GET_SPARE1(johnson) == -1) {
+      return TRUE;
+    }
+
+    // Precondition: If I have no memory of you, dismiss you.
+    if (!memory(johnson, ch)) {
+      do_say(johnson, "Hold on, I'm talking to someone else right now.", 0, 0);
+      return TRUE;
+    }
+
+    // Decline the quest.
+    GET_SPARE1(johnson) = -1;
+    GET_QUEST(ch) = 0;
+    forget(johnson, ch);
+    do_say(johnson, quest_table[GET_SPARE2(johnson)].decline, 0, 0);
+    return TRUE;
+  default:
+    do_say(johnson,
+           "Ugh, drank too much last night. Talk to me later when I've sobered "
+           "up.",
+           0, 0);
+    sprintf(buf,
+            "WARNING: Failed to evaluate Johnson tree and return successful "
+            "message for Johnson '%s' (%ld). Values: comm = %d, spare1 = %ld, "
+            "spare2 = %ld (maps to %ld)",
+            GET_NAME(johnson), GET_MOB_VNUM(johnson), comm, GET_SPARE1(johnson),
+            GET_SPARE2(johnson), quest_table[GET_SPARE2(johnson)].vnum);
+    mudlog(buf, ch, LOG_SYSLOG, TRUE);
+    break;
   }
 
   return TRUE;
 }
 
-
 /*
  * Almost a copy of the 'is_open()' for shops but modified
  * a good deal to work for Johnsons
  */
-void johnson_update(void)
-{
+void johnson_update(void) {
   struct char_data *johnson = NULL, *tmp = NULL;
   char buf[200];
   int i, rstart = 0, rend = 0;
 
   *buf = 0;
 
-  for ( i = 0; i <= top_of_questt;  i++ ) {
+  for (i = 0; i <= top_of_questt; i++) {
     /* Random times */
-    if ( quest_table[i].s_time == -1 ) {
-      if ( dice(1, 6) )
+    if (quest_table[i].s_time == -1) {
+      if (dice(1, 6))
         rstart++;
 
-      if ( dice(1, 6) ) {
+      if (dice(1, 6)) {
         rstart--;
         rend++;
       }
     }
 
     /* Needs to come to 'work' */
-    if ( rstart || quest_table[i].s_time > time_info.hours ) {
-      if ( quest_table[i].s_string != NULL )
-        strcpy( buf, quest_table[i].s_string );
-      johnson = read_mobile( quest_table[i].johnson, REAL );
+    if (rstart || quest_table[i].s_time > time_info.hours) {
+      if (quest_table[i].s_string != NULL)
+        strcpy(buf, quest_table[i].s_string);
+      johnson = read_mobile(quest_table[i].johnson, REAL);
       MOB_FLAGS(johnson).SetBit(MOB_ISNPC);
-      char_to_room( johnson, &world[quest_table[i].s_room] );
+      char_to_room(johnson, &world[quest_table[i].s_room]);
     }
     /* Needs to head off */
-    else if ( rend || quest_table[i].e_time < time_info.hours ) {
-      if ( quest_table[i].e_string != NULL )
-        strcpy( buf, quest_table[i].e_string );
-      for ( johnson = character_list; johnson != NULL; johnson = johnson->next ) {
-        if ( johnson->nr == (tmp = read_mobile( quest_table[i].johnson, REAL))->nr )
+    else if (rend || quest_table[i].e_time < time_info.hours) {
+      if (quest_table[i].e_string != NULL)
+        strcpy(buf, quest_table[i].e_string);
+      for (johnson = character_list; johnson != NULL; johnson = johnson->next) {
+        if (johnson->nr ==
+            (tmp = read_mobile(quest_table[i].johnson, REAL))->nr)
           break;
       }
-      if ( johnson != NULL && johnson->in_room) {
+      if (johnson != NULL && johnson->in_room) {
         MOB_FLAGS(johnson).SetBit(MOB_ISNPC);
-        char_from_room( johnson );
-        char_to_room( johnson, 0 );
+        char_from_room(johnson);
+        char_to_room(johnson, 0);
         extract_char(johnson);
       }
-      if ( tmp != NULL && tmp->in_room) {
+      if (tmp != NULL && tmp->in_room) {
         MOB_FLAGS(tmp).SetBit(MOB_ISNPC);
-        extract_char( tmp );
+        extract_char(tmp);
       }
     }
   }
 
-  if ( *buf != '\0' ) {
-    act( buf, TRUE, johnson, 0, 0, TO_ROOM );
+  if (*buf != '\0') {
+    act(buf, TRUE, johnson, 0, 0, TO_ROOM);
   }
 
   return;
 }
 
-
-void assign_johnsons(void)
-{
+void assign_johnsons(void) {
   int i, rnum;
 
   for (i = 0; i <= top_of_questt; i++) {
     if ((rnum = real_mobile(quest_table[i].johnson)) < 0)
       log_vfprintf("Johnson #%d does not exist (quest #%d)",
-          quest_table[i].johnson, quest_table[i].vnum);
+                   quest_table[i].johnson, quest_table[i].vnum);
     else if (mob_index[rnum].func != johnson) {
       mob_index[rnum].sfunc = mob_index[rnum].func;
       mob_index[rnum].func = johnson;
@@ -1016,8 +988,7 @@ void assign_johnsons(void)
   }
 }
 
-void list_detailed_quest(struct char_data *ch, long rnum)
-{
+void list_detailed_quest(struct char_data *ch, long rnum) {
   int i;
 
   {
@@ -1025,39 +996,44 @@ void list_detailed_quest(struct char_data *ch, long rnum)
 
     sprintf(buf, "Vnum: [%5ld], Rnum: [%ld], Johnson: [%s (%ld)]\r\n",
             quest_table[rnum].vnum, rnum,
-            johnson < 0 ? "none" : GET_NAME(mob_proto+johnson),
+            johnson < 0 ? "none" : GET_NAME(mob_proto + johnson),
             quest_table[rnum].johnson);
   }
 
-  if (!access_level(ch, LVL_ADMIN))
-  {
+  if (!access_level(ch, LVL_ADMIN)) {
     send_to_char(buf, ch);
     return;
   }
 
-  sprintf(buf + strlen(buf), "Time allowed: [%d], Minimum reputation: [%d], "
-          "Maximum reputation: [%d]\r\n", quest_table[rnum].time,
-          quest_table[rnum].min_rep, quest_table[rnum].max_rep);
+  sprintf(buf + strlen(buf),
+          "Time allowed: [%d], Minimum reputation: [%d], "
+          "Maximum reputation: [%d]\r\n",
+          quest_table[rnum].time, quest_table[rnum].min_rep,
+          quest_table[rnum].max_rep);
 
-  sprintf(buf + strlen(buf), "Bonus nuyen: [%d], Bonus Karma: [%0.2f], "
-          "Reward: [%d]\r\n", quest_table[rnum].nuyen,
-          ((float)quest_table[rnum].karma / 100), quest_table[rnum].reward);
+  sprintf(buf + strlen(buf),
+          "Bonus nuyen: [%d], Bonus Karma: [%0.2f], "
+          "Reward: [%d]\r\n",
+          quest_table[rnum].nuyen, ((float)quest_table[rnum].karma / 100),
+          quest_table[rnum].reward);
 
   for (i = 0; i < quest_table[rnum].num_mobs; i++)
-    sprintf(buf + strlen(buf), "M%2d) %d nuyen/%0.2f: V%ld; %s (%d); %s (%d)\r\n",
-            i, quest_table[rnum].mob[i].nuyen,
-            ((float)quest_table[rnum].mob[i].karma / 100),
-            quest_table[rnum].mob[i].vnum, sml[(int)quest_table[rnum].mob[i].load],
-            quest_table[rnum].mob[i].l_data,
-            smo[(int)quest_table[rnum].mob[i].objective],
-            quest_table[rnum].mob[i].o_data);
-
+    sprintf(
+        buf + strlen(buf), "M%2d) %d nuyen/%0.2f: V%ld; %s (%d); %s (%d)\r\n",
+        i, quest_table[rnum].mob[i].nuyen,
+        ((float)quest_table[rnum].mob[i].karma / 100),
+        quest_table[rnum].mob[i].vnum, sml[(int)quest_table[rnum].mob[i].load],
+        quest_table[rnum].mob[i].l_data,
+        smo[(int)quest_table[rnum].mob[i].objective],
+        quest_table[rnum].mob[i].o_data);
 
   for (i = 0; i < quest_table[rnum].num_objs; i++)
-    sprintf(buf + strlen(buf), "O%2d) %d nuyen/%0.2f: V%ld; %s (%d/%d); %s (%d)\r\n",
-            i, quest_table[rnum].obj[i].nuyen,
+    sprintf(buf + strlen(buf),
+            "O%2d) %d nuyen/%0.2f: V%ld; %s (%d/%d); %s (%d)\r\n", i,
+            quest_table[rnum].obj[i].nuyen,
             ((float)quest_table[rnum].obj[i].karma / 100),
-            quest_table[rnum].obj[i].vnum, sol[(int)quest_table[rnum].obj[i].load],
+            quest_table[rnum].obj[i].vnum,
+            sol[(int)quest_table[rnum].obj[i].load],
             quest_table[rnum].obj[i].l_data, quest_table[rnum].obj[i].l_data2,
             soo[(int)quest_table[rnum].obj[i].objective],
             quest_table[rnum].obj[i].o_data);
@@ -1065,21 +1041,18 @@ void list_detailed_quest(struct char_data *ch, long rnum)
   page_string(ch->desc, buf, 1);
 }
 
-void boot_one_quest(struct quest_data *quest)
-{
+void boot_one_quest(struct quest_data *quest) {
   int count, quest_nr = -1, i;
 
   if ((top_of_questt + 2) >= top_of_quest_array)
     // if it cannot resize, return...the edit_quest is freed later
-    if (!resize_qst_array())
-    {
+    if (!resize_qst_array()) {
       olc_state = 0;
       return;
     }
 
   for (count = 0; count <= top_of_questt; count++)
-    if (quest_table[count].vnum > quest->vnum)
-    {
+    if (quest_table[count].vnum > quest->vnum) {
       quest_nr = count;
       break;
     }
@@ -1087,10 +1060,9 @@ void boot_one_quest(struct quest_data *quest)
   if (quest_nr == -1)
     quest_nr = top_of_questt + 1;
   else
-    for (count = top_of_questt + 1; count > quest_nr; count--)
-    {
+    for (count = top_of_questt + 1; count > quest_nr; count--) {
       // copy quest_table[count-1] to quest_table[count]
-      quest_table[count] = quest_table[count-1];
+      quest_table[count] = quest_table[count - 1];
     }
 
   top_of_questt++;
@@ -1106,18 +1078,18 @@ void boot_one_quest(struct quest_data *quest)
   quest_table[quest_nr].reward = quest->reward;
 
   quest_table[quest_nr].num_objs = quest->num_objs;
-  if (quest_table[quest_nr].num_objs > 0)
-  {
-    quest_table[quest_nr].obj = new struct quest_om_data[quest_table[quest_nr].num_objs];
+  if (quest_table[quest_nr].num_objs > 0) {
+    quest_table[quest_nr].obj =
+        new struct quest_om_data[quest_table[quest_nr].num_objs];
     for (i = 0; i < quest_table[quest_nr].num_objs; i++)
       quest_table[quest_nr].obj[i] = quest->obj[i];
   } else
     quest_table[quest_nr].obj = NULL;
 
   quest_table[quest_nr].num_mobs = quest->num_mobs;
-  if (quest_table[quest_nr].num_mobs > 0)
-  {
-    quest_table[quest_nr].mob = new struct quest_om_data[quest_table[quest_nr].num_mobs];
+  if (quest_table[quest_nr].num_mobs > 0) {
+    quest_table[quest_nr].mob =
+        new struct quest_om_data[quest_table[quest_nr].num_mobs];
     for (i = 0; i < quest_table[quest_nr].num_mobs; i++)
       quest_table[quest_nr].mob[i] = quest->mob[i];
   } else
@@ -1133,19 +1105,16 @@ void boot_one_quest(struct quest_data *quest)
   quest_table[quest_nr].e_string = str_dup(quest->e_string);
 
   if ((i = real_mobile(quest_table[quest_nr].johnson)) > 0 &&
-      mob_index[i].func != johnson)
-  {
+      mob_index[i].func != johnson) {
     mob_index[i].sfunc = mob_index[i].func;
     mob_index[i].func = johnson;
   }
 }
 
-void reboot_quest(int rnum, struct quest_data *quest)
-{
+void reboot_quest(int rnum, struct quest_data *quest) {
   int i, ojn, njn;
 
-  if (quest_table[rnum].johnson != quest->johnson)
-  {
+  if (quest_table[rnum].johnson != quest->johnson) {
     ojn = real_mobile(quest_table[rnum].johnson);
     njn = real_mobile(quest->johnson);
     if (mob_index[ojn].func == johnson) {
@@ -1168,10 +1137,9 @@ void reboot_quest(int rnum, struct quest_data *quest)
   quest_table[rnum].reward = quest->reward;
 
   if (quest_table[rnum].obj)
-    delete [] quest_table[rnum].obj;
+    delete[] quest_table[rnum].obj;
 
-  if (quest_table[rnum].num_objs > 0)
-  {
+  if (quest_table[rnum].num_objs > 0) {
     quest_table[rnum].obj = new quest_om_data[quest_table[rnum].num_objs];
 
     for (i = 0; i < quest_table[rnum].num_objs; i++)
@@ -1180,10 +1148,9 @@ void reboot_quest(int rnum, struct quest_data *quest)
     quest_table[rnum].obj = NULL;
 
   if (quest_table[rnum].mob)
-    delete [] quest_table[rnum].mob;
+    delete[] quest_table[rnum].mob;
 
-  if (quest_table[rnum].num_mobs > 0)
-  {
+  if (quest_table[rnum].num_mobs > 0) {
     quest_table[rnum].mob = new quest_om_data[quest_table[rnum].num_mobs];
 
     for (i = 0; i < quest_table[rnum].num_mobs; i++)
@@ -1192,40 +1159,39 @@ void reboot_quest(int rnum, struct quest_data *quest)
     quest_table[rnum].mob = NULL;
 
   if (quest_table[rnum].intro)
-    delete [] quest_table[rnum].intro;
+    delete[] quest_table[rnum].intro;
   quest_table[rnum].intro = str_dup(quest->intro);
 
   if (quest_table[rnum].decline)
-    delete [] quest_table[rnum].decline;
+    delete[] quest_table[rnum].decline;
   quest_table[rnum].decline = str_dup(quest->decline);
 
   if (quest_table[rnum].quit)
-    delete [] quest_table[rnum].quit;
+    delete[] quest_table[rnum].quit;
   quest_table[rnum].quit = str_dup(quest->quit);
 
   if (quest_table[rnum].finish)
-    delete [] quest_table[rnum].finish;
+    delete[] quest_table[rnum].finish;
   quest_table[rnum].finish = str_dup(quest->finish);
 
   if (quest_table[rnum].info)
-    delete [] quest_table[rnum].info;
+    delete[] quest_table[rnum].info;
   quest_table[rnum].info = str_dup(quest->info);
 
   if (quest_table[rnum].done)
-    delete [] quest_table[rnum].done;
+    delete[] quest_table[rnum].done;
   quest_table[rnum].done = str_dup(quest->done);
-  
+
   if (quest_table[rnum].s_string)
-    delete [] quest_table[rnum].s_string;
+    delete[] quest_table[rnum].s_string;
   quest_table[rnum].s_string = str_dup(quest->s_string);
-  
+
   if (quest_table[rnum].e_string)
-    delete [] quest_table[rnum].e_string;
+    delete[] quest_table[rnum].e_string;
   quest_table[rnum].e_string = str_dup(quest->e_string);
 }
 
-int write_quests_to_disk(int zone)
-{
+int write_quests_to_disk(int zone) {
   long i, j, found = 0, counter;
   FILE *fp;
   zone = real_zone(zone);
@@ -1239,17 +1205,16 @@ int write_quests_to_disk(int zone)
     return 0;
   }
 
-  for (counter = zone_table[zone].number * 100;
-       counter <= zone_table[zone].top; counter++) {
+  for (counter = zone_table[zone].number * 100; counter <= zone_table[zone].top;
+       counter++) {
     if ((i = real_quest(counter)) > -1) {
       fprintf(fp, "#%ld\n", quest_table[i].vnum);
-      fprintf(fp, "%ld %d %d %d %d %d %d %d %d %d %d %d\n", quest_table[i].johnson,
-              quest_table[i].time, quest_table[i].min_rep,
-              quest_table[i].max_rep, quest_table[i].nuyen,
-              quest_table[i].karma, quest_table[i].reward,
-              quest_table[i].num_objs, quest_table[i].num_mobs,
-              quest_table[i].s_time, quest_table[i].e_time,
-              quest_table[i].s_room);
+      fprintf(
+          fp, "%ld %d %d %d %d %d %d %d %d %d %d %d\n", quest_table[i].johnson,
+          quest_table[i].time, quest_table[i].min_rep, quest_table[i].max_rep,
+          quest_table[i].nuyen, quest_table[i].karma, quest_table[i].reward,
+          quest_table[i].num_objs, quest_table[i].num_mobs,
+          quest_table[i].s_time, quest_table[i].e_time, quest_table[i].s_room);
 
       for (j = 0; j < quest_table[i].num_objs; j++)
         fprintf(fp, "%ld %d %d %d %d %d %d %d\n", quest_table[i].obj[j].vnum,
@@ -1295,8 +1260,7 @@ int write_quests_to_disk(int zone)
   return 1;
 }
 
-void qedit_list_obj_objectives(struct descriptor_data *d)
-{
+void qedit_list_obj_objectives(struct descriptor_data *d) {
   int i;
   long rnum;
 
@@ -1304,8 +1268,7 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
 
   *buf = '\0';
 
-  for (i = 0; i < QUEST->num_objs; i++)
-  {
+  for (i = 0; i < QUEST->num_objs; i++) {
     sprintf(buf + strlen(buf), "%2d) ", i);
     switch (QUEST->obj[i].load) {
     case QUEST_NONE:
@@ -1317,11 +1280,9 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
     case QOL_TARMOB_I:
       sprintf(buf + strlen(buf), "Give %ld to M%d ", QUEST->obj[i].vnum,
               QUEST->obj[i].l_data);
-      if (QUEST->obj[i].l_data >= 0 &&
-          QUEST->obj[i].l_data < QUEST->num_mobs &&
+      if (QUEST->obj[i].l_data >= 0 && QUEST->obj[i].l_data < QUEST->num_mobs &&
           (rnum = real_mobile(QUEST->mob[QUEST->obj[i].l_data].vnum)) > -1)
-        sprintf(buf + strlen(buf), "(%s)",
-                GET_NAME(mob_proto+rnum));
+        sprintf(buf + strlen(buf), "(%s)", GET_NAME(mob_proto + rnum));
       else
         strcat(buf, "(null)");
       break;
@@ -1329,11 +1290,9 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
     case QOL_TARMOB_E:
       sprintf(buf + strlen(buf), "Equip M%d ", QUEST->obj[i].l_data);
 
-      if (QUEST->obj[i].l_data >= 0 &&
-          QUEST->obj[i].l_data < QUEST->num_mobs &&
+      if (QUEST->obj[i].l_data >= 0 && QUEST->obj[i].l_data < QUEST->num_mobs &&
           (rnum = real_mobile(QUEST->mob[QUEST->obj[i].l_data].vnum)) > -1)
-        sprintf(buf + strlen(buf), "(%s) ",
-                GET_NAME(mob_proto+rnum));
+        sprintf(buf + strlen(buf), "(%s) ", GET_NAME(mob_proto + rnum));
 
       strcat(buf, "(null) ");
       sprintf(buf + strlen(buf), "with %ld at %s", QUEST->obj[i].vnum,
@@ -1344,16 +1303,16 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
       sprintf(buf + strlen(buf), "Install %ld in M%d ", QUEST->obj[i].vnum,
               QUEST->obj[i].l_data);
 
-      if (QUEST->obj[i].l_data >= 0 &&
-          QUEST->obj[i].l_data < QUEST->num_mobs &&
+      if (QUEST->obj[i].l_data >= 0 && QUEST->obj[i].l_data < QUEST->num_mobs &&
           (rnum = real_mobile(QUEST->mob[QUEST->obj[i].l_data].vnum)) > -1)
-        sprintf(buf + strlen(buf), "(%s)", GET_NAME(mob_proto+rnum));
+        sprintf(buf + strlen(buf), "(%s)", GET_NAME(mob_proto + rnum));
       else
         strcat(buf, "(null)");
 
       break;
     case QOL_HOST:
-      sprintf(buf + strlen(buf), "Load %ld in host %d", QUEST->obj[i].vnum, QUEST->obj[i].l_data);
+      sprintf(buf + strlen(buf), "Load %ld in host %d", QUEST->obj[i].vnum,
+              QUEST->obj[i].l_data);
       break;
     case QOL_LOCATION:
       sprintf(buf + strlen(buf), "Load %ld in room %d", QUEST->obj[i].vnum,
@@ -1372,10 +1331,9 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
     case QOO_TAR_MOB:
       sprintf(buf + strlen(buf), "delivering item to M%d ",
               QUEST->obj[i].o_data);
-      if (QUEST->obj[i].o_data >= 0 &&
-          QUEST->obj[i].o_data < QUEST->num_mobs &&
+      if (QUEST->obj[i].o_data >= 0 && QUEST->obj[i].o_data < QUEST->num_mobs &&
           (rnum = real_mobile(QUEST->mob[QUEST->obj[i].o_data].vnum)) > -1)
-        sprintf(buf + strlen(buf), "(%s)\r\n", GET_NAME(mob_proto+rnum));
+        sprintf(buf + strlen(buf), "(%s)\r\n", GET_NAME(mob_proto + rnum));
       else
         strcat(buf, "(null)\r\n");
       break;
@@ -1390,7 +1348,8 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
       strcat(buf, "each item destroyed\r\n");
       break;
     case QOO_UPLOAD:
-      sprintf(buf + strlen(buf), "uploading to host %d\n\n", QUEST->obj[i].o_data);
+      sprintf(buf + strlen(buf), "uploading to host %d\n\n",
+              QUEST->obj[i].o_data);
       break;
     case QOO_RETURN_PAY:
       sprintf(buf + strlen(buf), "returning paydata from host %d\r\n",
@@ -1400,63 +1359,65 @@ void qedit_list_obj_objectives(struct descriptor_data *d)
   send_to_char(buf, CH);
 }
 
-void qedit_list_mob_objectives(struct descriptor_data *d)
-{
+void qedit_list_mob_objectives(struct descriptor_data *d) {
   int i, rnum = 0;
 
   CLS(CH);
 
   *buf = '\0';
 
-  for (i = 0; i < QUEST->num_mobs; i++)
-  {
+  for (i = 0; i < QUEST->num_mobs; i++) {
     sprintf(buf + strlen(buf), "%2d) ", i);
     switch (QUEST->mob[i].load) {
     case QUEST_NONE:
       strcat(buf, "Not set");
       break;
     case QML_LOCATION:
-      sprintf(buf + strlen(buf), "Load %ld (%s) at room %d",
-              QUEST->mob[i].vnum,
-              (rnum = real_mobile(QUEST->mob[i].vnum)) > -1 ?
-              GET_NAME(mob_proto+rnum) : "null",
+      sprintf(buf + strlen(buf), "Load %ld (%s) at room %d", QUEST->mob[i].vnum,
+              (rnum = real_mobile(QUEST->mob[i].vnum)) > -1
+                  ? GET_NAME(mob_proto + rnum)
+                  : "null",
               QUEST->mob[i].l_data);
       break;
     case QML_FOLQUESTER:
       sprintf(buf + strlen(buf), "Load %ld (%s) at and follow quester",
               QUEST->mob[i].vnum,
-              (rnum = real_mobile(QUEST->mob[i].vnum)) > -1 ?
-              GET_NAME(mob_proto+rnum) : "null");
+              (rnum = real_mobile(QUEST->mob[i].vnum)) > -1
+                  ? GET_NAME(mob_proto + rnum)
+                  : "null");
       break;
     }
     switch (QUEST->mob[i].objective) {
     case QUEST_NONE:
-      sprintf(buf + strlen(buf), "\r\n    Award %d nuyen & %0.2f karma for "
-              "nothing\r\n", QUEST->mob[i].nuyen,
-              ((float)QUEST->mob[i].karma / 100));
+      sprintf(buf + strlen(buf),
+              "\r\n    Award %d nuyen & %0.2f karma for "
+              "nothing\r\n",
+              QUEST->mob[i].nuyen, ((float)QUEST->mob[i].karma / 100));
       break;
     case QMO_LOCATION:
-      sprintf(buf + strlen(buf), "\r\n    Award %d nuyen & %0.2f karma for "
-              "escorting target to room %d\r\n", QUEST->mob[i].nuyen,
-              ((float)QUEST->mob[i].karma / 100), QUEST->mob[i].o_data);
+      sprintf(buf + strlen(buf),
+              "\r\n    Award %d nuyen & %0.2f karma for "
+              "escorting target to room %d\r\n",
+              QUEST->mob[i].nuyen, ((float)QUEST->mob[i].karma / 100),
+              QUEST->mob[i].o_data);
       break;
     case QMO_KILL_ONE:
-      sprintf(buf + strlen(buf), "\r\n    Award %d nuyen & %0.2f karma for "
-              "killing target\r\n", QUEST->mob[i].nuyen,
-              ((float)QUEST->mob[i].karma / 100));
+      sprintf(buf + strlen(buf),
+              "\r\n    Award %d nuyen & %0.2f karma for "
+              "killing target\r\n",
+              QUEST->mob[i].nuyen, ((float)QUEST->mob[i].karma / 100));
       break;
     case QMO_KILL_MANY:
-      sprintf(buf + strlen(buf), "\r\n    Award %d nuyen & %0.2f karma for "
-              "each target killed\r\n", QUEST->mob[i].nuyen,
-              ((float)QUEST->mob[i].karma / 100));
+      sprintf(buf + strlen(buf),
+              "\r\n    Award %d nuyen & %0.2f karma for "
+              "each target killed\r\n",
+              QUEST->mob[i].nuyen, ((float)QUEST->mob[i].karma / 100));
       break;
     case QMO_KILL_ESCORTEE:
-      sprintf(buf + strlen(buf), "Target hunts M%d \r\n",
-              QUEST->mob[i].o_data);
-      if (QUEST->mob[i].o_data >= 0 &&
-          QUEST->mob[i].o_data < QUEST->num_mobs &&
+      sprintf(buf + strlen(buf), "Target hunts M%d \r\n", QUEST->mob[i].o_data);
+      if (QUEST->mob[i].o_data >= 0 && QUEST->mob[i].o_data < QUEST->num_mobs &&
           (rnum = real_mobile(QUEST->mob[QUEST->mob[i].o_data].vnum)) > -1)
-        sprintf(buf + strlen(buf), "(%s)\r\n", GET_NAME(mob_proto+rnum));
+        sprintf(buf + strlen(buf), "(%s)\r\n", GET_NAME(mob_proto + rnum));
       else
         strcat(buf, "(null)\r\n");
       break;
@@ -1465,34 +1426,35 @@ void qedit_list_mob_objectives(struct descriptor_data *d)
   send_to_char(buf, CH);
 }
 
-void qedit_disp_obj_menu(struct descriptor_data *d)
-{
-  send_to_char(CH, "Item objective menu:\r\n"
+void qedit_disp_obj_menu(struct descriptor_data *d) {
+  send_to_char(CH,
+               "Item objective menu:\r\n"
                " 1) List current objectives\r\n"
                " 2) Edit an existing objective\r\n"
                " 3) Add a new objective (%d slots remaining)\r\n"
                " q) Return to main menu\r\n"
-               "Enter your choice: ", QMAX_OBJS - QUEST->num_objs);
+               "Enter your choice: ",
+               QMAX_OBJS - QUEST->num_objs);
 
   d->edit_number2 = 0;
   d->edit_mode = QEDIT_O_MENU;
 }
 
-void qedit_disp_mob_menu(struct descriptor_data *d)
-{
-  send_to_char(CH, "Mobile objective menu:\r\n"
+void qedit_disp_mob_menu(struct descriptor_data *d) {
+  send_to_char(CH,
+               "Mobile objective menu:\r\n"
                " 1) List current objectives\r\n"
                " 2) Edit an existing objective\r\n"
                " 3) Add a new objective (%d slots remaining)\r\n"
                " q) Return to main menu\r\n"
-               "Enter your choice: ", QMAX_MOBS - QUEST->num_mobs);
+               "Enter your choice: ",
+               QMAX_MOBS - QUEST->num_mobs);
 
   d->edit_number2 = 0;
   d->edit_mode = QEDIT_M_MENU;
 }
 
-void qedit_disp_obj_loads(struct descriptor_data *d)
-{
+void qedit_disp_obj_loads(struct descriptor_data *d) {
   int i;
 
   CLS(CH);
@@ -1505,8 +1467,7 @@ void qedit_disp_obj_loads(struct descriptor_data *d)
   d->edit_mode = QEDIT_O_LOAD;
 }
 
-void qedit_disp_mob_loads(struct descriptor_data *d)
-{
+void qedit_disp_mob_loads(struct descriptor_data *d) {
   int i;
 
   CLS(CH);
@@ -1519,8 +1480,7 @@ void qedit_disp_mob_loads(struct descriptor_data *d)
   d->edit_mode = QEDIT_M_LOAD;
 }
 
-void qedit_disp_obj_objectives(struct descriptor_data *d)
-{
+void qedit_disp_obj_objectives(struct descriptor_data *d) {
   int i;
 
   CLS(CH);
@@ -1533,8 +1493,7 @@ void qedit_disp_obj_objectives(struct descriptor_data *d)
   d->edit_mode = QEDIT_O_OBJECTIVE;
 }
 
-void qedit_disp_mob_objectives(struct descriptor_data *d)
-{
+void qedit_disp_mob_objectives(struct descriptor_data *d) {
   int i;
 
   CLS(CH);
@@ -1547,8 +1506,7 @@ void qedit_disp_mob_objectives(struct descriptor_data *d)
   d->edit_mode = QEDIT_M_OBJECTIVE;
 }
 
-void qedit_disp_locations(struct descriptor_data *d)
-{
+void qedit_disp_locations(struct descriptor_data *d) {
   int i;
 
   CLS(CH);
@@ -1561,25 +1519,25 @@ void qedit_disp_locations(struct descriptor_data *d)
   d->edit_mode = QEDIT_O_LDATA2;
 }
 
-void qedit_disp_menu(struct descriptor_data *d)
-{
+void qedit_disp_menu(struct descriptor_data *d) {
   char s_time[10], e_time[10];
 
   CLS(CH);
-  send_to_char(CH, "Quest number: %s%d%s\r\n", CCCYN(CH, C_CMP),
-               d->edit_number, CCNRM(CH, C_CMP));
+  send_to_char(CH, "Quest number: %s%d%s\r\n", CCCYN(CH, C_CMP), d->edit_number,
+               CCNRM(CH, C_CMP));
   send_to_char(CH, "1) Johnson: %s%d%s (%s%s%s)\r\n", CCCYN(CH, C_CMP),
                QUEST->johnson, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               real_mobile(QUEST->johnson) < 0 ? "null" :
-               GET_NAME(mob_proto+real_mobile(QUEST->johnson)),
+               real_mobile(QUEST->johnson) < 0
+                   ? "null"
+                   : GET_NAME(mob_proto + real_mobile(QUEST->johnson)),
                CCNRM(CH, C_CMP));
   send_to_char(CH, "2) Time allowed (minutes): %s%d%s\r\n", CCCYN(CH, C_CMP),
                QUEST->time, CCNRM(CH, C_CMP));
   send_to_char(CH, "3) Reputation range: %s%d%s-%s%d%s\r\n", CCCYN(CH, C_CMP),
                QUEST->min_rep, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
                QUEST->max_rep, CCNRM(CH, C_CMP));
-  send_to_char(CH, "4) Bonus nuyen: %s%d%s\r\n", CCCYN(CH, C_CMP),
-               QUEST->nuyen, CCNRM(CH, C_CMP));
+  send_to_char(CH, "4) Bonus nuyen: %s%d%s\r\n", CCCYN(CH, C_CMP), QUEST->nuyen,
+               CCNRM(CH, C_CMP));
   send_to_char(CH, "5) Bonus karma: %s%0.2f%s\r\n", CCCYN(CH, C_CMP),
                ((float)QUEST->karma / 100), CCNRM(CH, C_CMP));
   send_to_char(CH, "6) Item objective menu\r\n");
@@ -1598,34 +1556,32 @@ void qedit_disp_menu(struct descriptor_data *d)
   /*
    * Determine what to print for the times the Johnson is out
    */
-  if ( QUEST->s_time == -1 )
-  {
-    strcpy(s_time,"Random");
+  if (QUEST->s_time == -1) {
+    strcpy(s_time, "Random");
     e_time[0] = '\0';
-  } else if ( QUEST->s_time == QUEST->e_time )
-  {
-    strcpy(s_time,"Always");
+  } else if (QUEST->s_time == QUEST->e_time) {
+    strcpy(s_time, "Always");
     e_time[0] = '\0';
-  } else
-  {
-    sprintf(s_time,"%d - ", QUEST->s_time);
-    sprintf(e_time,"%d", QUEST->e_time);
+  } else {
+    sprintf(s_time, "%d - ", QUEST->s_time);
+    sprintf(e_time, "%d", QUEST->e_time);
   }
-  send_to_char(CH, "d) Johnson hours: %s%s%s%s\r\n", CCCYN(CH, C_CMP),
-               s_time, e_time, CCNRM(CH, C_CMP));
+  send_to_char(CH, "d) Johnson hours: %s%s%s%s\r\n", CCCYN(CH, C_CMP), s_time,
+               e_time, CCNRM(CH, C_CMP));
 
   send_to_char(CH, "e) Start work message: %s%s%s\r\n", CCCYN(CH, C_CMP),
                QUEST->s_string, CCNRM(CH, C_CMP));
   send_to_char(CH, "f) End work message: %s%s%s\r\n", CCCYN(CH, C_CMP),
                QUEST->e_string, CCNRM(CH, C_CMP));
-  send_to_char(CH, "g) Quest already completed message: %s%s%s\r\n", CCCYN(CH, C_CMP),
-               QUEST->done, CCNRM(CH, C_CMP));
+  send_to_char(CH, "g) Quest already completed message: %s%s%s\r\n",
+               CCCYN(CH, C_CMP), QUEST->done, CCNRM(CH, C_CMP));
 
   if (access_level(CH, LVL_VICEPRES))
     send_to_char(CH, "h) Reward: %s%d%s (%s%s%s)\r\n", CCCYN(CH, C_CMP),
                  QUEST->reward, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-                 real_object(QUEST->reward) < 0 ? "null" :
-                 obj_proto[real_object(QUEST->reward)].text.name,
+                 real_object(QUEST->reward) < 0
+                     ? "null"
+                     : obj_proto[real_object(QUEST->reward)].text.name,
                  CCNRM(CH, C_CMP));
   send_to_char("q) Quit and save\r\n", CH);
   send_to_char("x) Exit and abort\r\n", CH);
@@ -1633,13 +1589,11 @@ void qedit_disp_menu(struct descriptor_data *d)
   d->edit_mode = QEDIT_MAIN_MENU;
 }
 
-void qedit_parse(struct descriptor_data *d, const char *arg)
-{
+void qedit_parse(struct descriptor_data *d, const char *arg) {
   int number;
   float karma;
 
-  switch (d->edit_mode)
-  {
+  switch (d->edit_mode) {
   case QEDIT_CONFIRM_EDIT:
     switch (*arg) {
     case 'y':
@@ -1662,7 +1616,7 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     }
     break;
   case QEDIT_CONFIRM_SAVESTRING:
-    switch(*arg) {
+    switch (*arg) {
     case 'y':
     case 'Y':
       if (real_quest(d->edit_number) == -1)
@@ -1670,7 +1624,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       else
         reboot_quest(real_quest(d->edit_number), QUEST);
       if (!write_quests_to_disk(d->character->player_specials->saved.zonenum))
-        send_to_char("There was an error in writing the zone's quests.\r\n", d->character);
+        send_to_char("There was an error in writing the zone's quests.\r\n",
+                     d->character);
       free_quest(d->edit_quest);
       delete d->edit_quest;
       d->edit_quest = NULL;
@@ -1693,7 +1648,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       break;
     default:
       send_to_char("Invalid choice!\r\n", d->character);
-      send_to_char("Do you wish to save this quest internally?\r\n", d->character);
+      send_to_char("Do you wish to save this quest internally?\r\n",
+                   d->character);
       break;
     }
     break;
@@ -1771,17 +1727,23 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       break;
     case 'e':
     case 'E':
-      send_to_char("Enter the string that will be given when the Johnson comes to work:\n\r", CH);
+      send_to_char("Enter the string that will be given when the Johnson comes "
+                   "to work:\n\r",
+                   CH);
       d->edit_mode = QEDIT_SSTRING;
       break;
     case 'f':
     case 'F':
-      send_to_char("Enter the string that will be given when the Johnson leaves work:\n\r", CH);
+      send_to_char("Enter the string that will be given when the Johnson "
+                   "leaves work:\n\r",
+                   CH);
       d->edit_mode = QEDIT_ESTRING;
       break;
     case 'g':
     case 'G':
-      send_to_char("Enter the string that will be given if quest is already complete:\n\r", CH);
+      send_to_char("Enter the string that will be given if quest is already "
+                   "complete:\n\r",
+                   CH);
       d->edit_mode = QEDIT_DONE;
       break;
     case 'h':
@@ -1812,7 +1774,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     number = atoi(arg);
     if (number < 30 || number > 1440)
       send_to_char("Time must range from 30 to 1440 mud minutes.\r\n"
-                   "Enter allowed time: ", CH);
+                   "Enter allowed time: ",
+                   CH);
     else {
       QUEST->time = number;
       qedit_disp_menu(d);
@@ -1821,7 +1784,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
   case QEDIT_MIN_REP:
     number = atoi(arg);
     if (number < 0 || number > 500)
-      send_to_char("Invalid value.  Enter minimum reputation between 0-500: ", CH);
+      send_to_char("Invalid value.  Enter minimum reputation between 0-500: ",
+                   CH);
     else {
       QUEST->min_rep = number;
       send_to_char("Enter maximum reputation: ", CH);
@@ -1832,7 +1796,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     number = atoi(arg);
     if ((unsigned)number < QUEST->min_rep)
       send_to_char("Maximum reputation must be greater than the minimum.\r\n"
-                   "Enter maximum reputation: ", CH);
+                   "Enter maximum reputation: ",
+                   CH);
     else if (number > 10000)
       send_to_char("Invalid value.  Enter maximum reputation: ", CH);
     else {
@@ -1959,7 +1924,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
         break;
       case QMO_KILL_ESCORTEE:
         d->edit_mode = QEDIT_M_ODATA;
-        send_to_char(CH, "Enter M# of mob to hunt ('l' to list, 'q' to quit): ");
+        send_to_char(CH,
+                     "Enter M# of mob to hunt ('l' to list, 'q' to quit): ");
         break;
       default:
         CLS(CH);
@@ -1979,14 +1945,14 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     }
     break;
   case QEDIT_M_LDATA2:
-    break;             // unused (for now)
+    break; // unused (for now)
   case QEDIT_M_ODATA:
     number = atoi(arg);
     switch (QUEST->mob[d->edit_number2].objective) {
     case QMO_LOCATION:
       if (real_room(number) < 0)
         send_to_char(CH, "Invalid room.  Enter vnum of room mob "
-                     "must be led to: ");
+                         "must be led to: ");
       else {
         QUEST->mob[d->edit_number2].o_data = number;
         qedit_disp_mob_menu(d);
@@ -2007,9 +1973,11 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
         qedit_disp_mob_menu(d);
       } else if (*arg == 'l' || *arg == 'L') {
         qedit_list_mob_objectives(d);
-        send_to_char(CH, "Enter M# of mob to hunt ('l' to list, 'q' to quit): ");
+        send_to_char(CH,
+                     "Enter M# of mob to hunt ('l' to list, 'q' to quit): ");
       } else if (number < 0 || number >= QUEST->num_mobs)
-        send_to_char(CH, "Invalid response.  "
+        send_to_char(CH,
+                     "Invalid response.  "
                      "Enter M# of mob to hunt ('l' to list, 'q' to quit): ");
       else {
         QUEST->mob[d->edit_number2].o_data = number;
@@ -2100,17 +2068,17 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       case QOL_TARMOB_I:
         d->edit_mode = QEDIT_O_LDATA;
         send_to_char(CH, "Enter M# of mob to give item to: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
         break;
       case QOL_TARMOB_E:
         d->edit_mode = QEDIT_O_LDATA;
         send_to_char(CH, "Enter M# of mob to equip item on: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
         break;
       case QOL_TARMOB_C:
         d->edit_mode = QEDIT_O_LDATA;
         send_to_char(CH, "Enter M# of mob to install item in: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
         break;
       case QOL_HOST:
         d->edit_mode = QEDIT_O_LDATA;
@@ -2136,7 +2104,7 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       case QOO_TAR_MOB:
         d->edit_mode = QEDIT_O_ODATA;
         send_to_char(CH, "Enter M# of mob item must be delivered to "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
         break;
       case QOO_LOCATION:
         d->edit_mode = QEDIT_O_ODATA;
@@ -2145,7 +2113,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       case QOO_RETURN_PAY:
       case QOO_UPLOAD:
         d->edit_mode = QEDIT_O_ODATA;
-        send_to_char(CH, "Enter vnum of host paydata must be retrieved/uploaded from: ");
+        send_to_char(
+            CH, "Enter vnum of host paydata must be retrieved/uploaded from: ");
         break;
       default:
         CLS(CH);
@@ -2161,10 +2130,10 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       if (*arg == 'l' || *arg == 'L') {
         qedit_list_mob_objectives(d);
         send_to_char(CH, "Enter M# of mob to give item to: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       } else if (number < 0 || number >= top_of_mobt)
         send_to_char(CH, "Enter M# of mob to give item to: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       else {
         QUEST->obj[d->edit_number2].l_data = number;
         qedit_disp_obj_objectives(d);
@@ -2174,10 +2143,10 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       if (*arg == 'l' || *arg == 'L') {
         qedit_list_mob_objectives(d);
         send_to_char(CH, "Enter M# of mob to equip item on: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       } else if (number < 0 || number >= top_of_mobt)
         send_to_char(CH, "Enter M# of mob to equip item on: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       else {
         QUEST->obj[d->edit_number2].l_data = number;
         qedit_disp_locations(d);
@@ -2187,10 +2156,10 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       if (*arg == 'l' || *arg == 'L') {
         qedit_list_mob_objectives(d);
         send_to_char(CH, "Enter M# of mob to install item in: "
-                     "('l' to list, 'q' to quit): ");
-      } else  if (number < 0 || number >= top_of_mobt)
+                         "('l' to list, 'q' to quit): ");
+      } else if (number < 0 || number >= top_of_mobt)
         send_to_char(CH, "Enter M# of mob to install item in: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       else {
         QUEST->obj[d->edit_number2].l_data = number;
         qedit_disp_obj_objectives(d);
@@ -2234,10 +2203,10 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
       } else if (*arg == 'l' || *arg == 'L') {
         qedit_list_mob_objectives(d);
         send_to_char(CH, "Enter M# of mob item must be delivered to: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       } else if (real_mobile(number) < 0)
         send_to_char(CH, "Enter M# of mob item must be delivered to: "
-                     "('l' to list, 'q' to quit): ");
+                         "('l' to list, 'q' to quit): ");
       else {
         QUEST->obj[d->edit_number2].o_data = number;
         CLS(CH);
@@ -2256,7 +2225,8 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     case QOO_UPLOAD:
     case QOO_RETURN_PAY:
       if (real_host(number) < 0)
-        send_to_char(CH, "Enter vnum of host paydata must be retrieved/uploaded from: ");
+        send_to_char(
+            CH, "Enter vnum of host paydata must be retrieved/uploaded from: ");
       else {
         QUEST->obj[d->edit_number2].o_data = number;
         CLS(CH);
@@ -2267,30 +2237,30 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     break;
   case QEDIT_INTRO:
     if (QUEST->intro)
-      delete [] QUEST->intro;
+      delete[] QUEST->intro;
     QUEST->intro = str_dup(arg);
     qedit_disp_menu(d);
     break;
   case QEDIT_DECLINE:
     if (QUEST->decline)
-      delete [] QUEST->decline;
+      delete[] QUEST->decline;
     QUEST->decline = str_dup(arg);
     qedit_disp_menu(d);
     break;
   case QEDIT_QUIT:
     if (QUEST->quit)
-      delete [] QUEST->quit;
+      delete[] QUEST->quit;
     QUEST->quit = str_dup(arg);
     qedit_disp_menu(d);
     break;
   case QEDIT_FINISH:
     if (QUEST->finish)
-      delete [] QUEST->finish;
+      delete[] QUEST->finish;
     QUEST->finish = str_dup(arg);
     qedit_disp_menu(d);
     break;
   case QEDIT_INFO:
-    break;               // we should never get here
+    break; // we should never get here
   case QEDIT_REWARD:
     number = atoi(arg);
     if (real_object(number) < 0)
@@ -2302,8 +2272,10 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     break;
   case QEDIT_SHOUR:
     number = atoi(arg);
-    if ( number > 23 || number < -1 ) {
-      send_to_char("Needs to be between -1 and 23.\n\rWhat time does he start work? ", CH);
+    if (number > 23 || number < -1) {
+      send_to_char(
+          "Needs to be between -1 and 23.\n\rWhat time does he start work? ",
+          CH);
     } else {
       QUEST->s_time = number;
       d->edit_mode = QEDIT_EHOUR;
@@ -2312,8 +2284,9 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     break;
   case QEDIT_EHOUR:
     number = atoi(arg);
-    if ( number > 23 || number < 0 ) {
-      send_to_char("Needs to be between 0 and 23.\n\rWhat time does he stop work? ", CH);
+    if (number > 23 || number < 0) {
+      send_to_char(
+          "Needs to be between 0 and 23.\n\rWhat time does he stop work? ", CH);
       return;
     } else {
       QUEST->e_time = number;
@@ -2322,19 +2295,19 @@ void qedit_parse(struct descriptor_data *d, const char *arg)
     break;
   case QEDIT_SSTRING:
     if (QUEST->s_string)
-      delete [] QUEST->s_string;
+      delete[] QUEST->s_string;
     QUEST->s_string = str_dup(arg);
     qedit_disp_menu(d);
     break;
   case QEDIT_ESTRING:
     if (QUEST->e_string)
-      delete [] QUEST->e_string;
+      delete[] QUEST->e_string;
     QUEST->e_string = str_dup(arg);
     qedit_disp_menu(d);
     break;
   case QEDIT_DONE:
     if (QUEST->done)
-      delete [] QUEST->done;
+      delete[] QUEST->done;
     QUEST->done = str_dup(arg);
     qedit_disp_menu(d);
     break;

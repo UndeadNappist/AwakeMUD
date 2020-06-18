@@ -23,41 +23,41 @@ extern void part_design(struct char_data *ch, struct obj_data *design);
 extern void spell_design(struct char_data *ch, struct obj_data *design);
 extern void ammo_test(struct char_data *ch, struct obj_data *obj);
 
-void pedit_disp_menu(struct descriptor_data *d)
-{
+void pedit_disp_menu(struct descriptor_data *d) {
   CLS(CH);
   send_to_char(CH, "1) Name: ^c%s^n\r\n", d->edit_obj->restring);
-  send_to_char(CH, "2) Type: ^c%s^n\r\n", programs[GET_OBJ_VAL(d->edit_obj, 0)].name);
+  send_to_char(CH, "2) Type: ^c%s^n\r\n",
+               programs[GET_OBJ_VAL(d->edit_obj, 0)].name);
   send_to_char(CH, "3) Rating: ^c%d^n\r\n", GET_OBJ_VAL(d->edit_obj, 1));
-  if (GET_OBJ_VAL(d->edit_obj, 0) == 5)
-  {
-    send_to_char(CH, "4) Damage: ^c%s^n\r\n", wound_name[GET_OBJ_VAL(d->edit_obj, 2)]);
-    send_to_char(CH, "Size: ^c%d^n\r\n", (GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 1)) * attack_multiplier[GET_OBJ_VAL(d->edit_obj, 2)]);
+  if (GET_OBJ_VAL(d->edit_obj, 0) == 5) {
+    send_to_char(CH, "4) Damage: ^c%s^n\r\n",
+                 wound_name[GET_OBJ_VAL(d->edit_obj, 2)]);
+    send_to_char(CH, "Size: ^c%d^n\r\n",
+                 (GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 1)) *
+                     attack_multiplier[GET_OBJ_VAL(d->edit_obj, 2)]);
   } else
-    send_to_char(CH, "Size: ^c%d^n\r\n", (GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 1)) * programs[GET_OBJ_VAL(d->edit_obj, 0)].multiplier);
+    send_to_char(CH, "Size: ^c%d^n\r\n",
+                 (GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 1)) *
+                     programs[GET_OBJ_VAL(d->edit_obj, 0)].multiplier);
   send_to_char(CH, "q) Quit\r\nEnter your choice: ");
   d->edit_mode = PEDIT_MENU;
 }
 
-void pedit_disp_program_menu(struct descriptor_data *d)
-{
+void pedit_disp_program_menu(struct descriptor_data *d) {
   CLS(CH);
-  for (int counter = 1; counter < NUM_PROGRAMS; counter += 3)
-  {
-    send_to_char(CH, "  %2d) %-15s %2d) %-15s %2d) %-15s\r\n",
-                 counter, programs[counter].name,
-                 counter + 1, counter + 1 < NUM_PROGRAMS ?
-                 programs[counter + 1].name : "", counter + 2, counter + 2 < NUM_PROGRAMS ?
-                 programs[counter + 2].name : "");
+  for (int counter = 1; counter < NUM_PROGRAMS; counter += 3) {
+    send_to_char(CH, "  %2d) %-15s %2d) %-15s %2d) %-15s\r\n", counter,
+                 programs[counter].name, counter + 1,
+                 counter + 1 < NUM_PROGRAMS ? programs[counter + 1].name : "",
+                 counter + 2,
+                 counter + 2 < NUM_PROGRAMS ? programs[counter + 2].name : "");
   }
   send_to_char("Program type: ", d->character);
   d->edit_mode = PEDIT_TYPE;
 }
-void pedit_parse(struct descriptor_data *d, const char *arg)
-{
+void pedit_parse(struct descriptor_data *d, const char *arg) {
   int number = atoi(arg);
-  switch(d->edit_mode)
-  {
+  switch (d->edit_mode) {
   case PEDIT_MENU:
     switch (*arg) {
     case '1':
@@ -71,7 +71,7 @@ void pedit_parse(struct descriptor_data *d, const char *arg)
       if (!GET_OBJ_VAL(d->edit_obj, 0))
         send_to_char(CH, "Choose a program type first!\r\n");
       else {
-        send_to_char(CH,"Enter Rating: ");
+        send_to_char(CH, "Enter Rating: ");
         d->edit_mode = PEDIT_RATING;
       }
       break;
@@ -80,19 +80,28 @@ void pedit_parse(struct descriptor_data *d, const char *arg)
         send_to_char(CH, "Invalid option!\r\n");
       else {
         CLS(CH);
-        send_to_char(CH, "1) Light\r\n2) Moderate\r\n3) Serious\r\n4) Deadly\r\nEnter your choice: ");
+        send_to_char(CH, "1) Light\r\n2) Moderate\r\n3) Serious\r\n4) "
+                         "Deadly\r\nEnter your choice: ");
         d->edit_mode = PEDIT_WOUND;
       }
       break;
     case 'q':
       send_to_char(CH, "Design saved!\r\n");
       if (GET_OBJ_VAL(d->edit_obj, 0) == 5)
-        GET_OBJ_VAL(d->edit_obj, 4) = GET_OBJ_VAL(d->edit_obj, 1) * attack_multiplier[GET_OBJ_VAL(d->edit_obj, 2)];
+        GET_OBJ_VAL(d->edit_obj, 4) =
+            GET_OBJ_VAL(d->edit_obj, 1) *
+            attack_multiplier[GET_OBJ_VAL(d->edit_obj, 2)];
       else if (GET_OBJ_VAL(d->edit_obj, 0) == SOFT_RESPONSE)
-        GET_OBJ_VAL(d->edit_obj, 4) = GET_OBJ_VAL(d->edit_obj, 1) * (GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 1));
-      else GET_OBJ_VAL(d->edit_obj, 4) = GET_OBJ_VAL(d->edit_obj, 1) * programs[GET_OBJ_VAL(d->edit_obj, 0)].multiplier;
-      GET_OBJ_VAL(d->edit_obj, 6) = GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 4);
-      GET_OBJ_VAL(d->edit_obj, 4)  *= 20;
+        GET_OBJ_VAL(d->edit_obj, 4) =
+            GET_OBJ_VAL(d->edit_obj, 1) *
+            (GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 1));
+      else
+        GET_OBJ_VAL(d->edit_obj, 4) =
+            GET_OBJ_VAL(d->edit_obj, 1) *
+            programs[GET_OBJ_VAL(d->edit_obj, 0)].multiplier;
+      GET_OBJ_VAL(d->edit_obj, 6) =
+          GET_OBJ_VAL(d->edit_obj, 1) * GET_OBJ_VAL(d->edit_obj, 4);
+      GET_OBJ_VAL(d->edit_obj, 4) *= 20;
       GET_OBJ_TIMER(d->edit_obj) = GET_OBJ_VAL(d->edit_obj, 4);
       GET_OBJ_VAL(d->edit_obj, 9) = GET_IDNUM(CH);
       obj_to_char(d->edit_obj, CH);
@@ -105,17 +114,25 @@ void pedit_parse(struct descriptor_data *d, const char *arg)
     }
     break;
   case PEDIT_RATING:
-    if (GET_OBJ_VAL(d->edit_obj, 0) <= SOFT_SENSOR && number > GET_SKILL(CH, SKILL_COMPUTER) * 1.5)
-      send_to_char(CH, "You can't create a persona program of a higher rating than your computer skill times one and a half.\r\n"
-                   "Enter Rating: ");
-    else if (GET_OBJ_VAL(d->edit_obj, 0) == SOFT_EVALUATE && number > GET_SKILL(CH, SKILL_DATA_BROKERAGE))
-      send_to_char(CH, "You can't create an evaluate program of a higher rating than your data brokerage skill.\r\n"
-                   "Enter Rating: ");
-    else if (GET_OBJ_VAL(d->edit_obj, 0) > SOFT_SENSOR && number > GET_SKILL(CH, SKILL_COMPUTER))
-      send_to_char(CH, "You can't create a program of a higher rating than your computer skill.\r\n"
-                   "Enter Rating: ");
+    if (GET_OBJ_VAL(d->edit_obj, 0) <= SOFT_SENSOR &&
+        number > GET_SKILL(CH, SKILL_COMPUTER) * 1.5)
+      send_to_char(CH, "You can't create a persona program of a higher rating "
+                       "than your computer skill times one and a half.\r\n"
+                       "Enter Rating: ");
+    else if (GET_OBJ_VAL(d->edit_obj, 0) == SOFT_EVALUATE &&
+             number > GET_SKILL(CH, SKILL_DATA_BROKERAGE))
+      send_to_char(CH, "You can't create an evaluate program of a higher "
+                       "rating than your data brokerage skill.\r\n"
+                       "Enter Rating: ");
+    else if (GET_OBJ_VAL(d->edit_obj, 0) > SOFT_SENSOR &&
+             number > GET_SKILL(CH, SKILL_COMPUTER))
+      send_to_char(CH, "You can't create a program of a higher rating than "
+                       "your computer skill.\r\n"
+                       "Enter Rating: ");
     else if (GET_OBJ_VAL(d->edit_obj, 0) == SOFT_RESPONSE && number > 3)
-      send_to_char("You can't create a response increase of a rating higher than 3.\r\nEnter Rating: ", CH);
+      send_to_char("You can't create a response increase of a rating higher "
+                   "than 3.\r\nEnter Rating: ",
+                   CH);
     else {
       GET_OBJ_VAL(d->edit_obj, 1) = number;
       pedit_disp_menu(d);
@@ -150,8 +167,7 @@ void pedit_parse(struct descriptor_data *d, const char *arg)
   }
 }
 
-void create_program(struct char_data *ch)
-{
+void create_program(struct char_data *ch) {
   struct obj_data *design = read_object(107, VIRTUAL);
   STATE(ch->desc) = CON_PRO_CREATE;
   design->restring = str_dup("A blank program");
@@ -159,23 +175,28 @@ void create_program(struct char_data *ch)
   pedit_disp_menu(ch->desc);
 }
 
-struct obj_data *can_program(struct char_data *ch)
-{
+struct obj_data *can_program(struct char_data *ch) {
   struct obj_data *comp;
   if (IS_ASTRAL(ch))
-    send_to_char("You can't read the screen in your current astral form.\r\n", ch);
+    send_to_char("You can't read the screen in your current astral form.\r\n",
+                 ch);
   else if (IS_WORKING(ch))
     send_to_char("You are already working on something.\r\n", ch);
-  else if (ch->in_veh && (ch->vfront || !ch->in_veh->flags.IsSet(VFLAG_WORKSHOP)))
+  else if (ch->in_veh &&
+           (ch->vfront || !ch->in_veh->flags.IsSet(VFLAG_WORKSHOP)))
     send_to_char("You can't do that in here.\r\n", ch);
   else {
-    for (struct char_data *vict = ch->in_veh ? ch->in_veh->people : ch->in_room->people; vict; vict = vict->next_in_room)
+    for (struct char_data *vict = ch->in_veh ? ch->in_veh->people
+                                             : ch->in_room->people;
+         vict; vict = vict->next_in_room)
       if (AFF_FLAGS(vict).AreAnySet(AFF_PROGRAM, AFF_DESIGN, ENDBIT)) {
         send_to_char(ch, "Someone is already using the computer.\r\n");
         return NULL;
       }
-    for (comp = ch->in_veh ? ch->in_veh->contents : ch->in_room->contents; comp; comp = comp->next_content)
-      if (GET_OBJ_TYPE(comp) == ITEM_DECK_ACCESSORY && GET_OBJ_VAL(comp, 0) == 2)
+    for (comp = ch->in_veh ? ch->in_veh->contents : ch->in_room->contents; comp;
+         comp = comp->next_content)
+      if (GET_OBJ_TYPE(comp) == ITEM_DECK_ACCESSORY &&
+          GET_OBJ_VAL(comp, 0) == 2)
         break;
     if (ch->in_veh && comp && comp->vfront)
       comp = NULL;
@@ -188,12 +209,13 @@ struct obj_data *can_program(struct char_data *ch)
   return NULL;
 }
 
-ACMD(do_design)
-{
+ACMD(do_design) {
   struct obj_data *comp, *prog;
   if (!*argument) {
-    if (AFF_FLAGS(ch).AreAnySet(AFF_DESIGN, AFF_PROGRAM, AFF_SPELLDESIGN, ENDBIT)) {
-      send_to_char(ch, "You stop working on %s.\r\n", GET_OBJ_NAME(GET_BUILDING(ch)));
+    if (AFF_FLAGS(ch).AreAnySet(AFF_DESIGN, AFF_PROGRAM, AFF_SPELLDESIGN,
+                                ENDBIT)) {
+      send_to_char(ch, "You stop working on %s.\r\n",
+                   GET_OBJ_NAME(GET_BUILDING(ch)));
       STOP_WORKING(ch);
     } else
       send_to_char(ch, "Design what?\r\n");
@@ -218,7 +240,9 @@ ACMD(do_design)
   if (!(comp = can_program(ch)))
     return;
   for (prog = comp->contains; prog; prog = prog->next_content)
-    if ((isname(argument, prog->text.keywords) || isname(argument, prog->restring)) && GET_OBJ_TYPE(prog) == ITEM_DESIGN)
+    if ((isname(argument, prog->text.keywords) ||
+         isname(argument, prog->restring)) &&
+        GET_OBJ_TYPE(prog) == ITEM_DESIGN)
       break;
   if (!prog) {
     send_to_char(ch, "The program design isn't on that computer.\r\n");
@@ -237,7 +261,7 @@ ACMD(do_design)
     target--;
   else if (GET_OBJ_VAL(prog, 1) > 9)
     target++;
-  switch (GET_OBJ_VAL(prog,0)) {
+  switch (GET_OBJ_VAL(prog, 0)) {
   case SOFT_BOD:
   case SOFT_EVASION:
   case SOFT_MASKING:
@@ -288,7 +312,8 @@ ACMD(do_design)
     break;
   }
   if (!skill) {
-    send_to_char(ch, "You have no idea how to go about creating a program design for that.\r\n");
+    send_to_char(ch, "You have no idea how to go about creating a program "
+                     "design for that.\r\n");
     return;
   }
   if (GET_OBJ_TIMER(prog) == GET_OBJ_VAL(prog, 4)) {
@@ -300,13 +325,13 @@ ACMD(do_design)
   GET_BUILDING(ch) = prog;
 }
 
-ACMD(do_program)
-{
+ACMD(do_program) {
   struct obj_data *comp, *prog;
   if (!*argument) {
     if (AFF_FLAGGED(ch, AFF_PROGRAM)) {
       AFF_FLAGS(ch).RemoveBit(AFF_PROGRAM);
-      send_to_char(ch, "You stop working on %s.\r\n", ch->char_specials.programming->restring);
+      send_to_char(ch, "You stop working on %s.\r\n",
+                   ch->char_specials.programming->restring);
       ch->char_specials.programming = NULL;
     } else
       send_to_char(ch, "Program What?\r\n");
@@ -324,7 +349,9 @@ ACMD(do_program)
     return;
   skip_spaces(&argument);
   for (prog = comp->contains; prog; prog = prog->next_content)
-    if ((isname(argument, prog->text.keywords) || isname(argument, prog->restring)) && GET_OBJ_TYPE(prog) == ITEM_DESIGN)
+    if ((isname(argument, prog->text.keywords) ||
+         isname(argument, prog->restring)) &&
+        GET_OBJ_TYPE(prog) == ITEM_DESIGN)
       break;
   if (!prog) {
     send_to_char(ch, "The program design isn't on that computer.\r\n");
@@ -336,7 +363,10 @@ ACMD(do_program)
   }
   if (!GET_OBJ_VAL(prog, 5)) {
     if (access_level(ch, LVL_ADMIN)) {
-      send_to_char(ch, "You use your admin powers to greatly reduce the development time for %s.\r\n", prog->restring);
+      send_to_char(ch,
+                   "You use your admin powers to greatly reduce the "
+                   "development time for %s.\r\n",
+                   prog->restring);
       GET_OBJ_VAL(prog, 5) = 1;
       GET_OBJ_TIMER(prog) = GET_OBJ_VAL(prog, 5);
     } else {
@@ -350,9 +380,14 @@ ACMD(do_program)
         target -= GET_OBJ_VAL(prog, 3);
       int skill = get_skill(ch, SKILL_COMPUTER, target);
       int success = success_test(skill, target);
-      for (struct obj_data *suite = comp->contains; suite; suite = suite->next_content)
-        if (GET_OBJ_TYPE(suite) == ITEM_PROGRAM && GET_OBJ_VAL(suite, 0) == SOFT_SUITE) {
-          success += (int)(success_test(MIN(GET_SKILL(ch, SKILL_COMPUTER), GET_OBJ_VAL(suite, 1)), target) / 2);
+      for (struct obj_data *suite = comp->contains; suite;
+           suite = suite->next_content)
+        if (GET_OBJ_TYPE(suite) == ITEM_PROGRAM &&
+            GET_OBJ_VAL(suite, 0) == SOFT_SUITE) {
+          success += (int)(success_test(MIN(GET_SKILL(ch, SKILL_COMPUTER),
+                                            GET_OBJ_VAL(suite, 1)),
+                                        target) /
+                           2);
           break;
         }
       if (success) {
@@ -371,8 +406,7 @@ ACMD(do_program)
   GET_BUILDING(ch) = prog;
 }
 
-ACMD(do_copy)
-{
+ACMD(do_copy) {
   struct obj_data *comp, *prog;
   if (!*argument) {
     send_to_char("What program do you want to copy?\r\n", ch);
@@ -382,7 +416,9 @@ ACMD(do_copy)
     return;
   skip_spaces(&argument);
   for (prog = comp->contains; prog; prog = prog->next_content)
-    if ((isname(argument, prog->text.keywords) || isname(argument, prog->restring)) && GET_OBJ_TYPE(prog) == ITEM_PROGRAM)
+    if ((isname(argument, prog->text.keywords) ||
+         isname(argument, prog->restring)) &&
+        GET_OBJ_TYPE(prog) == ITEM_PROGRAM)
       break;
   if (!prog)
     send_to_char("The program isn't on that computer.\r\n", ch);
@@ -392,21 +428,21 @@ ACMD(do_copy)
     send_to_char("There isn't enough space on there to copy that.\r\n", ch);
   else {
     switch (GET_OBJ_VAL(prog, 0)) {
-      case SOFT_ASIST_COLD:
-      case SOFT_ASIST_HOT:
-      case SOFT_HARDENING:
-      case SOFT_ICCM:
-      case SOFT_ICON:
-      case SOFT_MPCP: 
-      case SOFT_REALITY:
-      case SOFT_RESPONSE:
-      case SOFT_BOD:
-      case SOFT_SENSOR:
-      case SOFT_MASKING:
-      case SOFT_EVASION:
-      case SOFT_SUITE:
-        send_to_char("You can't copy this program.\r\n", ch);
-        return;     
+    case SOFT_ASIST_COLD:
+    case SOFT_ASIST_HOT:
+    case SOFT_HARDENING:
+    case SOFT_ICCM:
+    case SOFT_ICON:
+    case SOFT_MPCP:
+    case SOFT_REALITY:
+    case SOFT_RESPONSE:
+    case SOFT_BOD:
+    case SOFT_SENSOR:
+    case SOFT_MASKING:
+    case SOFT_EVASION:
+    case SOFT_SUITE:
+      send_to_char("You can't copy this program.\r\n", ch);
+      return;
     }
 
     GET_OBJ_VAL(comp, 3) += GET_OBJ_VAL(prog, 2);
@@ -424,8 +460,7 @@ ACMD(do_copy)
 #undef CH
 #define CH desc->character
 #define PROG GET_BUILDING(CH)
-void update_buildrepair(void)
-{
+void update_buildrepair(void) {
   PERF_PROF_SCOPE(pr_, __func__);
   struct descriptor_data *next;
   for (struct descriptor_data *desc = descriptor_list; desc; desc = next) {
@@ -434,10 +469,14 @@ void update_buildrepair(void)
       if (AFF_FLAGGED(desc->character, AFF_PART_BUILD)) {
         if (--GET_OBJ_VAL(PROG, 4) < 1) {
           if (GET_OBJ_TIMER(PROG) < 0) {
-            send_to_char(desc->character, "You realise you have botched installing %s.\r\n", GET_OBJ_NAME(PROG));
+            send_to_char(desc->character,
+                         "You realise you have botched installing %s.\r\n",
+                         GET_OBJ_NAME(PROG));
             extract_obj(PROG);
           } else {
-            send_to_char(desc->character, "You finish installing %s into %s.\r\n", GET_OBJ_NAME(PROG), GET_OBJ_NAME(PROG->contains));
+            send_to_char(desc->character,
+                         "You finish installing %s into %s.\r\n",
+                         GET_OBJ_NAME(PROG), GET_OBJ_NAME(PROG->contains));
             CH->char_specials.timer = 0;
             obj_from_char(PROG);
             obj_to_obj(PROG, PROG->contains);
@@ -445,7 +484,7 @@ void update_buildrepair(void)
             GET_OBJ_VAL(PROG, 4) = -2;
             if (!GET_OBJ_VAL(PROG->in_obj, 0))
               GET_OBJ_VAL(PROG->in_obj, 0) = GET_OBJ_VAL(PROG, 2);
-            switch(GET_OBJ_VAL(PROG, 0)) {
+            switch (GET_OBJ_VAL(PROG, 0)) {
             case PART_MPCP:
               GET_OBJ_VAL(PROG->in_obj, 0) = GET_OBJ_VAL(PROG, 2);
               break;
@@ -467,7 +506,8 @@ void update_buildrepair(void)
             }
             if (GET_OBJ_VAL(PROG->in_obj, 9)) {
               int x = 0;
-              for (struct obj_data *obj = PROG->in_obj->contains; obj; obj = obj->next_content)
+              for (struct obj_data *obj = PROG->in_obj->contains; obj;
+                   obj = obj->next_content)
                 if (GET_OBJ_TYPE(obj) == ITEM_PART)
                   switch (GET_OBJ_VAL(obj, 0)) {
                   case PART_MPCP:
@@ -484,13 +524,18 @@ void update_buildrepair(void)
           }
           STOP_WORKING(desc->character);
         }
-      } else if (AFF_FLAGGED(desc->character, AFF_PART_DESIGN) && --GET_OBJ_VAL(PROG, 3) < 1) {
-        send_to_char(desc->character, "You complete the design plan for %s.\r\n", GET_OBJ_NAME(PROG));
+      } else if (AFF_FLAGGED(desc->character, AFF_PART_DESIGN) &&
+                 --GET_OBJ_VAL(PROG, 3) < 1) {
+        send_to_char(desc->character,
+                     "You complete the design plan for %s.\r\n",
+                     GET_OBJ_NAME(PROG));
         CH->char_specials.timer = 0;
         STOP_WORKING(CH);
       } else if (AFF_FLAGGED(desc->character, AFF_DESIGN)) {
         if (--GET_OBJ_VAL(PROG, 4) < 1) {
-          send_to_char(desc->character, "You complete the design plan for %s.\r\n", GET_OBJ_NAME(PROG));
+          send_to_char(desc->character,
+                       "You complete the design plan for %s.\r\n",
+                       GET_OBJ_NAME(PROG));
           GET_OBJ_VAL(PROG, 3) = GET_OBJ_VAL(PROG, 8);
           GET_OBJ_VAL(PROG, 8) = -1;
           PROG = NULL;
@@ -499,9 +544,12 @@ void update_buildrepair(void)
       } else if (AFF_FLAGGED(desc->character, AFF_PROGRAM)) {
         if (--GET_OBJ_VAL(PROG, 5) < 1) {
           if (GET_OBJ_VAL(PROG, 7))
-            send_to_char(desc->character, "You realise programming %s is a lost cause.\r\n", GET_OBJ_NAME(PROG));
+            send_to_char(desc->character,
+                         "You realise programming %s is a lost cause.\r\n",
+                         GET_OBJ_NAME(PROG));
           else {
-            send_to_char(desc->character, "You complete programming %s.\r\n", GET_OBJ_NAME(PROG));
+            send_to_char(desc->character, "You complete programming %s.\r\n",
+                         GET_OBJ_NAME(PROG));
             struct obj_data *newp = read_object(108, VIRTUAL);
             newp->restring = str_dup(GET_OBJ_NAME(PROG));
             GET_OBJ_VAL(newp, 0) = GET_OBJ_VAL(PROG, 0);
@@ -511,25 +559,31 @@ void update_buildrepair(void)
             obj_to_obj(newp, PROG->in_obj);
             GET_OBJ_VAL(PROG->in_obj, 3) += GET_OBJ_VAL(newp, 2);
           }
-          GET_OBJ_VAL(PROG->in_obj, 3) -= GET_OBJ_VAL(PROG, 6) + (GET_OBJ_VAL(PROG, 6) / 10);
+          GET_OBJ_VAL(PROG->in_obj, 3) -=
+              GET_OBJ_VAL(PROG, 6) + (GET_OBJ_VAL(PROG, 6) / 10);
           extract_obj(PROG);
           PROG = NULL;
           AFF_FLAGS(desc->character).RemoveBit(AFF_PROGRAM);
           CH->char_specials.timer = 0;
         }
       } else if (AFF_FLAGGED(CH, AFF_BONDING) && --GET_OBJ_VAL(PROG, 9) < 1) {
-        send_to_char(CH, "You complete the bonding ritual for %s.\r\n", GET_OBJ_NAME(PROG));
+        send_to_char(CH, "You complete the bonding ritual for %s.\r\n",
+                     GET_OBJ_NAME(PROG));
         CH->char_specials.timer = 0;
         STOP_WORKING(CH);
-      } else if (AFF_FLAGGED(CH, AFF_CONJURE) && --CH->char_specials.conjure[2] < 1) {
+      } else if (AFF_FLAGGED(CH, AFF_CONJURE) &&
+                 --CH->char_specials.conjure[2] < 1) {
         if ((GET_OBJ_COST(PROG) -= CH->char_specials.conjure[1] * 1000) <= 0)
           extract_obj(PROG);
         STOP_WORKING(CH);
-        int skill = GET_SKILL(CH, SKILL_CONJURING), target = CH->char_specials.conjure[1];
+        int skill = GET_SKILL(CH, SKILL_CONJURING),
+            target = CH->char_specials.conjure[1];
         for (int i = 0; i < NUM_WEARS; i++)
-          if (GET_EQ(CH, i) && GET_OBJ_TYPE(GET_EQ(CH, i)) == ITEM_FOCUS && GET_OBJ_VAL(GET_EQ(CH, i), 0) == FOCI_SPIRIT
-              && GET_OBJ_VAL(GET_EQ(CH, i), 2) == GET_IDNUM(CH) && GET_OBJ_VAL(GET_EQ(CH, i), 3) == CH->char_specials.conjure[0]
-              && GET_OBJ_VAL(GET_EQ(CH, i), 4)) {
+          if (GET_EQ(CH, i) && GET_OBJ_TYPE(GET_EQ(CH, i)) == ITEM_FOCUS &&
+              GET_OBJ_VAL(GET_EQ(CH, i), 0) == FOCI_SPIRIT &&
+              GET_OBJ_VAL(GET_EQ(CH, i), 2) == GET_IDNUM(CH) &&
+              GET_OBJ_VAL(GET_EQ(CH, i), 3) == CH->char_specials.conjure[0] &&
+              GET_OBJ_VAL(GET_EQ(CH, i), 4)) {
             skill += GET_OBJ_VAL(GET_EQ(CH, i), 1);
             break;
           }
@@ -539,13 +593,18 @@ void update_buildrepair(void)
           target += GET_BACKGROUND_COUNT(CH->in_room);
         int success = success_test(skill, target);
         if (success < 1) {
-          send_to_char(CH, "You fail to conjure the %s elemental.\r\n", elements[CH->char_specials.conjure[0]].name);
+          send_to_char(CH, "You fail to conjure the %s elemental.\r\n",
+                       elements[CH->char_specials.conjure[0]].name);
           continue;
         }
         int idnum = number(0, 1000);
-        send_to_char(CH, "You summon a %s elemental.\r\n", elements[CH->char_specials.conjure[0]].name);
-        struct char_data *mob = create_elemental(CH, CH->char_specials.conjure[0], CH->char_specials.conjure[1], idnum, TRAD_HERMETIC);
-        act("$n appears just outside of the hermetic circle.", FALSE, mob, 0, 0, TO_ROOM);
+        send_to_char(CH, "You summon a %s elemental.\r\n",
+                     elements[CH->char_specials.conjure[0]].name);
+        struct char_data *mob = create_elemental(
+            CH, CH->char_specials.conjure[0], CH->char_specials.conjure[1],
+            idnum, TRAD_HERMETIC);
+        act("$n appears just outside of the hermetic circle.", FALSE, mob, 0, 0,
+            TO_ROOM);
         if (conjuring_drain(CH, CH->char_specials.conjure[1]) || !AWAKE(CH)) {
           if (success_test(GET_LEVEL(mob), 6) > 0)
             extract_char(mob);
@@ -568,7 +627,8 @@ void update_buildrepair(void)
         GET_SPARE2(mob) = spirit->id;
       } else if (AFF_FLAGGED(CH, AFF_CIRCLE) && --GET_OBJ_VAL(PROG, 9) < 1) {
         send_to_char("You complete drawing the circle.\r\n", CH);
-        act("$n finishes drawing the hermetic circle.\r\n", FALSE, CH, 0, 0, TO_ROOM);
+        act("$n finishes drawing the hermetic circle.\r\n", FALSE, CH, 0, 0,
+            TO_ROOM);
         CH->char_specials.timer = 0;
         STOP_WORKING(CH);
       } else if (AFF_FLAGGED(CH, AFF_LODGE) && --GET_OBJ_VAL(PROG, 9) < 1) {
@@ -577,7 +637,8 @@ void update_buildrepair(void)
         CH->char_specials.timer = 0;
         STOP_WORKING(CH);
       } else if (AFF_FLAGGED(CH, AFF_AMMOBUILD) && --GET_OBJ_VAL(PROG, 4) < 1) {
-        if (GET_OBJ_VAL(PROG, 4) <= -2) // --(-1) = -2; prevents penalizing people who ace the test.
+        if (GET_OBJ_VAL(PROG, 4) <=
+            -2) // --(-1) = -2; prevents penalizing people who ace the test.
           send_to_char("You seem to have messed up the batch of ammo.\r\n", CH);
         else {
           send_to_char("You have completed a batch of ammo.\r\n", CH);
@@ -585,23 +646,27 @@ void update_buildrepair(void)
         }
         GET_OBJ_VAL(PROG, 3) -= 10;
         if (!GET_OBJ_VAL(PROG, 3)) {
-          send_to_char(CH, "You have finished building %s.\r\n", GET_OBJ_NAME(PROG));
+          send_to_char(CH, "You have finished building %s.\r\n",
+                       GET_OBJ_NAME(PROG));
           GET_OBJ_VAL(PROG, 9) = 0;
           STOP_WORKING(CH);
-        } else ammo_test(CH, PROG);
-      } else if (AFF_FLAGGED(CH, AFF_SPELLDESIGN) && --GET_OBJ_VAL(PROG, 6) < 1) {
+        } else
+          ammo_test(CH, PROG);
+      } else if (AFF_FLAGGED(CH, AFF_SPELLDESIGN) &&
+                 --GET_OBJ_VAL(PROG, 6) < 1) {
         if (GET_OBJ_TIMER(PROG) == -3) {
-          send_to_char("You realise you have lost your inspiration for this spell.\r\n", CH);
+          send_to_char(
+              "You realise you have lost your inspiration for this spell.\r\n",
+              CH);
           extract_obj(PROG);
         } else {
-          send_to_char(CH, "You successfully finish designing %s.\r\n", GET_OBJ_NAME(PROG));
+          send_to_char(CH, "You successfully finish designing %s.\r\n",
+                       GET_OBJ_NAME(PROG));
           CH->char_specials.timer = 0;
-          GET_OBJ_TIMER(PROG) = 0; 
+          GET_OBJ_TIMER(PROG) = 0;
         }
         STOP_WORKING(CH);
       }
     }
   }
-
 }
-

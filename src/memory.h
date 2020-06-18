@@ -10,37 +10,26 @@
 #ifndef _memory_h_
 #define _memory_h_
 
-#define INITIAL_STACK_SIZE      500
+#define INITIAL_STACK_SIZE 500
 #define STACK_SIZE_INCREASE 100
 
 #include "structs.h"
 #include "utils.h"
 
-template <class T>
-class stackClass
-{
+template <class T> class stackClass {
 public:
   // constructors and destructors
   stackClass();
-  stackClass(const stackClass<T>& O);
+  stackClass(const stackClass<T> &O);
   ~stackClass();
 
   // stack routines
-  int Size()
-  {
-    return (top + 1);
-  }
-  int MaxSize()
-  {
-    return max_size;
-  }
+  int Size() { return (top + 1); }
+  int MaxSize() { return max_size; }
   void Push(T *NewItem);
   T *Pop();
   void PopDelete();
-  bool StackIsEmpty()
-  {
-    return (top < 0 ? 1 : 0);
-  }
+  bool StackIsEmpty() { return (top < 0 ? 1 : 0); }
 
 private:
   // private data for the stack
@@ -55,20 +44,15 @@ private:
   // This is the array of objects
   T **Items;
 
-}
-; // end class
+}; // end class
 
-template <class T>
-stackClass<T>::stackClass()
-{
+template <class T> stackClass<T>::stackClass() {
   max_size = INITIAL_STACK_SIZE;
-  Items = new T*[max_size];
+  Items = new T *[max_size];
   top = -1;
 }
 
-template <class T>
-stackClass<T>::stackClass(const stackClass<T>& O)
-{
+template <class T> stackClass<T>::stackClass(const stackClass<T> &O) {
   max_size = O.max_size;
   top = O.top;
 
@@ -76,16 +60,12 @@ stackClass<T>::stackClass(const stackClass<T>& O)
     Items[Index] = O.Items[Index];
 }
 
-template <class T>
-stackClass<T>::~stackClass()
-{
+template <class T> stackClass<T>::~stackClass() {
   while (top >= 0)
     PopDelete();
 }
 
-template <class T>
-void stackClass<T>::Push(T *NewItem)
-{
+template <class T> void stackClass<T>::Push(T *NewItem) {
   // make sure you have room in the array
   if (top < max_size - 1) {
     ++top;
@@ -96,9 +76,7 @@ void stackClass<T>::Push(T *NewItem)
   }
 }
 
-template <class T>
-T *stackClass<T>::Pop()
-{
+template <class T> T *stackClass<T>::Pop() {
   if (top < 0)
     return NULL;
 
@@ -106,9 +84,7 @@ T *stackClass<T>::Pop()
   return (Items[top + 1]);
 }
 
-template <class T>
-void stackClass<T>::PopDelete()
-{
+template <class T> void stackClass<T>::PopDelete() {
   if (top < 0)
     return;
 
@@ -119,13 +95,11 @@ void stackClass<T>::PopDelete()
   delete (Items[top + 1]);
 }
 
-template <class T>
-bool stackClass<T>::ResizeStack()
-{
+template <class T> bool stackClass<T>::ResizeStack() {
   // create a new stack array larger than the previous
   T **NewItems;
 
-  NewItems = new T*[max_size + STACK_SIZE_INCREASE];
+  NewItems = new T *[max_size + STACK_SIZE_INCREASE];
 
   // now copy the old stack array into the new one
   for (int Index = 0; Index <= top; ++Index)
@@ -146,8 +120,7 @@ bool stackClass<T>::ResizeStack()
   return TRUE;
 }
 
-class memoryClass
-{
+class memoryClass {
 private:
   stackClass<struct obj_data> *Obj;
   stackClass<struct char_data> *Ch;
@@ -160,63 +133,27 @@ public:
   // constructors and destructors
   memoryClass();
   ~memoryClass();
-  memoryClass(const memoryClass& mClass);
+  memoryClass(const memoryClass &mClass);
 
   // size operations for general info
-  int ObjSize()
-  {
-    return Obj->Size();
-  }
-  int ChSize()
-  {
-    return Ch->Size();
-  }
-  int RoomSize()
-  {
-    return Room->Size();
-  }
-  int VehSize()
-  {
-    return Veh->Size();
-  }
-  int HostSize()
-  {
-    return Host->Size();
-  }
-  int IconSize()
-  {
-    return Icon->Size();
-  }
-  int ObjMaxSize()
-  {
-    return Obj->MaxSize();
-  }
-  int ChMaxSize()
-  {
-    return Ch->MaxSize();
-  }
-  int RoomMaxSize()
-  {
-    return Room->MaxSize();
-  }
-  int VehMaxSize()
-  {
-    return Veh->MaxSize();
-  }
-  int HostMaxSize()
-  {
-    return Host->MaxSize();
-  }
-  int IconMaxSize()
-  {
-    return Icon->MaxSize();
-  }
+  int ObjSize() { return Obj->Size(); }
+  int ChSize() { return Ch->Size(); }
+  int RoomSize() { return Room->Size(); }
+  int VehSize() { return Veh->Size(); }
+  int HostSize() { return Host->Size(); }
+  int IconSize() { return Icon->Size(); }
+  int ObjMaxSize() { return Obj->MaxSize(); }
+  int ChMaxSize() { return Ch->MaxSize(); }
+  int RoomMaxSize() { return Room->MaxSize(); }
+  int VehMaxSize() { return Veh->MaxSize(); }
+  int HostMaxSize() { return Host->MaxSize(); }
+  int IconMaxSize() { return Icon->MaxSize(); }
 
   // get routines which return objects from the different stacks
   struct obj_data *GetObject();
   struct char_data *GetCh();
   struct room_data *GetRoom();
-  struct veh_data  *GetVehicle();
+  struct veh_data *GetVehicle();
   struct host_data *GetHost();
   struct matrix_icon *GetIcon();
 
@@ -227,7 +164,7 @@ public:
   void DeleteRoom(struct room_data *room);
   void DeleteVehicle(struct veh_data *veh);
   void DeleteHost(struct host_data *host);
-  void DeleteIcon(struct matrix_icon * icon);
+  void DeleteIcon(struct matrix_icon *icon);
 
   // clear routines which push objects onto the stacks after just clearing
   // the variables and pointers in the objects.  These will not wipe out

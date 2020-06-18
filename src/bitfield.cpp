@@ -20,17 +20,14 @@ static const int NUM_BUFFERS = 8;
 // I wish I could use (Bitfield::TotalWidth()+1), but that's not allowed..
 static const int BUFFER_SIZE = 256;
 static char buffer_tab[NUM_BUFFERS][BUFFER_SIZE];
-static int  buffer_idx = 0;
+static int buffer_idx = 0;
 
-// Byte bits-set lookup function, because why the hell are we using so many for-loops for a bitfield?
-uint8_t count_ones (uint8_t byte)
-{
-  static const uint8_t NIBBLE_LOOKUP [16] =
-  {
-    0, 1, 1, 2, 1, 2, 2, 3,
-    1, 2, 2, 3, 2, 3, 3, 4
-  };
-  
+// Byte bits-set lookup function, because why the hell are we using so many
+// for-loops for a bitfield?
+uint8_t count_ones(uint8_t byte) {
+  static const uint8_t NIBBLE_LOOKUP[16] = {0, 1, 1, 2, 1, 2, 2, 3,
+                                            1, 2, 2, 3, 2, 3, 3, 4};
+
   return NIBBLE_LOOKUP[byte & 0x0F] + NIBBLE_LOOKUP[byte >> 4];
 }
 
@@ -39,13 +36,9 @@ uint8_t count_ones (uint8_t byte)
 // Bitfield()
 // ______________________________
 
-Bitfield::Bitfield()
-{
-  Clear();
-}
+Bitfield::Bitfield() { Clear(); }
 
-Bitfield::Bitfield(dword offset)
-{
+Bitfield::Bitfield(dword offset) {
   Clear();
   SetBit(offset);
 }
@@ -57,15 +50,13 @@ Bitfield::Bitfield(dword offset)
 
 #define BITFIELD_IDX (offset / bits_per_var)
 #define BITFIELD_FLAG (offset % bits_per_var)
-bool Bitfield::IsSet(dword offset) const
-{
+bool Bitfield::IsSet(dword offset) const {
   return (data[BITFIELD_IDX] & (1 << BITFIELD_FLAG));
 }
 #undef BITFIELD_IDX
 #undef BITFIELD_FLAG
 
-bool Bitfield::AreAnySet(dword one, ...) const
-{
+bool Bitfield::AreAnySet(dword one, ...) const {
   va_list arg_list;
   dword offset;
 
@@ -90,8 +81,7 @@ bool Bitfield::AreAnySet(dword one, ...) const
   }
 }
 
-int  Bitfield::GetNumSet() const
-{
+int Bitfield::GetNumSet() const {
   int count = 0;
 
   for (int i = 0; i < BITFIELD_SIZE; i++)
@@ -100,8 +90,7 @@ int  Bitfield::GetNumSet() const
   return count;
 }
 
-bool Bitfield::AreAnyShared(const Bitfield &test) const
-{
+bool Bitfield::AreAnyShared(const Bitfield &test) const {
   for (int i = 0; i < BITFIELD_SIZE; i++)
     if (data[i] & test.data[i])
       return true;
@@ -109,41 +98,33 @@ bool Bitfield::AreAnyShared(const Bitfield &test) const
   return false;
 }
 
-int  Bitfield::GetNumShared(const Bitfield &test) const
-{
+int Bitfield::GetNumShared(const Bitfield &test) const {
   int count = 0;
-  
+
   for (int i = 0; i < BITFIELD_SIZE; i++)
     count += count_ones(data[i] & test.data[i]);
-  
+
   return count;
 }
 
-bool Bitfield::operator==(const Bitfield &two) const
-{
-  return (memcmp(data, two.data, BITFIELD_SIZE*sizeof(bitfield_t)) == 0);
+bool Bitfield::operator==(const Bitfield &two) const {
+  return (memcmp(data, two.data, BITFIELD_SIZE * sizeof(bitfield_t)) == 0);
 }
 
-bool Bitfield::operator!=(const Bitfield &two) const
-{
-  return (memcmp(data, two.data, BITFIELD_SIZE*sizeof(bitfield_t)) != 0);
+bool Bitfield::operator!=(const Bitfield &two) const {
+  return (memcmp(data, two.data, BITFIELD_SIZE * sizeof(bitfield_t)) != 0);
 }
 
-void Bitfield::Clear()
-{
-  memset(data, 0, BITFIELD_SIZE*sizeof(bitfield_t));
-}
+void Bitfield::Clear() { memset(data, 0, BITFIELD_SIZE * sizeof(bitfield_t)); }
 
-void Bitfield::SetBit(dword offset)
-{
-  //const int idx = offset / bits_per_var;
-  //const int flag = offset % bits_per_var;
+void Bitfield::SetBit(dword offset) {
+  // const int idx = offset / bits_per_var;
+  // const int flag = offset % bits_per_var;
 
   data[(offset / bits_per_var)] |= (1 << (offset % bits_per_var));
 }
 
-void Bitfield::SetBits(dword one, ...)
-{
+void Bitfield::SetBits(dword one, ...) {
   va_list arg_list;
   dword offset;
 
@@ -166,22 +147,19 @@ void Bitfield::SetBits(dword one, ...)
   va_end(arg_list);
 }
 
-void Bitfield::SetAll(const Bitfield &two)
-{
+void Bitfield::SetAll(const Bitfield &two) {
   for (int i = 0; i < BITFIELD_SIZE; i++)
     data[i] |= two.data[i];
 }
 
-void Bitfield::RemoveBit(dword offset)
-{
-  //const int idx = offset / bits_per_var;
-  //const int flag = offset % bits_per_var;
+void Bitfield::RemoveBit(dword offset) {
+  // const int idx = offset / bits_per_var;
+  // const int flag = offset % bits_per_var;
 
   data[(offset / bits_per_var)] &= ~(1 << (offset % bits_per_var));
 }
 
-void Bitfield::RemoveBits(dword one, ...)
-{
+void Bitfield::RemoveBits(dword one, ...) {
   va_list arg_list;
   dword offset;
 
@@ -204,22 +182,19 @@ void Bitfield::RemoveBits(dword one, ...)
   va_end(arg_list);
 }
 
-void Bitfield::RemoveAll(const Bitfield &two)
-{
+void Bitfield::RemoveAll(const Bitfield &two) {
   for (int i = 0; i < BITFIELD_SIZE; i++)
     data[i] &= ~two.data[i];
 }
 
-void Bitfield::ToggleBit(dword offset)
-{
-  //const int idx = offset / bits_per_var;
-  //const int flag = offset % bits_per_var;
+void Bitfield::ToggleBit(dword offset) {
+  // const int idx = offset / bits_per_var;
+  // const int flag = offset % bits_per_var;
 
   data[(offset / bits_per_var)] ^= (1 << (offset % bits_per_var));
 }
 
-void Bitfield::ToggleBits(dword one, ...)
-{
+void Bitfield::ToggleBits(dword one, ...) {
   va_list arg_list;
   dword offset;
 
@@ -242,15 +217,14 @@ void Bitfield::ToggleBits(dword one, ...)
   va_end(arg_list);
 }
 
-const char *Bitfield::ToString() const
-{
+const char *Bitfield::ToString() const {
   char *buffer = buffer_tab[buffer_idx];
   char *buf_ptr = buffer;
 
   if (++buffer_idx >= NUM_BUFFERS)
     buffer_idx = 0;
 
-  for (int i = TotalWidth()-1; i >= 0; i--)
+  for (int i = TotalWidth() - 1; i >= 0; i--)
     if (IsSet(i))
       *(buf_ptr++) = '1';
     else if (buf_ptr != buffer)
@@ -265,8 +239,7 @@ const char *Bitfield::ToString() const
   return (const char *)buffer;
 }
 
-void Bitfield::FromString(const char *str)
-{
+void Bitfield::FromString(const char *str) {
   const size_t len = strlen(str);
   dword offset = 0;
 
@@ -292,9 +265,8 @@ void Bitfield::FromString(const char *str)
   }
 }
 
-void Bitfield::PrintBits(char *dest, size_t dest_size,
-                         const char *names[], size_t name_cnt)
-{
+void Bitfield::PrintBits(char *dest, size_t dest_size, const char *names[],
+                         size_t name_cnt) {
   size_t len = 0;
   int left = dest_size - 1;
   bool first = true;
@@ -306,11 +278,10 @@ void Bitfield::PrintBits(char *dest, size_t dest_size,
       size_t written;
 
       if ((unsigned)i < name_cnt && *names[i] != '\n')
-        written = snprintf(dest + len, left,
-                           "%s%s", first? "" : ", ", names[i]);
+        written =
+            snprintf(dest + len, left, "%s%s", first ? "" : ", ", names[i]);
       else
-        written = snprintf(dest + len, left,
-                           "%sUNDEFINED", first? "" : ", ");
+        written = snprintf(dest + len, left, "%sUNDEFINED", first ? "" : ", ");
 
       left -= written;
       len += written;
@@ -321,9 +292,8 @@ void Bitfield::PrintBits(char *dest, size_t dest_size,
 
   if (left < 1) {
     strncpy(dest, "<TRUNCATED>", dest_size);
-    len = MIN(dest_size-1, 11);
+    len = MIN(dest_size - 1, 11);
   }
 
-  *(dest+len) = '\0';
+  *(dest + len) = '\0';
 }
-

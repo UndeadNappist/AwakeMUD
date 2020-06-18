@@ -25,14 +25,12 @@ ACMD_CONST(do_return);
 
 #define VEH ch->in_veh
 
-int get_maneuver(struct veh_data *veh)
-{
+int get_maneuver(struct veh_data *veh) {
   int score = -2;
   struct char_data *ch = NULL;
   int x = 0, skill;
 
-  switch (veh->type)
-  {
+  switch (veh->type) {
   case VEH_BIKE:
     score += 5;
     break;
@@ -53,8 +51,7 @@ int get_maneuver(struct veh_data *veh)
     for (ch = veh->people; ch; ch = ch->next_in_veh)
       if (AFF_FLAGGED(ch, AFF_PILOT))
         break;
-  if (ch)
-  {
+  if (ch) {
     // TODO: What is this passage for? -LS
     for (skill = veh_skill(ch, veh); skill > 0; skill--) {
       x = MAX(x, srdice());
@@ -64,8 +61,7 @@ int get_maneuver(struct veh_data *veh)
   return score;
 }
 
-int modify_veh(struct veh_data *veh)
-{
+int modify_veh(struct veh_data *veh) {
   struct char_data *ch;
   struct obj_data *cyber;
   int mod = 0;
@@ -75,8 +71,7 @@ int modify_veh(struct veh_data *veh)
       if (AFF_FLAGGED(ch, AFF_PILOT))
         break;
 
-  if (veh->cspeed > SPEED_IDLE && ch)
-  {
+  if (veh->cspeed > SPEED_IDLE && ch) {
     for (cyber = ch->cyberware; cyber; cyber = cyber->next_content)
       if (GET_OBJ_VAL(cyber, 0) == CYB_VCR) {
         mod -= GET_OBJ_VAL(cyber, 1);
@@ -87,14 +82,14 @@ int modify_veh(struct veh_data *veh)
     if (get_speed(veh) > (int)(GET_REA(ch) * 20)) {
       if (get_speed(veh) > (int)(GET_REA(ch) * 40))
         mod += 3;
-      else if (get_speed(veh) < (int)(GET_REA(ch) * 40) && get_speed(veh) > (int)(GET_REA(ch) * 30))
+      else if (get_speed(veh) < (int)(GET_REA(ch) * 40) &&
+               get_speed(veh) > (int)(GET_REA(ch) * 30))
         mod += 2;
       else
         mod++;
     }
   }
-  switch (veh->damage)
-  {
+  switch (veh->damage) {
   case 1:
   case 2:
     mod += 1;
@@ -116,20 +111,17 @@ int modify_veh(struct veh_data *veh)
   return mod;
 }
 
-void stop_chase(struct veh_data *veh)
-{
+void stop_chase(struct veh_data *veh) {
   struct veh_follow *k, *j;
 
   if (!veh->following)
     return;
 
-  if (veh == veh->following->followers->follower)
-  {
+  if (veh == veh->following->followers->follower) {
     k = veh->following->followers;
     veh->following->followers = k->next;
     DELETE_AND_NULL(k);
-  } else
-  {
+  } else {
     for (k = veh->following->followers; k->next->follower != veh; k = k->next)
       ;
     j = k->next;
@@ -139,8 +131,7 @@ void stop_chase(struct veh_data *veh)
   veh->following = NULL;
 }
 
-void crash_test(struct char_data *ch)
-{
+void crash_test(struct char_data *ch) {
   int target = 0, skill = 0;
   int power, attack_resist = 0, damage_total = SERIOUS;
   struct veh_data *veh;
@@ -156,8 +147,7 @@ void crash_test(struct char_data *ch)
   send_to_char("You begin to lose control!\r\n", ch);
   skill = veh_skill(ch, veh) + veh->autonav;
 
-  if (success_test(skill, target))
-  {
+  if (success_test(skill, target)) {
     send_to_char("You get your ride under control.\r\n", ch);
     return;
   }
@@ -172,14 +162,14 @@ void crash_test(struct char_data *ch)
 
   veh->damage += damage_total;
   stop_chase(veh);
-  if (veh->type == VEH_BIKE && veh->people)
-  {
+  if (veh->type == VEH_BIKE && veh->people) {
     power = (int)(get_speed(veh) / 10);
     for (tch = veh->people; tch; tch = next) {
       next = tch->next_in_veh;
       char_from_room(tch);
       char_to_room(tch, veh->in_room);
-      damage_total = convert_damage(stage(0 - success_test(GET_BOD(tch), power), MODERATE));
+      damage_total = convert_damage(
+          stage(0 - success_test(GET_BOD(tch), power), MODERATE));
       damage(tch, tch, damage_total, TYPE_CRASH, PHYSICAL);
       AFF_FLAGS(tch).RemoveBits(AFF_PILOT, AFF_RIG, ENDBIT);
       send_to_char("You are thrown from the bike!\r\n", tch);
@@ -188,8 +178,7 @@ void crash_test(struct char_data *ch)
   }
 }
 
-ACMD(do_drive)
-{
+ACMD(do_drive) {
   struct char_data *temp;
 
   if (IS_ASTRAL(ch)) {
@@ -212,7 +201,8 @@ ACMD(do_drive)
     send_to_char(TOOBUSY, ch);
     return;
   }
-  if(GET_SKILL(ch, SKILL_PILOT_CAR) == 0 && GET_SKILL(ch, SKILL_PILOT_BIKE) == 0 &&
+  if (GET_SKILL(ch, SKILL_PILOT_CAR) == 0 &&
+      GET_SKILL(ch, SKILL_PILOT_BIKE) == 0 &&
       GET_SKILL(ch, SKILL_PILOT_TRUCK) == 0) {
     send_to_char("You have no idea how to do that.\r\n", ch);
     return;
@@ -225,8 +215,8 @@ ACMD(do_drive)
     send_to_char("You can't seem to take control!\r\n", ch);
     return;
   }
-  for(temp = VEH->people; temp; temp= temp->next_in_veh)
-    if(ch != temp && AFF_FLAGGED(temp, AFF_PILOT)) {
+  for (temp = VEH->people; temp; temp = temp->next_in_veh)
+    if (ch != temp && AFF_FLAGGED(temp, AFF_PILOT)) {
       send_to_char("Someone is already in charge!\r\n", ch);
       return;
     }
@@ -254,8 +244,7 @@ ACMD(do_drive)
   return;
 }
 
-ACMD(do_rig)
-{
+ACMD(do_rig) {
   struct char_data *temp;
   struct obj_data *cyber;
   int has_datajack = 0;
@@ -277,7 +266,9 @@ ACMD(do_rig)
     return;
   }
   for (cyber = ch->cyberware; cyber; cyber = cyber->next_content)
-    if (GET_OBJ_VAL(cyber, 0) == CYB_DATAJACK || (GET_OBJ_VAL(cyber, 0) == CYB_EYES && IS_SET(GET_OBJ_VAL(cyber, 3), EYE_DATAJACK))) {
+    if (GET_OBJ_VAL(cyber, 0) == CYB_DATAJACK ||
+        (GET_OBJ_VAL(cyber, 0) == CYB_EYES &&
+         IS_SET(GET_OBJ_VAL(cyber, 3), EYE_DATAJACK))) {
       has_datajack = TRUE;
       break;
     }
@@ -286,17 +277,20 @@ ACMD(do_rig)
     return;
   }
 
-  if (GET_OBJ_VAL(cyber, 0) == CYB_DATAJACK && GET_OBJ_VAL(cyber, 3) == DATA_INDUCTION) {
+  if (GET_OBJ_VAL(cyber, 0) == CYB_DATAJACK &&
+      GET_OBJ_VAL(cyber, 3) == DATA_INDUCTION) {
     if (GET_EQ(ch, WEAR_HANDS)) {
       send_to_char(ch, "Try removing your gloves first.\r\n");
       return;
     }
-  } else if (GET_EQ(ch, WEAR_HEAD) && GET_OBJ_VAL(GET_EQ(ch, WEAR_HEAD), 7) > 0) {
+  } else if (GET_EQ(ch, WEAR_HEAD) &&
+             GET_OBJ_VAL(GET_EQ(ch, WEAR_HEAD), 7) > 0) {
     send_to_char(ch, "Try removing your helmet first.\r\n");
     return;
   }
 
-  if (GET_SKILL(ch, SKILL_PILOT_CAR) == 0 && GET_SKILL(ch, SKILL_PILOT_BIKE) == 0 &&
+  if (GET_SKILL(ch, SKILL_PILOT_CAR) == 0 &&
+      GET_SKILL(ch, SKILL_PILOT_BIKE) == 0 &&
       GET_SKILL(ch, SKILL_PILOT_TRUCK) == 0) {
     send_to_char("You have no idea how to do that.\r\n", ch);
     return;
@@ -309,23 +303,24 @@ ACMD(do_rig)
     send_to_char("The system is unresponsive!\r\n", ch);
     return;
   }
-  for(temp = VEH->people; temp; temp= temp->next_in_veh)
-    if(ch != temp && AFF_FLAGGED(temp, AFF_PILOT)) {
+  for (temp = VEH->people; temp; temp = temp->next_in_veh)
+    if (ch != temp && AFF_FLAGGED(temp, AFF_PILOT)) {
       send_to_char("Someone is already in charge!\r\n", ch);
       return;
     }
-  if(VEH->cspeed == SPEED_OFF || VEH->dest) {
+  if (VEH->cspeed == SPEED_OFF || VEH->dest) {
     if (VEH->type == VEH_BIKE && VEH->locked && GET_IDNUM(ch) != VEH->owner) {
       send_to_char("You jack in and nothing happens.\r\n", ch);
       return;
-    } 
+    }
     AFF_FLAGS(ch).ToggleBits(AFF_PILOT, AFF_RIG, ENDBIT);
     VEH->cspeed = SPEED_IDLE;
     VEH->lastin[0] = VEH->in_room;
     send_to_veh(buf1, VEH, ch, TRUE);
     stop_manning_weapon_mounts(ch, TRUE);
     send_to_char("As you jack in, your perception shifts.\r\n", ch);
-    sprintf(buf1, "%s jacks into the vehicle control system.\r\n", GET_NAME(ch));
+    sprintf(buf1, "%s jacks into the vehicle control system.\r\n",
+            GET_NAME(ch));
   } else {
     if (!AFF_FLAGGED(ch, AFF_RIG)) {
       send_to_char("But you're not rigging.\r\n", ch);
@@ -343,8 +338,7 @@ ACMD(do_rig)
   return;
 }
 
-ACMD(do_vemote)
-{
+ACMD(do_vemote) {
   struct veh_data *veh;
   if (!(AFF_FLAGGED(ch, AFF_PILOT) || PLR_FLAGGED(ch, PLR_REMOTE))) {
     send_to_char("You must be driving a vehicle to use that command.\r\n", ch);
@@ -365,8 +359,7 @@ ACMD(do_vemote)
   return;
 }
 
-ACMD(do_ram)
-{
+ACMD(do_ram) {
   struct veh_data *veh, *tveh = NULL;
   struct char_data *vict = NULL;
 
@@ -388,7 +381,9 @@ ACMD(do_ram)
     return;
   }
   if (veh->in_veh) {
-    send_to_char("There's not enough room in here to even think about trying something like that.\r\n", ch);
+    send_to_char("There's not enough room in here to even think about trying "
+                 "something like that.\r\n",
+                 ch);
     return;
   }
   two_arguments(argument, arg, buf2);
@@ -397,17 +392,21 @@ ACMD(do_ram)
     send_to_char("Ram what?\r\n", ch);
     return;
   }
-  
+
   if (!(vict = get_char_room(arg, veh->in_room)) &&
       !(tveh = get_veh_list(arg, veh->in_room->vehicles, ch))) {
-    send_to_char("You can't seem to find the target you're looking for.\r\n", ch);
+    send_to_char("You can't seem to find the target you're looking for.\r\n",
+                 ch);
     return;
   }
   if (vict && !invis_ok(ch, vict)) {
-    send_to_char("You can't seem to find the target you're looking for.\r\n", ch);
+    send_to_char("You can't seem to find the target you're looking for.\r\n",
+                 ch);
     return;
   }
-  if (vict && !IS_NPC(vict) && !(IS_NPC(ch) || (PRF_FLAGGED(ch, PRF_PKER) && PRF_FLAGGED(vict, PRF_PKER)))) {
+  if (vict && !IS_NPC(vict) &&
+      !(IS_NPC(ch) ||
+        (PRF_FLAGGED(ch, PRF_PKER) && PRF_FLAGGED(vict, PRF_PKER)))) {
     send_to_char(ch, "You have to be flagged PK to attack another player.\r\n");
     return;
   }
@@ -415,13 +414,14 @@ ACMD(do_ram)
     send_to_char("You can't ram yourself!\r\n", ch);
     return;
   }
-  
+
   do_raw_ram(ch, veh, tveh, vict);
 }
 
-void do_raw_ram(struct char_data *ch, struct veh_data *veh, struct veh_data *tveh, struct char_data *vict) {
+void do_raw_ram(struct char_data *ch, struct veh_data *veh,
+                struct veh_data *tveh, struct char_data *vict) {
   int skill = veh_skill(ch, veh), target = 0, vehm = 0, tvehm = 0;
-  
+
   if (tveh) {
     target = modify_veh(veh) + veh->handling + modify_target(ch);
     vehm = get_maneuver(veh);
@@ -436,7 +436,8 @@ void do_raw_ram(struct char_data *ch, struct veh_data *veh, struct veh_data *tve
       target += 2;
     strcpy(buf3, GET_VEH_NAME(veh));
     sprintf(buf, "%s heads straight towards your ride.\r\n", buf3);
-    sprintf(buf1, "%s heads straight towards %s.\r\n", buf3, GET_VEH_NAME(tveh));
+    sprintf(buf1, "%s heads straight towards %s.\r\n", buf3,
+            GET_VEH_NAME(tveh));
     sprintf(buf2, "You attempt to ram %s.\r\n", GET_VEH_NAME(tveh));
     send_to_veh(buf, tveh, 0, TRUE);
     send_to_room(buf1, veh->in_room);
@@ -475,8 +476,7 @@ void do_raw_ram(struct char_data *ch, struct veh_data *veh, struct veh_data *tve
   }
 }
 
-ACMD(do_upgrade)
-{
+ACMD(do_upgrade) {
   struct veh_data *veh;
   struct obj_data *mod, *obj, *shop = NULL;
   int j = 0, skill = 0, target = 0, kit = 0;
@@ -491,7 +491,9 @@ ACMD(do_upgrade)
     send_to_char("You don't have any more music to play on the radio.\r\n", ch);
     return;
   }
-  if (!(veh = get_veh_list(buf1, ch->in_veh ? ch->in_veh->carriedvehs : ch->in_room->vehicles, ch))) {
+  if (!(veh = get_veh_list(
+            buf1, ch->in_veh ? ch->in_veh->carriedvehs : ch->in_room->vehicles,
+            ch))) {
     send_to_char(NOOBJECT, ch);
     return;
   }
@@ -508,7 +510,7 @@ ACMD(do_upgrade)
     return;
   }
   if (!IS_NPC(ch)) {
-    switch(veh->type) {
+    switch (veh->type) {
     case VEH_DRONE:
       skill = SKILL_BR_DRONE;
       break;
@@ -523,31 +525,35 @@ ACMD(do_upgrade)
       break;
     }
     switch (GET_OBJ_VAL(mod, 0)) {
-      case TYPE_ENGINECUST:
-        target = 6;
-        break;
-      case TYPE_TURBOCHARGER:
-        target = 2 + GET_OBJ_VAL(mod, 2);
-        break;
-      case TYPE_AUTONAV:
-        target = 8 - veh->handling;
-        break;
-      case TYPE_CMC:
-      case TYPE_DRIVEBYWIRE:
-        target = 10 - veh->handling;
-        break;
-      case TYPE_ARMOUR:
-      case TYPE_CONCEALEDARMOUR:
-        target = (int)((GET_OBJ_VAL(mod, 2) + (GET_MOD(veh, GET_OBJ_VAL(mod, 6)) ? GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 2) : 0))/ 3);
-        break;
-      case TYPE_ROLLBARS:
-      case TYPE_TIRES:
-      case TYPE_MISC:
-        target = 3;
-        break;
-      default:
-        target = 4;
-        break;
+    case TYPE_ENGINECUST:
+      target = 6;
+      break;
+    case TYPE_TURBOCHARGER:
+      target = 2 + GET_OBJ_VAL(mod, 2);
+      break;
+    case TYPE_AUTONAV:
+      target = 8 - veh->handling;
+      break;
+    case TYPE_CMC:
+    case TYPE_DRIVEBYWIRE:
+      target = 10 - veh->handling;
+      break;
+    case TYPE_ARMOUR:
+    case TYPE_CONCEALEDARMOUR:
+      target = (int)((GET_OBJ_VAL(mod, 2) +
+                      (GET_MOD(veh, GET_OBJ_VAL(mod, 6))
+                           ? GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 2)
+                           : 0)) /
+                     3);
+      break;
+    case TYPE_ROLLBARS:
+    case TYPE_TIRES:
+    case TYPE_MISC:
+      target = 3;
+      break;
+    default:
+      target = 4;
+      break;
     }
     skill = get_skill(ch, skill, target);
     target += modify_target(ch);
@@ -555,7 +561,8 @@ ACMD(do_upgrade)
     if ((shop = find_workshop(ch, TYPE_VEHICLE)))
       kit = GET_OBJ_VAL(shop, 0);
     if (!kit && !shop) {
-      send_to_char("You don't have any tools here for working on vehicles.\r\n", ch);
+      send_to_char("You don't have any tools here for working on vehicles.\r\n",
+                   ch);
       return;
     }
     if (kit < mod_types[GET_OBJ_VAL(mod, 0)].tools) {
@@ -566,11 +573,13 @@ ACMD(do_upgrade)
         target--;
       else if (kit == TYPE_FACILITY)
         target -= 3;
-    } else if (mod_types[GET_OBJ_VAL(mod, 0)].tools == TYPE_SHOP && kit == TYPE_FACILITY)
+    } else if (mod_types[GET_OBJ_VAL(mod, 0)].tools == TYPE_SHOP &&
+               kit == TYPE_FACILITY)
       target--;
 
     if ((skill = success_test(skill, target)) == -1) {
-      sprintf(buf, "You botch up the upgrade completely, destroying %s.\r\n", GET_OBJ_NAME(mod));
+      sprintf(buf, "You botch up the upgrade completely, destroying %s.\r\n",
+              GET_OBJ_NAME(mod));
       send_to_char(buf, ch);
       extract_obj(mod);
       return;
@@ -582,13 +591,17 @@ ACMD(do_upgrade)
       target = 4;
       skill = get_skill(ch, SKILL_BR_COMPUTER, target);
       if (success_test(skill, target) < 0) {
-        send_to_char("You can't seem to get your head around the computers on this part.\r\n", ch);
+        send_to_char("You can't seem to get your head around the computers on "
+                     "this part.\r\n",
+                     ch);
         return;
       }
       target = 4;
       skill = get_skill(ch, SKILL_BR_ELECTRONICS, target);
       if (success_test(skill, target) < 0) {
-        send_to_char("You can't seem to get your head around the wiring on this part.\r\n", ch);
+        send_to_char("You can't seem to get your head around the wiring on "
+                     "this part.\r\n",
+                     ch);
         return;
       }
     }
@@ -619,16 +632,16 @@ ACMD(do_upgrade)
     switch (GET_OBJ_VAL(mod, 1)) {
     case 1:
       skill = 1;
-      // explicit fallthrough-- internal mounts are +1 skill vs external mounts, but otherwise share attributes
-      // fall through
+      // explicit fallthrough-- internal mounts are +1 skill vs external mounts,
+      // but otherwise share attributes fall through
     case 0:
       j++;
       target = 10;
       break;
     case 3:
       skill = 1;
-      // explicit fallthrough-- internal mounts are +1 skill vs external mounts, but otherwise share attributes
-      // fall through
+      // explicit fallthrough-- internal mounts are +1 skill vs external mounts,
+      // but otherwise share attributes fall through
     case 2:
       j += 2;
       target = 10;
@@ -659,12 +672,18 @@ ACMD(do_upgrade)
       send_to_char("You can't use that part on this type of engine.\r\n", ch);
       return;
     }
-    if ((GET_OBJ_VAL(mod, 0) != TYPE_SEATS && GET_OBJ_VAL(mod, 0) == TYPE_ARMOUR && GET_OBJ_VAL(mod, 0) == TYPE_CONCEALEDARMOUR) && GET_MOD(veh, GET_OBJ_VAL(mod, 6))) {
+    if ((GET_OBJ_VAL(mod, 0) != TYPE_SEATS &&
+         GET_OBJ_VAL(mod, 0) == TYPE_ARMOUR &&
+         GET_OBJ_VAL(mod, 0) == TYPE_CONCEALEDARMOUR) &&
+        GET_MOD(veh, GET_OBJ_VAL(mod, 6))) {
       send_to_char(ch, "There is already a mod of that type installed.\r\n");
       return;
     }
-    if (GET_OBJ_VAL(mod, 0) == TYPE_ARMOUR || GET_OBJ_VAL(mod, 0) == TYPE_CONCEALEDARMOUR) {
-      if (GET_MOD(veh, GET_OBJ_VAL(mod, 6)) && GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 0) != GET_OBJ_VAL(mod, 0)) {
+    if (GET_OBJ_VAL(mod, 0) == TYPE_ARMOUR ||
+        GET_OBJ_VAL(mod, 0) == TYPE_CONCEALEDARMOUR) {
+      if (GET_MOD(veh, GET_OBJ_VAL(mod, 6)) &&
+          GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 0) !=
+              GET_OBJ_VAL(mod, 0)) {
         send_to_char("You cannot mix normal and concealed armour.\r\n", ch);
         return;
       }
@@ -674,17 +693,20 @@ ACMD(do_upgrade)
       if (totalarmour > veh->body / 2) {
         send_to_char("You can't put this much armour on that vehicle.\r\n", ch);
         return;
-      }      
+      }
       if (!GET_MOD(veh, GET_OBJ_VAL(mod, 6)))
-        GET_MOD(veh, GET_OBJ_VAL(mod, 6)) = mod;      
-      else  affect_veh(veh, mod->affected[0].location, -mod->affected[0].modifier);
+        GET_MOD(veh, GET_OBJ_VAL(mod, 6)) = mod;
+      else
+        affect_veh(veh, mod->affected[0].location, -mod->affected[0].modifier);
       veh->usedload += GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 1);
-      GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 1) = (veh->body * veh->body) * totalarmour * 5;
+      GET_OBJ_VAL(GET_MOD(veh, GET_OBJ_VAL(mod, 6)), 1) =
+          (veh->body * veh->body) * totalarmour * 5;
       mod->affected[0].modifier = totalarmour;
       affect_veh(veh, mod->affected[0].location, mod->affected[0].modifier);
       if (GET_MOD(veh, GET_OBJ_VAL(mod, 6)) != mod)
         extract_obj(mod);
-      else obj_from_char(mod);
+      else
+        obj_from_char(mod);
     } else {
       if (veh->load - veh->usedload < GET_OBJ_VAL(mod, 1)) {
         send_to_char(ch, "Try as you might, you just can't fit it in.\r\n");
@@ -693,13 +715,14 @@ ACMD(do_upgrade)
       veh->usedload += GET_OBJ_VAL(mod, 1);
       for (j = 0; j < MAX_OBJ_AFFECT; j++)
         affect_veh(veh, mod->affected[j].location, mod->affected[j].modifier);
-      if (GET_OBJ_VAL(mod, 0) == TYPE_SEATS && GET_MOD(veh, GET_OBJ_VAL(mod, 6))) {
+      if (GET_OBJ_VAL(mod, 0) == TYPE_SEATS &&
+          GET_MOD(veh, GET_OBJ_VAL(mod, 6))) {
         GET_MOD(veh, GET_OBJ_VAL(mod, 6))->affected[0].modifier++;
         extract_obj(mod);
       } else {
         GET_MOD(veh, GET_OBJ_VAL(mod, 6)) = mod;
-       obj_from_char(mod);
-      } 
+        obj_from_char(mod);
+      }
     }
   }
 
@@ -709,19 +732,21 @@ ACMD(do_upgrade)
   send_to_char(buf, ch);
 }
 
-void disp_mod(struct veh_data *veh, struct char_data *ch, int i)
-{
+void disp_mod(struct veh_data *veh, struct char_data *ch, int i) {
   send_to_char(ch, "\r\nMounts:\r\n");
   for (struct obj_data *mount = veh->mount; mount; mount = mount->next_content)
-    if (GET_OBJ_VAL(mount, 1) != 0 && GET_OBJ_VAL(mount, 1) != 2 && mount->contains)
-      send_to_char(ch, "%s mounted on %s.\r\n", CAP(GET_OBJ_NAME(mount->contains)), GET_OBJ_NAME(mount));
+    if (GET_OBJ_VAL(mount, 1) != 0 && GET_OBJ_VAL(mount, 1) != 2 &&
+        mount->contains)
+      send_to_char(ch, "%s mounted on %s.\r\n",
+                   CAP(GET_OBJ_NAME(mount->contains)), GET_OBJ_NAME(mount));
   send_to_char(ch, "Modifications:\r\n");
   for (int x = 0; x < NUM_MODS; x++) {
     if (!GET_MOD(veh, x))
       continue;
-    if ((x >= MOD_WHEELS && x <= MOD_ARMOUR) || x == MOD_EXHAUST) 
+    if ((x >= MOD_WHEELS && x <= MOD_ARMOUR) || x == MOD_EXHAUST)
       send_to_char(ch, "  %s\r\n", GET_OBJ_NAME(GET_MOD(veh, x)));
-    else switch (x) {
+    else
+      switch (x) {
       case MOD_INTAKE_FRONT:
       case MOD_INTAKE_MID:
       case MOD_INTAKE_REAR:
@@ -744,14 +769,13 @@ void disp_mod(struct veh_data *veh, struct char_data *ch, int i)
         if (i >= 5)
           send_to_char(ch, "  %s\r\n", GET_OBJ_NAME(GET_MOD(veh, x)));
         break;
-
-    }
+      }
   }
 }
 
-ACMD(do_control)
-{
-  struct obj_data *cyber, *jack = NULL;;
+ACMD(do_control) {
+  struct obj_data *cyber, *jack = NULL;
+  ;
   struct veh_data *veh;
   struct char_data *temp;
   bool has_rig = FALSE;
@@ -760,7 +784,9 @@ ACMD(do_control)
   for (cyber = ch->cyberware; cyber; cyber = cyber->next_content)
     if (GET_OBJ_VAL(cyber, 0) == CYB_VCR)
       has_rig = TRUE;
-    else if (GET_OBJ_VAL(cyber, 0) == CYB_DATAJACK || (GET_OBJ_VAL(cyber, 0) == CYB_EYES && IS_SET(GET_OBJ_VAL(cyber, 3), EYE_DATAJACK)))
+    else if (GET_OBJ_VAL(cyber, 0) == CYB_DATAJACK ||
+             (GET_OBJ_VAL(cyber, 0) == CYB_EYES &&
+              IS_SET(GET_OBJ_VAL(cyber, 3), EYE_DATAJACK)))
       jack = cyber;
 
   if (IS_WORKING(ch) || AFF_FLAGGED(ch, AFF_PILOT)) {
@@ -776,12 +802,14 @@ ACMD(do_control)
     return;
   }
 
-  if (GET_OBJ_VAL(jack, 0) == CYB_DATAJACK && GET_OBJ_VAL(jack, 3) == DATA_INDUCTION) {
+  if (GET_OBJ_VAL(jack, 0) == CYB_DATAJACK &&
+      GET_OBJ_VAL(jack, 3) == DATA_INDUCTION) {
     if (GET_EQ(ch, WEAR_HANDS)) {
       send_to_char(ch, "Try removing your gloves first.\r\n");
       return;
     }
-  } else if (GET_EQ(ch, WEAR_HEAD) && GET_OBJ_VAL(GET_EQ(ch, WEAR_HEAD), 7) > 0) {
+  } else if (GET_EQ(ch, WEAR_HEAD) &&
+             GET_OBJ_VAL(GET_EQ(ch, WEAR_HEAD), 7) > 0) {
     send_to_char(ch, "Try removing your helmet first.\r\n");
     return;
   }
@@ -821,16 +849,18 @@ ACMD(do_control)
   }
   if (!veh->in_room && !veh->in_veh) {
     send_to_char("You can't seem to make contact with it.\r\n", ch);
-    sprintf(buf, "SYSERR: Vehicle %s is not located in a valid room or vehicle!\r\n", GET_VEH_NAME(veh));
+    sprintf(buf,
+            "SYSERR: Vehicle %s is not located in a valid room or vehicle!\r\n",
+            GET_VEH_NAME(veh));
     mudlog(buf, ch, LOG_SYSLOG, TRUE);
     return;
   }
   if (PLR_FLAGGED(ch, PLR_REMOTE))
     do_return(ch, NULL, 0, 0);
-  
+
   ch->char_specials.rigging = veh;
   veh->rigger = ch;
-  for(temp = veh->people; temp; temp = temp->next_in_veh)
+  for (temp = veh->people; temp; temp = temp->next_in_veh)
     if (AFF_FLAGGED(temp, AFF_RIG)) {
       send_to_char("You are forced out of the system!\r\n", temp);
       AFF_FLAGS(temp).ToggleBits(AFF_RIG, AFF_PILOT, ENDBIT);
@@ -841,20 +871,24 @@ ACMD(do_control)
       send_to_char("The vehicle begins to move.\r\n", temp);
 
   GET_POS(ch) = POS_SITTING;
-  if (GET_OBJ_VAL(jack, 0) == CYB_DATAJACK && GET_OBJ_VAL(jack, 3) == DATA_INDUCTION)
-    sprintf(buf, "$n places $s hand over $s induction pad as $e connects to $s deck.");
+  if (GET_OBJ_VAL(jack, 0) == CYB_DATAJACK &&
+      GET_OBJ_VAL(jack, 3) == DATA_INDUCTION)
+    sprintf(
+        buf,
+        "$n places $s hand over $s induction pad as $e connects to $s deck.");
   else if (GET_OBJ_VAL(jack, 0) == CYB_DATAJACK)
-    sprintf(buf, "$n slides ones end of the cable into $s datajack and the other into $s remote control deck.");
-  else sprintf(buf, "$n's eye opens up as $e slides $s remote control deck cable into $s eye datajack.");
+    sprintf(buf, "$n slides ones end of the cable into $s datajack and the "
+                 "other into $s remote control deck.");
+  else
+    sprintf(buf, "$n's eye opens up as $e slides $s remote control deck cable "
+                 "into $s eye datajack.");
   act(buf, TRUE, ch, NULL, NULL, TO_ROOM);
   PLR_FLAGS(ch).ToggleBit(PLR_REMOTE);
   sprintf(buf, "You take control of %s.\r\n", GET_VEH_NAME(veh));
   send_to_char(buf, ch);
 }
 
-
-ACMD(do_subscribe)
-{
+ACMD(do_subscribe) {
   struct veh_data *veh = NULL;
   struct obj_data *obj;
   bool has_deck = FALSE;
@@ -892,15 +926,17 @@ ACMD(do_subscribe)
       veh->prev_sub->next_sub = veh->next_sub;
     else
       ch->char_specials.subscribe = veh->next_sub;
-    
+
     if (veh->next_sub)
       veh->next_sub->prev_sub = veh->prev_sub;
-      
-    // Now that we've removed it from the list, wipe the sub data from this vehicle.
+
+    // Now that we've removed it from the list, wipe the sub data from this
+    // vehicle.
     veh->sub = FALSE;
     veh->next_sub = NULL;
     veh->prev_sub = NULL;
-    sprintf(buf, "You remove %s from your subscriber list.\r\n", GET_VEH_NAME(veh));
+    sprintf(buf, "You remove %s from your subscriber list.\r\n",
+            GET_VEH_NAME(veh));
     send_to_char(buf, ch);
     return;
   }
@@ -909,8 +945,8 @@ ACMD(do_subscribe)
     if (ch->char_specials.subscribe) {
       send_to_char("Your subscriber list contains:\r\n", ch);
       for (veh = ch->char_specials.subscribe; veh; veh = veh->next_sub) {
-        sprintf(buf, "%2d) %-30s (At %s^n) [%2d/10] Damage\r\n", i, GET_VEH_NAME(veh),
-                get_veh_in_room(veh)->name, veh->damage);
+        sprintf(buf, "%2d) %-30s (At %s^n) [%2d/10] Damage\r\n", i,
+                GET_VEH_NAME(veh), get_veh_in_room(veh)->name, veh->damage);
         send_to_char(buf, ch);
         i++;
       }
@@ -919,12 +955,13 @@ ACMD(do_subscribe)
     return;
   }
 
-
   one_argument(argument, buf);
   if (ch->in_veh) {
     struct veh_data *un_nest = ch->in_veh;
     while (un_nest && !veh) {
-      // Starting from the vehicle you're in, search carried vehicles of this veh, then expand out to carrier's carried vehs, etc until a match is found.
+      // Starting from the vehicle you're in, search carried vehicles of this
+      // veh, then expand out to carrier's carried vehs, etc until a match is
+      // found.
       veh = get_veh_list(buf, un_nest->carriedvehs, ch);
       un_nest = un_nest->in_veh;
     }
@@ -951,8 +988,7 @@ ACMD(do_subscribe)
   send_to_char(buf, ch);
 }
 
-ACMD(do_repair)
-{
+ACMD(do_repair) {
   struct obj_data *obj, *shop = NULL;
   struct veh_data *veh;
   int target = 4, skill = 0, success, mod = 0;
@@ -967,11 +1003,15 @@ ACMD(do_repair)
     return;
   }
   if (ch->in_veh && (ch->vfront || !ch->in_veh->flags.IsSet(VFLAG_WORKSHOP))) {
-    send_to_char("Well, you could probably polish the dash from in here.\r\n", ch);
+    send_to_char("Well, you could probably polish the dash from in here.\r\n",
+                 ch);
     return;
   }
 
-  if (!(veh = get_veh_list(argument, ch->in_veh ? ch->in_veh->carriedvehs : get_ch_in_room(ch)->vehicles, ch))) {
+  if (!(veh = get_veh_list(argument,
+                           ch->in_veh ? ch->in_veh->carriedvehs
+                                      : get_ch_in_room(ch)->vehicles,
+                           ch))) {
     send_to_char(NOOBJECT, ch);
     return;
   }
@@ -981,39 +1021,45 @@ ACMD(do_repair)
     return;
   }
 
-  switch(veh->type) {
-    case VEH_DRONE:
-      skill = SKILL_BR_DRONE;
-      break;
-    case VEH_BIKE:
-      skill = SKILL_BR_BIKE;
-      break;
-    case VEH_CAR:
-      skill = SKILL_BR_CAR;
-      break;
-    case VEH_TRUCK:
-      skill = SKILL_BR_TRUCK;
-      break;
+  switch (veh->type) {
+  case VEH_DRONE:
+    skill = SKILL_BR_DRONE;
+    break;
+  case VEH_BIKE:
+    skill = SKILL_BR_BIKE;
+    break;
+  case VEH_CAR:
+    skill = SKILL_BR_CAR;
+    break;
+  case VEH_TRUCK:
+    skill = SKILL_BR_TRUCK;
+    break;
   }
   skill = get_skill(ch, skill, target);
   target += (veh->damage - 2) / 2;
   target += modify_target(ch);
 
   for (obj = ch->carrying; obj && !mod; obj = obj->next_content)
-    if (GET_OBJ_TYPE(obj) == ITEM_WORKSHOP && GET_WORKSHOP_TYPE(obj) == TYPE_VEHICLE && GET_WORKSHOP_GRADE(obj) == TYPE_KIT)
+    if (GET_OBJ_TYPE(obj) == ITEM_WORKSHOP &&
+        GET_WORKSHOP_TYPE(obj) == TYPE_VEHICLE &&
+        GET_WORKSHOP_GRADE(obj) == TYPE_KIT)
       mod = TYPE_KIT;
   for (int i = 0; i < NUM_WEARS && !mod; i++)
-    if ((obj = GET_EQ(ch, i)) && GET_OBJ_TYPE(obj) == ITEM_WORKSHOP && GET_WORKSHOP_TYPE(obj) == TYPE_VEHICLE && GET_WORKSHOP_GRADE(obj) == TYPE_KIT)
+    if ((obj = GET_EQ(ch, i)) && GET_OBJ_TYPE(obj) == ITEM_WORKSHOP &&
+        GET_WORKSHOP_TYPE(obj) == TYPE_VEHICLE &&
+        GET_WORKSHOP_GRADE(obj) == TYPE_KIT)
       mod = TYPE_KIT;
   shop = find_workshop(ch, TYPE_VEHICLE);
   if (!shop) {
     if (veh->damage >= 7) {
-      send_to_char("You'd better get it to a garage before you try and fix this much damage.\r\n", ch);
+      send_to_char("You'd better get it to a garage before you try and fix "
+                   "this much damage.\r\n",
+                   ch);
       return;
     }
     target += 2;
   }
-  
+
   if (shop && GET_WORKSHOP_GRADE(shop) == TYPE_FACILITY) {
     target -= 2;
   } else if (mod == TYPE_KIT) {
@@ -1022,21 +1068,23 @@ ACMD(do_repair)
     target += 4;
   }
 
-  if ((success = (GET_LEVEL(ch) > LVL_MORTAL ? 20 : success_test(skill, target))) < 1) {
+  if ((success =
+           (GET_LEVEL(ch) > LVL_MORTAL ? 20 : success_test(skill, target))) <
+      1) {
     send_to_char(ch, "It seems to be beyond your skill.\r\n");
     return;
   }
   veh->damage -= (success + 1) / 2;
   if (veh->damage <= 0) {
-    send_to_char(ch, "You go to work on the vehicle and it looks as good as new.\r\n");
+    send_to_char(
+        ch, "You go to work on the vehicle and it looks as good as new.\r\n");
     veh->damage = 0;
   } else
     send_to_char(ch, "You go to work and repair part of the damage.\r\n");
   WAIT_STATE(ch, 2 * PULSE_VIOLENCE);
 }
 
-ACMD(do_driveby)
-{
+ACMD(do_driveby) {
   struct obj_data *wielded;
   struct char_data *vict, *pass, *list = NULL;
   int dir;
@@ -1061,7 +1109,8 @@ ACMD(do_driveby)
   }
   if (!ch->in_veh->in_room) {
     // We're inside a vehicle or otherwise don't have a containing room.
-    send_to_char("You're going to have a hard time maneuvering in here.\r\n", ch);
+    send_to_char("You're going to have a hard time maneuvering in here.\r\n",
+                 ch);
     return;
   }
   if (!(vict = get_char_in_list_vis(ch, arg, ch->in_veh->in_room->people))) {
@@ -1079,37 +1128,47 @@ ACMD(do_driveby)
   }
 
   if (ch->in_veh->cspeed <= SPEED_IDLE) {
-    send_to_char("How do you expect to driveby from a stationary vehicle?\r\n", ch);
+    send_to_char("How do you expect to driveby from a stationary vehicle?\r\n",
+                 ch);
     return;
   }
 
   if ((wielded = GET_EQ(ch, WEAR_WIELD))) {
-    if (!(GET_OBJ_VAL(wielded, 4) == SKILL_PISTOLS || GET_OBJ_VAL(wielded, 4) == SKILL_SMG)) {
+    if (!(GET_OBJ_VAL(wielded, 4) == SKILL_PISTOLS ||
+          GET_OBJ_VAL(wielded, 4) == SKILL_SMG)) {
       send_to_char(ch, "You can only do a driveby with a pistol or SMG.\r\n");
       return;
     }
-    if (!IS_NPC(vict) && !PRF_FLAGGED(ch, PRF_PKER) && !PRF_FLAGGED(vict, PRF_PKER)) {
-      send_to_char(ch, "You have to be flagged PK to attack another player.\r\n");
+    if (!IS_NPC(vict) && !PRF_FLAGGED(ch, PRF_PKER) &&
+        !PRF_FLAGGED(vict, PRF_PKER)) {
+      send_to_char(ch,
+                   "You have to be flagged PK to attack another player.\r\n");
       return;
     }
-    sprintf(buf, "You point %s towards %s and open fire!\r\n", GET_OBJ_NAME(wielded), GET_NAME(vict));
+    sprintf(buf, "You point %s towards %s and open fire!\r\n",
+            GET_OBJ_NAME(wielded), GET_NAME(vict));
     send_to_char(buf, ch);
-    sprintf(buf, "%s aims %s towards %s and opens fire!\r\n", GET_NAME(ch), GET_OBJ_NAME(wielded), GET_NAME(vict));
+    sprintf(buf, "%s aims %s towards %s and opens fire!\r\n", GET_NAME(ch),
+            GET_OBJ_NAME(wielded), GET_NAME(vict));
     send_to_veh(buf, ch->in_veh, ch, FALSE);
     list = ch;
     roll_individual_initiative(ch);
     GET_INIT_ROLL(ch) += 20;
   } else {
-    sprintf(buf, "You point towards %s and shout, \"Light 'em Up!\".\r\n", GET_NAME(vict));
+    sprintf(buf, "You point towards %s and shout, \"Light 'em Up!\".\r\n",
+            GET_NAME(vict));
     send_to_char(buf, ch);
-    sprintf(buf, "%s points towards %s and shouts, \"Light 'em Up!\".!\r\n", GET_NAME(ch), GET_NAME(vict));
+    sprintf(buf, "%s points towards %s and shouts, \"Light 'em Up!\".!\r\n",
+            GET_NAME(ch), GET_NAME(vict));
     send_to_veh(buf, ch->in_veh, ch, FALSE);
   }
 
   for (pass = ch->in_veh->people; pass; pass = pass->next_in_veh) {
-    if (pass != ch && PLR_FLAGGED(pass, PLR_DRIVEBY) && AWAKE(pass) && GET_EQ(pass, WEAR_WIELD) &&
-        GET_OBJ_VAL(GET_EQ(pass, WEAR_WIELD),4) >= SKILL_FIREARMS) {
-      if (!IS_NPC(vict) && !PRF_FLAGGED(pass, PRF_PKER) && !PRF_FLAGGED(vict, PRF_PKER))
+    if (pass != ch && PLR_FLAGGED(pass, PLR_DRIVEBY) && AWAKE(pass) &&
+        GET_EQ(pass, WEAR_WIELD) &&
+        GET_OBJ_VAL(GET_EQ(pass, WEAR_WIELD), 4) >= SKILL_FIREARMS) {
+      if (!IS_NPC(vict) && !PRF_FLAGGED(pass, PRF_PKER) &&
+          !PRF_FLAGGED(vict, PRF_PKER))
         continue;
       sprintf(buf, "You follow %s lead and take aim.\r\n", HSHR(ch));
       send_to_char(pass, buf);
@@ -1127,13 +1186,17 @@ ACMD(do_driveby)
   order_list(list);
   roll_individual_initiative(vict);
   if (GET_INIT_ROLL(vict) < 12)
-    sprintf(buf, "You suddenly feel a cap busted in your ass as %s zooms past!\r\n", GET_VEH_NAME(ch->in_veh));
+    sprintf(buf,
+            "You suddenly feel a cap busted in your ass as %s zooms past!\r\n",
+            GET_VEH_NAME(ch->in_veh));
   else
-    sprintf(buf, "A hail of bullets flies from %s as it zooms past!\r\n", GET_VEH_NAME(ch->in_veh));
+    sprintf(buf, "A hail of bullets flies from %s as it zooms past!\r\n",
+            GET_VEH_NAME(ch->in_veh));
   send_to_char(vict, buf);
 
   for (int i = 2; i > 0; i--) {
-    for (pass = list; pass && vict->in_room == ch->in_veh->in_room; pass = pass->next_fighting) {
+    for (pass = list; pass && vict->in_room == ch->in_veh->in_room;
+         pass = pass->next_fighting) {
       if (GET_INIT_ROLL(pass) >= 0) {
         hit(pass, vict, GET_EQ(pass, WEAR_WIELD), NULL);
         GET_INIT_ROLL(pass) -= 10;
@@ -1141,16 +1204,19 @@ ACMD(do_driveby)
     }
   }
 
-  for (;list ; list = pass) {
+  for (; list; list = pass) {
     pass = list->next_fighting;
     list->next_fighting = NULL;
   }
 
   if (GET_INIT_ROLL(vict) >= 12) {
-    if (GET_EQ(vict, WEAR_WIELD) && GET_OBJ_VAL(GET_EQ(vict, WEAR_WIELD),4) >= SKILL_FIREARMS) {
-      sprintf(buf, "You swing around and take aim at %s.\r\n", GET_VEH_NAME(ch->in_veh));
+    if (GET_EQ(vict, WEAR_WIELD) &&
+        GET_OBJ_VAL(GET_EQ(vict, WEAR_WIELD), 4) >= SKILL_FIREARMS) {
+      sprintf(buf, "You swing around and take aim at %s.\r\n",
+              GET_VEH_NAME(ch->in_veh));
       send_to_char(vict, buf);
-      sprintf(buf, "%s swings around and takes aim at your ride.\r\n", GET_NAME(vict));
+      sprintf(buf, "%s swings around and takes aim at your ride.\r\n",
+              GET_NAME(vict));
       send_to_veh(buf, ch->in_veh, NULL, TRUE);
       vcombat(vict, ch->in_veh);
     }
@@ -1159,8 +1225,7 @@ ACMD(do_driveby)
     move_vehicle(ch, dir);
 }
 
-ACMD(do_speed)
-{
+ACMD(do_speed) {
   struct veh_data *veh;
   int i = 0;
 
@@ -1216,8 +1281,7 @@ ACMD(do_speed)
   veh->cspeed = i;
 }
 
-ACMD(do_chase)
-{
+ACMD(do_chase) {
   struct veh_data *veh, *tveh;
   struct veh_follow *k;
   struct char_data *vict;
@@ -1239,12 +1303,14 @@ ACMD(do_chase)
     send_to_char(buf, ch);
     return;
   }
-  
+
   if (veh->in_veh) {
-    send_to_char("You're going to have a hard time chasing anything from in here.\r\n", ch);
+    send_to_char(
+        "You're going to have a hard time chasing anything from in here.\r\n",
+        ch);
     return;
   }
-  
+
   two_arguments(argument, arg, buf2);
 
   if (!*arg) {
@@ -1277,11 +1343,11 @@ ACMD(do_chase)
       send_to_veh("You speed up.\r\n", veh, ch, FALSE);
       veh->cspeed = SPEED_CRUISING;
     }
-  } else if (vict) {}
+  } else if (vict) {
+  }
 }
 
-ACMD(do_target)
-{
+ACMD(do_target) {
   struct char_data *vict = NULL;
   struct veh_data *veh, *tveh = NULL;
   struct obj_data *obj;
@@ -1323,7 +1389,8 @@ ACMD(do_target)
     }
     strcpy(arg, buf2);
   } else {
-    if (!(AFF_FLAGGED(ch, AFF_RIG) || PLR_FLAGGED(ch, PLR_REMOTE) || AFF_FLAGGED(ch, AFF_MANNING))) {
+    if (!(AFF_FLAGGED(ch, AFF_RIG) || PLR_FLAGGED(ch, PLR_REMOTE) ||
+          AFF_FLAGGED(ch, AFF_MANNING))) {
       send_to_char("You don't have control over any mounts.\r\n", ch);
       return;
     }
@@ -1344,14 +1411,17 @@ ACMD(do_target)
       modeall = TRUE;
     }
   }
-  
+
   if (veh->in_veh) {
-    send_to_char("It'd be a bad idea to start firing in such an enclosed space.\r\n", ch);
+    send_to_char(
+        "It'd be a bad idea to start firing in such an enclosed space.\r\n",
+        ch);
     return;
   }
-  
+
   if (!(vict = get_char_room(arg, veh->in_room)) &&
-      !((tveh = get_veh_list(arg, veh->in_room->vehicles, ch)) && (vict && !CAN_SEE(ch, vict)))) {
+      !((tveh = get_veh_list(arg, veh->in_room->vehicles, ch)) &&
+        (vict && !CAN_SEE(ch, vict)))) {
     send_to_char(ch, "You don't see %s there.\r\n", arg);
     return;
   }
@@ -1359,11 +1429,13 @@ ACMD(do_target)
     send_to_char("Why would you want to target yourself?\r\n", ch);
     return;
   }
-  
+
   do_raw_target(ch, veh, tveh, vict, modeall, obj);
 }
 
-void do_raw_target(struct char_data *ch, struct veh_data *veh, struct veh_data *tveh, struct char_data *vict, bool modeall, struct obj_data *obj) {  
+void do_raw_target(struct char_data *ch, struct veh_data *veh,
+                   struct veh_data *tveh, struct char_data *vict, bool modeall,
+                   struct obj_data *obj) {
   if (CH_IN_COMBAT(ch))
     stop_fighting(ch);
   if (modeall) {
@@ -1375,17 +1447,21 @@ void do_raw_target(struct char_data *ch, struct veh_data *veh, struct veh_data *
             obj->tveh = NULL;
           obj->targ = vict;
           set_fighting(vict, veh);
-          sprintf(buf, "You target %s towards %s.\r\n", GET_OBJ_NAME(obj->contains), PERS(vict, ch));
+          sprintf(buf, "You target %s towards %s.\r\n",
+                  GET_OBJ_NAME(obj->contains), PERS(vict, ch));
           send_to_char(buf, ch);
         } else if (tveh) {
           set_fighting(ch, tveh);
           if (obj->targ)
             obj->targ = NULL;
           obj->tveh = tveh;
-          sprintf(buf, "You target %s towards %s.\r\n", GET_OBJ_NAME(obj->contains), GET_VEH_NAME(tveh));
+          sprintf(buf, "You target %s towards %s.\r\n",
+                  GET_OBJ_NAME(obj->contains), GET_VEH_NAME(tveh));
           send_to_char(buf, ch);
         } else {
-          mudlog("SYSERR: Reached end of do_raw_target (mode all) with no valid target.", ch, LOG_SYSLOG, TRUE);
+          mudlog("SYSERR: Reached end of do_raw_target (mode all) with no "
+                 "valid target.",
+                 ch, LOG_SYSLOG, TRUE);
         }
       }
     return;
@@ -1403,7 +1479,8 @@ void do_raw_target(struct char_data *ch, struct veh_data *veh, struct veh_data *
     set_fighting(vict, veh);
     act("You target $p towards $N.", FALSE, ch, obj->contains, vict, TO_CHAR);
     if (AFF_FLAGGED(ch, AFF_MANNING)) {
-      sprintf(buf, "%s's $p swivels towards you.\r\n", GET_VEH_NAME(ch->in_veh));
+      sprintf(buf, "%s's $p swivels towards you.\r\n",
+              GET_VEH_NAME(ch->in_veh));
       act(buf, FALSE, ch, obj, vict, TO_VICT);
       sprintf(buf, "%s's $p swivels towards $N.\r\n", GET_VEH_NAME(ch->in_veh));
       act(buf, FALSE, ch, obj, vict, TO_VEH_ROOM);
@@ -1413,25 +1490,28 @@ void do_raw_target(struct char_data *ch, struct veh_data *veh, struct veh_data *
     if (obj->targ)
       obj->targ = NULL;
     obj->tveh = tveh;
-    sprintf(buf, "You target %s towards %s.\r\n", GET_OBJ_NAME(obj->contains), GET_VEH_NAME(tveh));
+    sprintf(buf, "You target %s towards %s.\r\n", GET_OBJ_NAME(obj->contains),
+            GET_VEH_NAME(tveh));
     send_to_char(buf, ch);
     if (AFF_FLAGGED(ch, AFF_MANNING)) {
-      sprintf(buf, "%s's %s swivels towards your ride.\r\n", GET_VEH_NAME(ch->in_veh), GET_OBJ_NAME(obj));
+      sprintf(buf, "%s's %s swivels towards your ride.\r\n",
+              GET_VEH_NAME(ch->in_veh), GET_OBJ_NAME(obj));
       send_to_veh(buf, tveh, 0, TRUE);
       strcpy(buf3, GET_VEH_NAME(ch->in_veh));
       sprintf(buf, "%s's $p swivels towards %s.\r\n", buf3, GET_VEH_NAME(tveh));
       act(buf, FALSE, ch, obj, NULL, TO_VEH_ROOM);
     }
   } else {
-    mudlog("SYSERR: Reached end of do_raw_target with no valid target.", ch, LOG_SYSLOG, TRUE);
+    mudlog("SYSERR: Reached end of do_raw_target with no valid target.", ch,
+           LOG_SYSLOG, TRUE);
   }
 }
 
-ACMD(do_mount)
-{
+ACMD(do_mount) {
   int i = 0;
   struct veh_data *veh;
-  struct obj_data *obj, *gun = NULL, *ammo = NULL; /* Appears unused:  *bin = NULL; */
+  struct obj_data *obj, *gun = NULL,
+                        *ammo = NULL; /* Appears unused:  *bin = NULL; */
   RIG_VEH(ch, veh);
   if (!veh) {
     send_to_char("You must be in a vehicle to use that.\r\n", ch);
@@ -1450,26 +1530,27 @@ ACMD(do_mount)
         ammo = x;
       else if (GET_OBJ_TYPE(x) == ITEM_WEAPON)
         gun = x;
-      /* Code appears to be unused:
-      else if (GET_OBJ_TYPE(x) == ITEM_MOD)
-        bin = x; */
+    /* Code appears to be unused:
+    else if (GET_OBJ_TYPE(x) == ITEM_MOD)
+      bin = x; */
     if (gun)
-      sprintf(buf, "%2d) %-20s (Mounting %s) (Ammo %d/%d)", i, GET_OBJ_NAME(obj),
-              GET_OBJ_NAME(gun), ammo ? GET_OBJ_VAL(ammo, 0) : 0, GET_OBJ_VAL(gun, 5) * 2);
+      sprintf(buf, "%2d) %-20s (Mounting %s) (Ammo %d/%d)", i,
+              GET_OBJ_NAME(obj), GET_OBJ_NAME(gun),
+              ammo ? GET_OBJ_VAL(ammo, 0) : 0, GET_OBJ_VAL(gun, 5) * 2);
     else
       sprintf(buf, "%2d) %-20s (Mounting Nothing)", i, GET_OBJ_NAME(obj));
     if (obj->worn_by)
-      sprintf(buf + strlen(buf), " (Manned by %s)", (found_mem(GET_MEMORY(ch), obj->worn_by) ?
-              (found_mem(GET_MEMORY(ch), obj->worn_by))->mem
-              : GET_NAME(obj->worn_by)));
+      sprintf(buf + strlen(buf), " (Manned by %s)",
+              (found_mem(GET_MEMORY(ch), obj->worn_by)
+                   ? (found_mem(GET_MEMORY(ch), obj->worn_by))->mem
+                   : GET_NAME(obj->worn_by)));
     strcat(buf, "\r\n");
     send_to_char(buf, ch);
     i++;
   }
 }
 
-ACMD(do_man)
-{
+ACMD(do_man) {
   struct obj_data *mount;
   int j;
   if (!ch->in_veh) {
@@ -1515,12 +1596,11 @@ ACMD(do_man)
     AFF_FLAGS(ch).SetBit(AFF_MANNING);
     return;
   }
-  
+
   send_to_char("But there is no weapon mounted there.\r\n", ch);
 }
 
-ACMD(do_gridguide)
-{
+ACMD(do_gridguide) {
   struct veh_data *veh;
   struct grid_data *grid = NULL;
   vnum_t x = 0, y = 0;
@@ -1543,7 +1623,8 @@ ACMD(do_gridguide)
     send_to_char("Gridguide refuses to engage with the hood up.\r\n", ch);
     return;
   }
-  if ((veh->locked && GET_IDNUM(ch) != veh->owner) && !(PLR_FLAGGED(ch, PLR_REMOTE) || AFF_FLAGGED(ch, AFF_PILOT))) {
+  if ((veh->locked && GET_IDNUM(ch) != veh->owner) &&
+      !(PLR_FLAGGED(ch, PLR_REMOTE) || AFF_FLAGGED(ch, AFF_PILOT))) {
     send_to_char("You don't have control over the vehicle.\r\n", ch);
     return;
   }
@@ -1553,7 +1634,8 @@ ACMD(do_gridguide)
     send_to_char("The following destinations are available:\r\n", ch);
     for (grid = veh->grid; grid; grid = grid->next) {
       i++;
-      if (!veh->in_room || find_first_step(real_room(veh->in_room->number), real_room(grid->room)) < 0)
+      if (!veh->in_room || find_first_step(real_room(veh->in_room->number),
+                                           real_room(grid->room)) < 0)
         sprintf(buf, "^r%-20s [%-6ld, %-6ld](Unavailable)\r\n", CAP(grid->name),
                 grid->room - (grid->room * 3), grid->room + 100);
       else
@@ -1568,7 +1650,8 @@ ACMD(do_gridguide)
     if (!AFF_FLAGGED(ch, AFF_PILOT))
       veh->cspeed = SPEED_OFF;
   } else if (!*buf2) {
-    if (veh->cspeed > SPEED_IDLE && !(AFF_FLAGGED(ch, AFF_PILOT) || PLR_FLAGGED(ch, PLR_REMOTE))) {
+    if (veh->cspeed > SPEED_IDLE &&
+        !(AFF_FLAGGED(ch, AFF_PILOT) || PLR_FLAGGED(ch, PLR_REMOTE))) {
       send_to_char("You don't have control over the vehicle.\r\n", ch);
       return;
     }
@@ -1576,8 +1659,10 @@ ACMD(do_gridguide)
       if (is_abbrev(arg, grid->name))
         break;
     if (!grid)
-      send_to_char("That destination doesn't seem to be in the system.\r\n", ch);
-    else if (!veh->in_room || find_first_step(real_room(veh->in_room->number), real_room(grid->room)) < 0)
+      send_to_char("That destination doesn't seem to be in the system.\r\n",
+                   ch);
+    else if (!veh->in_room || find_first_step(real_room(veh->in_room->number),
+                                              real_room(grid->room)) < 0)
       send_to_char("That destination is currently unavailable.\r\n", ch);
     else {
       veh->dest = &world[real_room(grid->room)];
@@ -1585,13 +1670,18 @@ ACMD(do_gridguide)
       if (AFF_FLAGGED(ch, AFF_PILOT))
         AFF_FLAGS(ch).RemoveBits(AFF_PILOT, AFF_RIG, ENDBIT);
       if (PLR_FLAGGED(ch, PLR_REMOTE)) {
-        send_to_veh("The autonav beeps and the vehicle starts to move towards its destination.\r\n", veh, 0, FALSE);
-        send_to_char("Gridguide activates and kicks you out of the system.\r\n", ch);
+        send_to_veh("The autonav beeps and the vehicle starts to move towards "
+                    "its destination.\r\n",
+                    veh, 0, FALSE);
+        send_to_char("Gridguide activates and kicks you out of the system.\r\n",
+                     ch);
         PLR_FLAGS(ch).RemoveBit(PLR_REMOTE);
         ch->char_specials.rigging = FALSE;
         veh->rigger = NULL;
-      } else send_to_veh("The autonav beeps and the vehicle starts to move towards its destination.\r\n", veh, 0, TRUE);
-
+      } else
+        send_to_veh("The autonav beeps and the vehicle starts to move towards "
+                    "its destination.\r\n",
+                    veh, 0, TRUE);
     }
   } else if (!str_cmp(arg, "del")) {
     struct grid_data *temp;
@@ -1599,13 +1689,14 @@ ACMD(do_gridguide)
       if (!str_cmp(buf2, grid->name))
         break;
     if (!grid)
-      send_to_char("That destination doesn't seem to be in the system.\r\n", ch);
+      send_to_char("That destination doesn't seem to be in the system.\r\n",
+                   ch);
     else {
       REMOVE_FROM_LIST(grid, veh->grid, next);
       DELETE_ARRAY_IF_EXTANT(grid->name);
       DELETE_AND_NULL(grid);
       send_to_char("You remove the destination from the system.\r\n", ch);
-      act("$n punches something into the autonav.", FALSE, ch, 0 , 0, TO_ROOM);
+      act("$n punches something into the autonav.", FALSE, ch, 0, 0, TO_ROOM);
     }
   } else if (!str_cmp(arg, "add")) {
     int i = 0;
@@ -1621,7 +1712,9 @@ ACMD(do_gridguide)
       return;
     }
     if (!*argument) {
-      if (!veh->in_room || !(ROOM_FLAGGED(veh->in_room, ROOM_ROAD) || ROOM_FLAGGED(veh->in_room, ROOM_GARAGE)) ||
+      if (!veh->in_room ||
+          !(ROOM_FLAGGED(veh->in_room, ROOM_ROAD) ||
+            ROOM_FLAGGED(veh->in_room, ROOM_GARAGE)) ||
           ROOM_FLAGGED(veh->in_room, ROOM_NOGRID)) {
         send_to_char("You currently aren't on the grid.\r\n", ch);
         return;
@@ -1638,7 +1731,9 @@ ACMD(do_gridguide)
         return;
       }
       x = (x + ((y - 100) * 3));
-      if (!(x = real_room(x)) || !(ROOM_FLAGGED(&world[x], ROOM_ROAD) || ROOM_FLAGGED(&world[x], ROOM_GARAGE)) ||
+      if (!(x = real_room(x)) ||
+          !(ROOM_FLAGGED(&world[x], ROOM_ROAD) ||
+            ROOM_FLAGGED(&world[x], ROOM_GARAGE)) ||
           ROOM_FLAGGED(&world[x], ROOM_NOGRID)) {
         send_to_char("Those co-ordinates seem invalid.\r\n", ch);
         return;
@@ -1652,45 +1747,51 @@ ACMD(do_gridguide)
     grid->next = veh->grid;
     veh->grid = grid;
     send_to_char("You add the destination into the system.\r\n", ch);
-    act("$n punches something into the autonav.", FALSE, ch, 0 , 0, TO_ROOM);
+    act("$n punches something into the autonav.", FALSE, ch, 0, 0, TO_ROOM);
   }
 }
 
-void process_autonav(void)
-{
+void process_autonav(void) {
   PERF_PROF_SCOPE(pr_, __func__);
   for (struct veh_data *veh = veh_list; veh; veh = veh->next) {
     bool veh_moved = FALSE;
-  
-    if (veh->in_room && veh->dest && veh->cspeed > SPEED_IDLE && veh->damage < 10) {
+
+    if (veh->in_room && veh->dest && veh->cspeed > SPEED_IDLE &&
+        veh->damage < 10) {
       struct char_data *ch = NULL;
-      
+
       if (!(ch = veh->rigger))
         ch = veh->people;
-      
+
       // Stop empty vehicles
       if (!ch) {
         veh->dest = NULL;
         veh->cspeed = SPEED_OFF;
         return;
       }
-      
+
       int dir = 0;
-      for (int x = MAX((int)get_speed(veh) / 10, 1); x && dir >= 0 && veh->dest; x--) {
-        dir = find_first_step(real_room(veh->in_room->number), real_room(veh->dest->number));
+      for (int x = MAX((int)get_speed(veh) / 10, 1); x && dir >= 0 && veh->dest;
+           x--) {
+        dir = find_first_step(real_room(veh->in_room->number),
+                              real_room(veh->dest->number));
         if (dir >= 0) {
           veh_moved = TRUE;
           move_vehicle(ch, dir);
         }
       }
       if (!veh_moved) {
-        send_to_veh("The autonav beeps and flashes a red 'ERROR' message before shutting off.\r\n", veh, 0, TRUE);
+        send_to_veh("The autonav beeps and flashes a red 'ERROR' message "
+                    "before shutting off.\r\n",
+                    veh, 0, TRUE);
         veh->cspeed = SPEED_OFF;
         veh->dest = NULL;
         return;
       }
       if (veh->in_room == veh->dest) {
-        send_to_veh("Having reached its destination, the autonav shuts off.\r\n", veh, 0, TRUE);
+        send_to_veh(
+            "Having reached its destination, the autonav shuts off.\r\n", veh,
+            0, TRUE);
         veh->cspeed = SPEED_OFF;
         veh->dest = NULL;
       }
@@ -1698,27 +1799,27 @@ void process_autonav(void)
   }
 }
 
-ACMD(do_switch)
-{
+ACMD(do_switch) {
   if (!ch->in_veh) {
     send_to_char("You can't switch positions when not in a vehicle.\r\n", ch);
     return;
   }
-  
+
   else if (IS_WORKING(ch) || AFF_FLAGGED(ch, AFF_PILOT)) {
     send_to_char(TOOBUSY, ch);
     return;
   }
-  
+
   else if (!ch->in_veh->seating[!ch->vfront]) {
     if (access_level(ch, LVL_ADMIN)) {
-      send_to_char("You use your staff powers to bypass the lack of seating.\r\n", ch);
+      send_to_char(
+          "You use your staff powers to bypass the lack of seating.\r\n", ch);
     } else {
       send_to_char("There's no room to move to.\r\n", ch);
       return;
     }
   }
-  
+
   ch->in_veh->seating[ch->vfront]++;
   ch->in_veh->seating[!ch->vfront]--;
   ch->vfront = !ch->vfront;
@@ -1727,8 +1828,7 @@ ACMD(do_switch)
   send_to_char(ch, "You climb into the %s.\r\n", ch->vfront ? "front" : "back");
 }
 
-ACMD(do_pop)
-{
+ACMD(do_pop) {
   skip_spaces(&argument);
   struct veh_data *veh = ch->in_veh;
   if (veh && veh->hood) {
@@ -1741,18 +1841,20 @@ ACMD(do_pop)
   }
   if (!ch->in_veh && !veh->hood && veh->owner != GET_IDNUM(ch)) {
     if (access_level(ch, LVL_ADMIN)) {
-      send_to_char("You use your staff powers to bypass the fact that this isn't your vehicle.\r\n", ch);
+      send_to_char("You use your staff powers to bypass the fact that this "
+                   "isn't your vehicle.\r\n",
+                   ch);
     } else {
       send_to_char("That's not your vehicle.\r\n", ch);
       return;
     }
   }
-  
+
   if (veh->cspeed > SPEED_OFF) {
     send_to_char("It's moving too fast for you to do that.\r\n", ch);
     return;
   }
-  
+
   if (veh->hood) {
     send_to_char(ch, "You close the hood of %s.\r\n", GET_VEH_NAME(veh));
     sprintf(buf, "$n closes the hood of %s.", GET_VEH_NAME(veh));
@@ -1766,10 +1868,11 @@ ACMD(do_pop)
       if (ch->in_veh->in_room) {
         act(buf, FALSE, ch->in_veh->in_room->people, 0, 0, TO_ROOM);
         act(buf, FALSE, ch->in_veh->in_room->people, 0, 0, TO_CHAR);
-      } else if (ch->in_veh->in_veh){
+      } else if (ch->in_veh->in_veh) {
         send_to_veh(buf, ch->in_veh->in_veh, ch, TRUE);
       } else {
-        sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!", GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
+        sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!",
+                GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
         mudlog(buf, ch, LOG_SYSLOG, TRUE);
       }
     }
@@ -1778,8 +1881,7 @@ ACMD(do_pop)
   }
 }
 
-ACMD(do_tow)
-{
+ACMD(do_tow) {
   struct veh_data *veh, *tveh;
   if (!(AFF_FLAGGED(ch, AFF_PILOT) || PLR_FLAGGED(ch, PLR_REMOTE))) {
     send_to_char("You have to be controlling a vehicle to do that.\r\n", ch);
@@ -1795,26 +1897,31 @@ ACMD(do_tow)
     return;
   }
   if (veh->towing) {
-    // Compose our release message, which is emitted if the release processes successfully.
+    // Compose our release message, which is emitted if the release processes
+    // successfully.
     strcpy(buf3, GET_VEH_NAME(veh));
-    sprintf(buf, "%s releases %s from its towing equipment.\r\n", buf3, GET_VEH_NAME(veh->towing));
-    
+    sprintf(buf, "%s releases %s from its towing equipment.\r\n", buf3,
+            GET_VEH_NAME(veh->towing));
+
     if (ch->in_veh->in_room) {
       act(buf, FALSE, ch->in_veh->in_room->people, 0, 0, TO_ROOM);
       act(buf, FALSE, ch->in_veh->in_room->people, 0, 0, TO_CHAR);
       veh_to_room(veh->towing, veh->in_room);
       veh->towing = NULL;
-    } else if (ch->in_veh->in_veh){
+    } else if (ch->in_veh->in_veh) {
       send_to_veh(buf, ch->in_veh->in_veh, ch, TRUE);
       veh_to_veh(veh->towing, veh->in_veh);
     } else {
-      sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!", GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
-      send_to_char("The game system encountered an error. Tow not released.\r\n", ch);
+      sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!",
+              GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
+      send_to_char(
+          "The game system encountered an error. Tow not released.\r\n", ch);
       mudlog(buf, ch, LOG_SYSLOG, TRUE);
       return;
     }
 
-    send_to_char(ch, "You release %s from your towing equipment.\r\n", GET_VEH_NAME(veh->towing));
+    send_to_char(ch, "You release %s from your towing equipment.\r\n",
+                 GET_VEH_NAME(veh->towing));
     veh->towing = NULL;
     return;
   }
@@ -1836,18 +1943,22 @@ ACMD(do_tow)
   else if (veh->type == VEH_DRONE && tveh->type != VEH_DRONE)
     send_to_char("Drones can only tow other drones.\r\n", ch);
   else if (veh->type == VEH_DRONE && veh->load < tveh->load)
-    send_to_char("Drones can only tow drones that are lighter than them.\r\n", ch);
+    send_to_char("Drones can only tow drones that are lighter than them.\r\n",
+                 ch);
   else {
-    send_to_char(ch, "You pick up %s with your towing equipment.\r\n", GET_VEH_NAME(tveh));
+    send_to_char(ch, "You pick up %s with your towing equipment.\r\n",
+                 GET_VEH_NAME(tveh));
     strcpy(buf3, GET_VEH_NAME(veh));
-    sprintf(buf, "%s picks up %s with its towing equipment.\r\n", buf3, GET_VEH_NAME(tveh));
+    sprintf(buf, "%s picks up %s with its towing equipment.\r\n", buf3,
+            GET_VEH_NAME(tveh));
     if (ch->in_veh->in_room) {
       act(buf, FALSE, ch->in_veh->in_room->people, 0, 0, TO_ROOM);
       act(buf, FALSE, ch->in_veh->in_room->people, 0, 0, TO_CHAR);
-    } else if (ch->in_veh->in_veh){
+    } else if (ch->in_veh->in_veh) {
       send_to_veh(buf, ch->in_veh->in_veh, ch, TRUE);
     } else {
-      sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!", GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
+      sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!",
+              GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
       mudlog(buf, ch, LOG_SYSLOG, TRUE);
     }
     veh->towing = tveh;
@@ -1856,65 +1967,62 @@ ACMD(do_tow)
 }
 
 #define CH d->character
-#define VEHCUST_NAME	0
-#define VEHCUST_MAIN	1
-#define VEHCUST_DESC	2
+#define VEHCUST_NAME 0
+#define VEHCUST_MAIN 1
+#define VEHCUST_DESC 2
 
-void vehcust_menu(struct descriptor_data *d)
-{
-  send_to_char(CH, "\033[H\033[J1) Vehicle Name: ^c%s^n\r\n"
-                   "2) Vehicle Description: \r\n^c%s^n\r\n"
-                   "q) Finalize\r\n"
-                   "Enter Choice: ", d->edit_veh->restring, d->edit_veh->restring_long);
+void vehcust_menu(struct descriptor_data *d) {
+  send_to_char(CH,
+               "\033[H\033[J1) Vehicle Name: ^c%s^n\r\n"
+               "2) Vehicle Description: \r\n^c%s^n\r\n"
+               "q) Finalize\r\n"
+               "Enter Choice: ",
+               d->edit_veh->restring, d->edit_veh->restring_long);
   d->edit_mode = VEHCUST_MAIN;
 }
 
-void vehcust_parse(struct descriptor_data *d, char *arg)
-{
-  switch (d->edit_mode)
-  {
-    case VEHCUST_MAIN:
-      switch (LOWER(*arg)) {
-        case '1':
-          send_to_char("Enter new vehicle name: ", CH);
-          d->edit_mode = VEHCUST_NAME;
-          break;
-        case '2':
-          send_to_char(CH, "Enter new vehicle description:\r\n");
-          d->edit_mode = VEHCUST_DESC;
-          DELETE_D_STR_IF_EXTANT(d);
-          d->str = new (char *);
-          *(d->str) = NULL;
-          d->max_str = MAX_MESSAGE_LENGTH;
-          d->mail_to = 0;
-          break;
-        case 'q':
-          STATE(d) = CON_PLAYING;
-          PLR_FLAGS(CH).RemoveBit(PLR_WRITING);
-          d->edit_veh = NULL;
-          send_to_char("Your ride will be ready in 3 days.\r\n", CH);
-          break; 
-      }
+void vehcust_parse(struct descriptor_data *d, char *arg) {
+  switch (d->edit_mode) {
+  case VEHCUST_MAIN:
+    switch (LOWER(*arg)) {
+    case '1':
+      send_to_char("Enter new vehicle name: ", CH);
+      d->edit_mode = VEHCUST_NAME;
       break;
-    case VEHCUST_NAME:   
-      if (strlen(arg) >= LINE_LENGTH) {
-        vehcust_menu(d);
-        return;
-      }
-      DELETE_ARRAY_IF_EXTANT(d->edit_veh->restring);
-      d->edit_veh->restring = str_dup(arg);
+    case '2':
+      send_to_char(CH, "Enter new vehicle description:\r\n");
+      d->edit_mode = VEHCUST_DESC;
+      DELETE_D_STR_IF_EXTANT(d);
+      d->str = new (char *);
+      *(d->str) = NULL;
+      d->max_str = MAX_MESSAGE_LENGTH;
+      d->mail_to = 0;
+      break;
+    case 'q':
+      STATE(d) = CON_PLAYING;
+      PLR_FLAGS(CH).RemoveBit(PLR_WRITING);
+      d->edit_veh = NULL;
+      send_to_char("Your ride will be ready in 3 days.\r\n", CH);
+      break;
+    }
+    break;
+  case VEHCUST_NAME:
+    if (strlen(arg) >= LINE_LENGTH) {
       vehcust_menu(d);
-      break;
+      return;
+    }
+    DELETE_ARRAY_IF_EXTANT(d->edit_veh->restring);
+    d->edit_veh->restring = str_dup(arg);
+    vehcust_menu(d);
+    break;
   }
-
 }
 
-ACMD(do_push)
-{
+ACMD(do_push) {
   skip_spaces(&argument);
   struct veh_data *veh = NULL, *found_veh = NULL;
   if (!*argument)
-    send_to_char("Push what?\r\n", ch);   
+    send_to_char("Push what?\r\n", ch);
   else if (ch->in_veh) {
     if (ch->vfront)
       send_to_char("You can't push a vehicle out from here.\r\n", ch);
@@ -1926,15 +2034,17 @@ ACMD(do_push)
       strcpy(buf3, GET_VEH_NAME(veh));
       send_to_char(ch, "You push %s out of the back.\r\n", buf3);
       sprintf(buf, "$n pushes %s out of the back.", buf3);
-      sprintf(buf2, "$N pushes %s out of the back of %s.", buf3, GET_VEH_NAME(ch->in_veh));
+      sprintf(buf2, "$N pushes %s out of the back of %s.", buf3,
+              GET_VEH_NAME(ch->in_veh));
       act(buf, FALSE, ch, NULL, NULL, TO_ROOM);
       if (ch->in_veh->in_room) {
         act(buf2, FALSE, ch, 0, 0, TO_VEH_ROOM);
-      } else if (ch->in_veh->in_veh){
+      } else if (ch->in_veh->in_veh) {
         // TODO: test this, doesn't it send '$n pushes...'?
         send_to_veh(buf, ch->in_veh->in_veh, ch, TRUE);
       } else {
-        sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!", GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
+        sprintf(buf, "SYSERR: Veh %s (%ld) has neither in_room nor in_veh!",
+                GET_VEH_NAME(ch->in_veh), ch->in_veh->idnum);
         mudlog(buf, ch, LOG_SYSLOG, TRUE);
       }
       if (ch->in_veh->in_room)
@@ -1942,27 +2052,28 @@ ACMD(do_push)
       else
         veh_to_veh(veh, ch->in_veh->in_veh);
     }
-  } else {  
+  } else {
     two_arguments(argument, buf, buf1);
     if (!*buf || !*buf1) {
       send_to_char("Push what?\r\n", ch);
       return;
     }
-    if (!(veh = get_veh_list(buf, ch->in_room->vehicles, ch)) || !(found_veh = get_veh_list(buf1, ch->in_room->vehicles, ch))) {
+    if (!(veh = get_veh_list(buf, ch->in_room->vehicles, ch)) ||
+        !(found_veh = get_veh_list(buf1, ch->in_room->vehicles, ch))) {
       send_to_char("You don't see that vehicle here.\r\n", ch);
       return;
     }
     int mult;
     switch (veh->type) {
-      case VEH_DRONE:
-        mult = 100;
-        break;
-      case VEH_TRUCK:
-        mult = 1500;
-        break;
-      default:
-        mult = 500;
-        break;
+    case VEH_DRONE:
+      mult = 100;
+      break;
+    case VEH_TRUCK:
+      mult = 1500;
+      break;
+    default:
+      mult = 500;
+      break;
     }
     if (found_veh == veh)
       send_to_char("You can't push it into itself.\r\n", ch);
@@ -1974,8 +2085,10 @@ ACMD(do_push)
       send_to_char("The wheels seem to be locked.\r\n", ch);
     else {
       strcpy(buf2, GET_VEH_NAME(veh));
-      sprintf(buf, "$n pushes %s into the back of %s.", buf2, GET_VEH_NAME(found_veh));
-      send_to_char(ch, "You push %s into the back of %s.\r\n", buf2, GET_VEH_NAME(found_veh));
+      sprintf(buf, "$n pushes %s into the back of %s.", buf2,
+              GET_VEH_NAME(found_veh));
+      send_to_char(ch, "You push %s into the back of %s.\r\n", buf2,
+                   GET_VEH_NAME(found_veh));
       act(buf, 0, ch, 0, 0, TO_ROOM);
       sprintf(buf2, "You are pushed into %s.\r\n", GET_VEH_NAME(found_veh));
       send_to_veh(buf2, veh, NULL, TRUE);
@@ -1984,20 +2097,21 @@ ACMD(do_push)
   }
 }
 
-ACMD(do_transfer)
-{
+ACMD(do_transfer) {
   two_arguments(argument, buf, buf2);
   struct veh_data *veh = NULL;
   struct char_data *targ = NULL;
-    
+
   if (!*buf || !*buf2)
     send_to_char("Transfer what to who?\r\n", ch);
   else if (ch->in_veh)
-    send_to_char("You can't transfer ownership while you're inside a vehicle.\r\n", ch);
+    send_to_char(
+        "You can't transfer ownership while you're inside a vehicle.\r\n", ch);
   else if (!(veh = get_veh_list(buf, ch->in_room->vehicles, ch)))
     send_to_char("You don't see that vehicle here.\r\n", ch);
   else if (veh->owner != GET_IDNUM(ch))
-    send_to_char("You can't transfer ownership of a vehicle you don't own.\r\n", ch);
+    send_to_char("You can't transfer ownership of a vehicle you don't own.\r\n",
+                 ch);
   else if (!(targ = get_char_room_vis(ch, buf2)))
     send_to_char("You don't see that person here.\r\n", ch);
   else {
@@ -2007,8 +2121,7 @@ ACMD(do_transfer)
     act(buf2, 0, ch, 0, targ, TO_VICT);
     veh->owner = GET_IDNUM(targ);
     veh->sub = FALSE;
-    
+
     save_vehicles();
   }
 }
- 

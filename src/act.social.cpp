@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: act.social.c                                  Part of CircleMUD *
-*  Usage: Functions to handle socials                                     *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: act.social.c                                  Part of CircleMUD *
+ *  Usage: Functions to handle socials                                     *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,18 +29,17 @@ extern struct descriptor_data *descriptor_list;
 /* local globals */
 static int list_top = -1;
 
-struct social_messg
-{
+struct social_messg {
   int act_nr;
   int hide;
-  int min_victim_position;      /* Position of victim */
+  int min_victim_position; /* Position of victim */
 
   /* No argument was supplied */
   char *char_no_arg;
   char *others_no_arg;
 
   /* An argument was there, and a victim was found */
-  char *char_found;             /* if NULL, read no further, ignore args */
+  char *char_found; /* if NULL, read no further, ignore args */
   char *others_found;
   char *vict_found;
 
@@ -52,17 +51,14 @@ struct social_messg
   char *others_auto;
 } *soc_mess_list = NULL;
 
-
-int find_action(int cmd)
-{
+int find_action(int cmd) {
   for (int x = 0; x < list_top; x++)
     if (soc_mess_list[x].act_nr == cmd)
       return x;
   return -1;
 }
 
-ACMD(do_action)
-{
+ACMD(do_action) {
   int act_nr;
   struct social_messg *action;
   struct char_data *vict;
@@ -93,8 +89,8 @@ ACMD(do_action)
     act(action->others_auto, action->hide, ch, 0, 0, TO_ROOM);
   } else {
     if (GET_POS(vict) < action->min_victim_position)
-      act("$N is not in a proper position for that.",
-          FALSE, ch, 0, vict, TO_CHAR | TO_SLEEP);
+      act("$N is not in a proper position for that.", FALSE, ch, 0, vict,
+          TO_CHAR | TO_SLEEP);
     else {
       act(action->char_found, 0, ch, 0, vict, TO_CHAR | TO_SLEEP);
       act(action->others_found, action->hide, ch, 0, vict, TO_NOTVICT);
@@ -103,17 +99,15 @@ ACMD(do_action)
   }
 }
 
-void perform_wizsocial(char *orig, struct char_data * ch, struct char_data *vict,
-                       struct char_data * to)
-{
+void perform_wizsocial(char *orig, struct char_data *ch, struct char_data *vict,
+                       struct char_data *to) {
   const char *i = NULL;
   char *buf;
   static char lbuf[MAX_STRING_LENGTH];
 
   buf = lbuf;
 
-  for (;;)
-  {
+  for (;;) {
     if (*orig == '$') {
       switch (*(++orig)) {
       case 'n':
@@ -173,8 +167,7 @@ void perform_wizsocial(char *orig, struct char_data * ch, struct char_data *vict
   SEND_TO_Q(CAP(lbuf), to->desc);
 }
 
-ACMD(do_wizfeel)
-{
+ACMD(do_wizfeel) {
   int act_nr, length, cmdnum;
   struct social_messg *action;
   struct char_data *vict = NULL;
@@ -193,7 +186,8 @@ ACMD(do_wizfeel)
     *buf = '\0';
 
   /* otherwise, find the command */
-  for (length = strlen(buf), cmdnum = 0; *cmd_info[cmdnum].command != '\n'; cmdnum++)
+  for (length = strlen(buf), cmdnum = 0; *cmd_info[cmdnum].command != '\n';
+       cmdnum++)
     if (!strncmp(cmd_info[cmdnum].command, buf, length))
       if (access_level(ch, cmd_info[cmdnum].minimum_level))
         break;
@@ -214,7 +208,7 @@ ACMD(do_wizfeel)
       return;
     }
 
-    if ( buf1[0] == '\'' && buf1[1] == 's' ) {
+    if (buf1[0] == '\'' && buf1[1] == 's') {
       sprintf(text1, "^c[]: $n%s^n", buf1);
       sprintf(text2, "^c[]: $n%s^n", buf1);
     } else {
@@ -230,28 +224,34 @@ ACMD(do_wizfeel)
     else
       *buf2 = '\0';
     if (!*buf2) {
-      sprintf(text1, "^c[]: %s^n", (action->char_no_arg ? action->char_no_arg : ""));
-      sprintf(text2, "^c[]: %s^n", (action->others_no_arg ? action->others_no_arg : ""));
+      sprintf(text1, "^c[]: %s^n",
+              (action->char_no_arg ? action->char_no_arg : ""));
+      sprintf(text2, "^c[]: %s^n",
+              (action->others_no_arg ? action->others_no_arg : ""));
     } else {
       for (d = descriptor_list; d && !vict; d = d->next)
-        if (d->character &&
-            isname(buf2, GET_KEYWORDS(d->character)) &&
-            !d->connected &&
-            IS_SENATOR(d->character) &&
+        if (d->character && isname(buf2, GET_KEYWORDS(d->character)) &&
+            !d->connected && IS_SENATOR(d->character) &&
             CAN_SEE(ch, d->character))
           vict = d->character;
       if (!vict) {
-        sprintf(text1, "^c[]: %s^n", (action->not_found ? action->not_found : ""));
+        sprintf(text1, "^c[]: %s^n",
+                (action->not_found ? action->not_found : ""));
         send_to_char(text1, ch);
         send_to_char("\r\n", ch);
         return;
       } else if (vict == ch) {
-        sprintf(text1, "^c[]: %s^n", (action->char_auto ? action->char_auto : ""));
-        sprintf(text2, "^c[]: %s^n", (action->others_auto ? action->others_auto : ""));
+        sprintf(text1, "^c[]: %s^n",
+                (action->char_auto ? action->char_auto : ""));
+        sprintf(text2, "^c[]: %s^n",
+                (action->others_auto ? action->others_auto : ""));
       } else {
-        sprintf(text1, "^c[]: %s^n", (action->char_found ? action->char_found : ""));
-        sprintf(text2, "^c[]: %s^n", (action->others_found ? action->others_found : ""));
-        sprintf(text3, "^c[]: %s^n", (action->vict_found ? action->vict_found : ""));
+        sprintf(text1, "^c[]: %s^n",
+                (action->char_found ? action->char_found : ""));
+        sprintf(text2, "^c[]: %s^n",
+                (action->others_found ? action->others_found : ""));
+        sprintf(text3, "^c[]: %s^n",
+                (action->vict_found ? action->vict_found : ""));
       }
     }
   }
@@ -259,11 +259,11 @@ ACMD(do_wizfeel)
     perform_wizsocial(text1, ch, vict, ch);
 
   for (d = descriptor_list; d; d = d->next)
-    if ((!d->connected)
-        && d->character
-        && access_level(d->character, LVL_BUILDER)
-        && (!PLR_FLAGS(d->character).AreAnySet(PLR_WRITING, PLR_MAILING, PLR_EDITING, ENDBIT))
-        && (d != ch->desc)) {
+    if ((!d->connected) && d->character &&
+        access_level(d->character, LVL_BUILDER) &&
+        (!PLR_FLAGS(d->character)
+              .AreAnySet(PLR_WRITING, PLR_MAILING, PLR_EDITING, ENDBIT)) &&
+        (d != ch->desc)) {
       if (vict && vict == d->character && strlen(text3) > 9)
         perform_wizsocial(text3, ch, vict, vict);
       else if (strlen(text2) > 9)
@@ -271,8 +271,7 @@ ACMD(do_wizfeel)
     }
 }
 
-ACMD(do_insult)
-{
+ACMD(do_insult) {
   struct char_data *victim;
 
   one_argument(argument, arg);
@@ -289,15 +288,18 @@ ACMD(do_insult)
         case 0:
           if (GET_SEX(ch) == SEX_MALE) {
             if (GET_SEX(victim) == SEX_MALE)
-              act("$n accuses you of fighting like a woman!", FALSE, ch, 0, victim, TO_VICT);
+              act("$n accuses you of fighting like a woman!", FALSE, ch, 0,
+                  victim, TO_VICT);
             else
-              act("$n says that women can't fight.", FALSE, ch, 0, victim, TO_VICT);
-          } else {              /* Ch == Woman */
+              act("$n says that women can't fight.", FALSE, ch, 0, victim,
+                  TO_VICT);
+          } else { /* Ch == Woman */
             if (GET_SEX(victim) == SEX_MALE)
-              act("$n accuses you of having the smallest... (brain?)",
-                  FALSE, ch, 0, victim, TO_VICT);
+              act("$n accuses you of having the smallest... (brain?)", FALSE,
+                  ch, 0, victim, TO_VICT);
             else
-              act("$n tells you that you'd lose a beauty contest against a troll.",
+              act("$n tells you that you'd lose a beauty contest against a "
+                  "troll.",
                   FALSE, ch, 0, victim, TO_VICT);
           }
           break;
@@ -307,10 +309,10 @@ ACMD(do_insult)
         default:
           act("$n tells you to get lost!", FALSE, ch, 0, victim, TO_VICT);
           break;
-        }                       /* end switch */
+        } /* end switch */
 
         act("$n insults $N.", TRUE, ch, 0, victim, TO_NOTVICT);
-      } else {                  /* ch == victim */
+      } else { /* ch == victim */
         send_to_char("You feel insulted.\r\n", ch);
       }
     }
@@ -318,8 +320,7 @@ ACMD(do_insult)
     send_to_char("I'm sure you don't want to insult *everybody*...\r\n", ch);
 }
 
-char *fread_action(FILE * fl, int nr)
-{
+char *fread_action(FILE *fl, int nr) {
   char *rslt;
 
   fgets(buf, MAX_STRING_LENGTH, fl);
@@ -337,9 +338,7 @@ char *fread_action(FILE * fl, int nr)
   }
 }
 
-
-void boot_social_messages(void)
-{
+void boot_social_messages(void) {
   FILE *fl;
   int nr, hide, min_pos, curr_soc = -1;
   char next_soc[250];
@@ -355,7 +354,7 @@ void boot_social_messages(void)
     if (cmd_info[nr].command_pointer == do_action)
       list_top++;
 
-  soc_mess_list = new struct social_messg[list_top+6];
+  soc_mess_list = new struct social_messg[list_top + 6];
 
   /* now read 'em */
   for (;;) {
@@ -394,7 +393,7 @@ void boot_social_messages(void)
   /* close file & set top */
   fclose(fl);
   list_top = curr_soc;
-  
+
   // Why tho? --LS
   // soc_mess_list[0] = soc_mess_list[1];
 }

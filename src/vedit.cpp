@@ -22,7 +22,7 @@
 #include "olc.h"
 #include "memory.h"
 
-#define VEH     d->edit_veh
+#define VEH d->edit_veh
 
 extern class memoryClass *Mem;
 
@@ -32,39 +32,46 @@ void write_vehs_to_disk(int zone);
 extern char *cleanup(char *dest, const char *src);
 
 /* display main menu */
-void vedit_disp_menu(struct descriptor_data * d)
-{
+void vedit_disp_menu(struct descriptor_data *d) {
   CLS(CH);
-  send_to_char(CH, "Vehicle number: %s%d%s\r\n", CCCYN(CH, C_CMP), d->edit_number,
-               CCNRM(CH, C_CMP));
+  send_to_char(CH, "Vehicle number: %s%d%s\r\n", CCCYN(CH, C_CMP),
+               d->edit_number, CCNRM(CH, C_CMP));
   send_to_char(CH, "1) Vehicle namelist: %s%s%s\r\n", CCCYN(CH, C_CMP),
                d->edit_veh->name, CCNRM(CH, C_CMP));
   send_to_char(CH, "2) Vehicle shortdesc: %s%s%s\r\n", CCCYN(CH, C_CMP),
                d->edit_veh->short_description, CCNRM(CH, C_CMP));
-  send_to_char(CH, "3) Vehicle descript (Stationary): %s%s%s\r\n", CCCYN(CH, C_CMP),
-               d->edit_veh->description, CCNRM(CH, C_CMP));
+  send_to_char(CH, "3) Vehicle descript (Stationary): %s%s%s\r\n",
+               CCCYN(CH, C_CMP), d->edit_veh->description, CCNRM(CH, C_CMP));
   send_to_char(CH, "4) Vehicle longdesc: \r\n%s\r\n",
-               d->edit_veh->long_description ? d->edit_veh->long_description :
-               "(not set)");
+               d->edit_veh->long_description ? d->edit_veh->long_description
+                                             : "(not set)");
   send_to_char(CH, "5) Vehicle Inside Descript: \r\n%s\r\n",
-               d->edit_veh->inside_description ? d->edit_veh->inside_description : "(not set)");
-  send_to_char(CH, "6) Vehicle Inside Rear Descript: \r\n%s\r\n", 
-               d->edit_veh->rear_description ? d->edit_veh->rear_description : "(not set)");
+               d->edit_veh->inside_description ? d->edit_veh->inside_description
+                                               : "(not set)");
+  send_to_char(CH, "6) Vehicle Inside Rear Descript: \r\n%s\r\n",
+               d->edit_veh->rear_description ? d->edit_veh->rear_description
+                                             : "(not set)");
   send_to_char(CH, "7) Arrive text: ^c%s^n,  8) Leave text: ^c%s^n\r\n",
                d->edit_veh->arrive, d->edit_veh->leave);
   d->edit_veh->flags.PrintBits(buf1, MAX_STRING_LENGTH, veh_flag, NUM_VFLAGS);
   send_to_char(CH, "9) Flags: ^c%s^n\r\n", buf1);
-  send_to_char(CH, "a) H(^c%d^n) Sp(^c%d^n) Acc(^c%d^n) B(^c%d^n) Ar(^c%d^n)\r\n",
-               d->edit_veh->handling, d->edit_veh->speed, d->edit_veh->accel, d->edit_veh->body,
-               d->edit_veh->armor);
-  send_to_char(CH, "   Sig(^c%d^n) Au(^c%d^n) P(^c%d^n) Seat(^c%d/%d^n) Load(^c%d^n) Cost(^c%d^n)\r\n",
-               d->edit_veh->sig, d->edit_veh->autonav, d->edit_veh->pilot, d->edit_veh->seating[1], d->edit_veh->seating[0],
+  send_to_char(CH,
+               "a) H(^c%d^n) Sp(^c%d^n) Acc(^c%d^n) B(^c%d^n) Ar(^c%d^n)\r\n",
+               d->edit_veh->handling, d->edit_veh->speed, d->edit_veh->accel,
+               d->edit_veh->body, d->edit_veh->armor);
+  send_to_char(CH,
+               "   Sig(^c%d^n) Au(^c%d^n) P(^c%d^n) Seat(^c%d/%d^n) "
+               "Load(^c%d^n) Cost(^c%d^n)\r\n",
+               d->edit_veh->sig, d->edit_veh->autonav, d->edit_veh->pilot,
+               d->edit_veh->seating[1], d->edit_veh->seating[0],
                (int)d->edit_veh->load, d->edit_veh->cost);
   send_to_char(CH, "b) Type: ^C%s^n\r\n", veh_type[d->edit_veh->type]);
-  send_to_char(CH, "c) Stock Engine: ^C%s^n\r\n", engine_type[d->edit_veh->engine]);
+  send_to_char(CH, "c) Stock Engine: ^C%s^n\r\n",
+               engine_type[d->edit_veh->engine]);
   send_to_char("q) Quit and save\r\n"
                "x) Exit and abort\r\n"
-               "Enter your choice:\r\n", CH);
+               "Enter your choice:\r\n",
+               CH);
   d->edit_mode = VEDIT_MAIN_MENU;
 }
 
@@ -72,8 +79,7 @@ void vedit_disp_menu(struct descriptor_data * d)
  main loop (of sorts).. basically interpreter throws all input to here
  ***************************************************************************/
 
-void vedit_disp_att(struct descriptor_data * d)
-{
+void vedit_disp_att(struct descriptor_data *d) {
   CLS(CH);
   send_to_char(CH, "1) Handling:  ^c%d^n\r\n", d->edit_veh->handling);
   send_to_char(CH, "2) Speed:  ^c%d^n\r\n", d->edit_veh->speed);
@@ -83,7 +89,8 @@ void vedit_disp_att(struct descriptor_data * d)
   send_to_char(CH, "6) Signature:  ^c%d^n\r\n", d->edit_veh->sig);
   send_to_char(CH, "7) AutoNav:  ^c%d^n\r\n", d->edit_veh->autonav);
   send_to_char(CH, "8) Pilot:  ^c%d^n\r\n", d->edit_veh->pilot);
-  send_to_char(CH, "9) Seating:  ^c%d/%d^n\r\n", d->edit_veh->seating[1], d->edit_veh->seating[0]);
+  send_to_char(CH, "9) Seating:  ^c%d/%d^n\r\n", d->edit_veh->seating[1],
+               d->edit_veh->seating[0]);
   send_to_char(CH, "0) Load:  ^c%d^n\r\n", (int)d->edit_veh->load);
   send_to_char(CH, "a) Cost:  ^c%d^n\r\n", d->edit_veh->cost);
   send_to_char(CH, "q) Quit\r\n");
@@ -91,8 +98,7 @@ void vedit_disp_att(struct descriptor_data * d)
   d->edit_mode = VEDIT_ATT;
 }
 
-void vedit_disp_type(struct descriptor_data * d)
-{
+void vedit_disp_type(struct descriptor_data *d) {
   CLS(CH);
   send_to_char(CH, "0) Drone\r\n");
   send_to_char(CH, "1) Car\r\n");
@@ -109,24 +115,19 @@ void vedit_disp_type(struct descriptor_data * d)
   d->edit_mode = VEDIT_TYPE;
 }
 
-void vedit_disp_flag_menu(struct descriptor_data *d)
-{
+void vedit_disp_flag_menu(struct descriptor_data *d) {
   CLS(CH);
   for (int x = 1; x < NUM_VFLAGS; x++)
     send_to_char(CH, "%d) %s\r\n", x, veh_flag[x]);
-  d->edit_veh->flags.PrintBits(buf1, MAX_STRING_LENGTH,
-                               veh_flag, NUM_VFLAGS);
+  d->edit_veh->flags.PrintBits(buf1, MAX_STRING_LENGTH, veh_flag, NUM_VFLAGS);
   send_to_char(CH, "Vehicle Flags: ^c%s^n\r\nSelect Flag (q to quit): ", buf1);
   d->edit_mode = VEDIT_FLAGS;
 }
 
-
-void vedit_parse(struct descriptor_data * d, const char *arg)
-{
-  int             number;
-  int             veh_number;   /* the RNUM */
-  switch (d->edit_mode)
-  {
+void vedit_parse(struct descriptor_data *d, const char *arg) {
+  int number;
+  int veh_number; /* the RNUM */
+  switch (d->edit_mode) {
 
   case VEDIT_CONFIRM_EDIT:
     /* if player hits 'Y' then edit veh */
@@ -150,157 +151,155 @@ void vedit_parse(struct descriptor_data * d, const char *arg)
       send_to_char("Do you wish to edit it?\r\n", d->character);
       break;
     }
-    break;                      /* end of VEDIT_CONFIRM_EDIT */
+    break; /* end of VEDIT_CONFIRM_EDIT */
 
   case VEDIT_CONFIRM_SAVESTRING:
     switch (*arg) {
     case 'y':
     case 'Y': {
-        /* write to internal tables */
-        veh_number = real_vehicle(d->edit_number);
-        if (veh_number > 0) {
-          /* we need to run through each and every vehicle currently in the
-           * game to see which ones are pointing to this prototype */
-          struct veh_data *temp;
-          /* if vehicle is pointing to this prototype, then we need to replace
-           * with the new one */
-          for (struct veh_data *i = veh_list; i; i = i->next) {
-            if (veh_number == i->veh_number) {
-              temp = Mem->GetVehicle();
-              *temp = *i;
-              *i = *d->edit_veh;
-              /* copy game-time dependent vars over */
-              i->in_room = temp->in_room;
-              i->veh_number = veh_number;
-              i->next_veh = temp->next_veh;
-              i->contents = temp->contents;
-              i->people = temp->people;
-              i->damage = temp->damage;
-              i->cspeed = temp->cspeed;
-              i->seating[0] = temp->seating[0];
-              i->seating[1] = temp->seating[1];
-              i->next = temp->next;
-              for (int c = 0; c < NUM_MODS; c++)
-                i->mod[c] = temp->mod[c];
-              i->owner = temp->owner;
-              Mem->ClearVehicle(temp);
-            }
+      /* write to internal tables */
+      veh_number = real_vehicle(d->edit_number);
+      if (veh_number > 0) {
+        /* we need to run through each and every vehicle currently in the
+         * game to see which ones are pointing to this prototype */
+        struct veh_data *temp;
+        /* if vehicle is pointing to this prototype, then we need to replace
+         * with the new one */
+        for (struct veh_data *i = veh_list; i; i = i->next) {
+          if (veh_number == i->veh_number) {
+            temp = Mem->GetVehicle();
+            *temp = *i;
+            *i = *d->edit_veh;
+            /* copy game-time dependent vars over */
+            i->in_room = temp->in_room;
+            i->veh_number = veh_number;
+            i->next_veh = temp->next_veh;
+            i->contents = temp->contents;
+            i->people = temp->people;
+            i->damage = temp->damage;
+            i->cspeed = temp->cspeed;
+            i->seating[0] = temp->seating[0];
+            i->seating[1] = temp->seating[1];
+            i->next = temp->next;
+            for (int c = 0; c < NUM_MODS; c++)
+              i->mod[c] = temp->mod[c];
+            i->owner = temp->owner;
+            Mem->ClearVehicle(temp);
           }
-          // this function updates pointers to the active list of vehicles
-          // in the mud
-          /* now safe to free old proto and write over */
-          
-#define SAFE_VEH_ARRAY_DELETE(ITEM)                                                                        \
-if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_proto[veh_number].ITEM) {  \
-  delete [] veh_proto[veh_number].ITEM;                                                                    \
-  veh_proto[veh_number].ITEM = NULL;                                                                       \
-}
+        }
+        // this function updates pointers to the active list of vehicles
+        // in the mud
+        /* now safe to free old proto and write over */
 
-          SAFE_VEH_ARRAY_DELETE(name);
-          SAFE_VEH_ARRAY_DELETE(description);
-          SAFE_VEH_ARRAY_DELETE(short_description);
-          SAFE_VEH_ARRAY_DELETE(long_description);
-          SAFE_VEH_ARRAY_DELETE(inside_description);
-          SAFE_VEH_ARRAY_DELETE(rear_description);
-          SAFE_VEH_ARRAY_DELETE(arrive);
-          SAFE_VEH_ARRAY_DELETE(leave);
-          
+#define SAFE_VEH_ARRAY_DELETE(ITEM)                                            \
+  if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM &&                       \
+      d->edit_veh->ITEM != veh_proto[veh_number].ITEM) {                       \
+    delete[] veh_proto[veh_number].ITEM;                                       \
+    veh_proto[veh_number].ITEM = NULL;                                         \
+  }
+
+        SAFE_VEH_ARRAY_DELETE(name);
+        SAFE_VEH_ARRAY_DELETE(description);
+        SAFE_VEH_ARRAY_DELETE(short_description);
+        SAFE_VEH_ARRAY_DELETE(long_description);
+        SAFE_VEH_ARRAY_DELETE(inside_description);
+        SAFE_VEH_ARRAY_DELETE(rear_description);
+        SAFE_VEH_ARRAY_DELETE(arrive);
+        SAFE_VEH_ARRAY_DELETE(leave);
+
 #undef SAFE_VEH_ARRAY_DELETE
-          
-          veh_proto[veh_number] = *d->edit_veh;
-          
-        } else {
-          /* uhoh.. need to make a new place in the vehicle prototype table */
-          int             found = FALSE;
 
-          struct veh_data *new_veh_proto;
-          struct index_data *new_veh_index;
-          struct veh_data *temp_veh;
+        veh_proto[veh_number] = *d->edit_veh;
 
-          /* + 2.. strange but true */
-          new_veh_index = new struct index_data[top_of_veht + 2];
-          new_veh_proto = new struct veh_data[top_of_veht + 2];
-          /* start counting through both tables */
-          int counter = 0;
-          for (counter = 0; counter <= top_of_veht; counter++) {
-            /* if we haven't found it */
-            if (!found) {
-              /* check if current virtual is bigger than our virtual */
-              if (veh_index[counter].vnum > d->edit_number) {
-                /* eureka. insert now */
-                /*---------*/
-                new_veh_index[counter].vnum = d->edit_number;
-                new_veh_index[counter].number = 0;
-                new_veh_index[counter].func = NULL;
-                /*---------*/
-                new_veh_proto[counter] = *(d->edit_veh);
-                new_veh_proto[counter].in_room = NULL;
-                /* it is now safe (and necessary!) to assign real number to
-                 * the edit_veh, which has been -1 all this time */
-                d->edit_veh->veh_number = counter;
-                /* and assign to prototype as well */
-                new_veh_proto[counter].veh_number = counter;
-                found = TRUE;
-                /* insert the other proto at this point */
-                new_veh_index[counter + 1] = veh_index[counter];
-                new_veh_proto[counter + 1] = veh_proto[counter];
-                new_veh_proto[counter + 1].veh_number = counter + 1;
-              } else {
-                /* just copy from old to new, no num change */
-                new_veh_proto[counter] = veh_proto[counter];
-                new_veh_index[counter] = veh_index[counter];
-              }
-            } else {
-              /* we HAVE already found it.. therefore copy to vehicle + 1 */
+      } else {
+        /* uhoh.. need to make a new place in the vehicle prototype table */
+        int found = FALSE;
+
+        struct veh_data *new_veh_proto;
+        struct index_data *new_veh_index;
+        struct veh_data *temp_veh;
+
+        /* + 2.. strange but true */
+        new_veh_index = new struct index_data[top_of_veht + 2];
+        new_veh_proto = new struct veh_data[top_of_veht + 2];
+        /* start counting through both tables */
+        int counter = 0;
+        for (counter = 0; counter <= top_of_veht; counter++) {
+          /* if we haven't found it */
+          if (!found) {
+            /* check if current virtual is bigger than our virtual */
+            if (veh_index[counter].vnum > d->edit_number) {
+              /* eureka. insert now */
+              /*---------*/
+              new_veh_index[counter].vnum = d->edit_number;
+              new_veh_index[counter].number = 0;
+              new_veh_index[counter].func = NULL;
+              /*---------*/
+              new_veh_proto[counter] = *(d->edit_veh);
+              new_veh_proto[counter].in_room = NULL;
+              /* it is now safe (and necessary!) to assign real number to
+               * the edit_veh, which has been -1 all this time */
+              d->edit_veh->veh_number = counter;
+              /* and assign to prototype as well */
+              new_veh_proto[counter].veh_number = counter;
+              found = TRUE;
+              /* insert the other proto at this point */
               new_veh_index[counter + 1] = veh_index[counter];
               new_veh_proto[counter + 1] = veh_proto[counter];
               new_veh_proto[counter + 1].veh_number = counter + 1;
+            } else {
+              /* just copy from old to new, no num change */
+              new_veh_proto[counter] = veh_proto[counter];
+              new_veh_index[counter] = veh_index[counter];
             }
+          } else {
+            /* we HAVE already found it.. therefore copy to vehicle + 1 */
+            new_veh_index[counter + 1] = veh_index[counter];
+            new_veh_proto[counter + 1] = veh_proto[counter];
+            new_veh_proto[counter + 1].veh_number = counter + 1;
           }
-          /* if we STILL haven't found it, means the vehicle was > than all
-           * the other vehicles.. so insert at end */
-          if (!found) {
-            new_veh_index[top_of_veht + 1].vnum = d->edit_number;
-            new_veh_index[top_of_veht + 1].number = 0;
-            new_veh_index[top_of_veht + 1].func = NULL;
-
-            clear_vehicle(new_veh_proto + top_of_veht + 1);
-            new_veh_proto[top_of_veht + 1] = *(d->edit_veh);
-            new_veh_proto[top_of_veht + 1].in_room = NULL;
-            new_veh_proto[top_of_veht + 1].veh_number = top_of_veht + 1;
-            /* it is now safe (and necessary!) to assign real number to
-             * the edit_veh, which has been -1 all this time */
-            d->edit_veh->veh_number = top_of_veht + 1;
-          }
-          top_of_veht++;
-
-
-          /* we also have to renumber all the vehicles currently
-             existing in the world. This is because when I start
-             extracting vehicles, bad things will happen! */
-          for (temp_veh = veh_list; temp_veh; temp_veh = temp_veh->next)
-            if (temp_veh->veh_number >= d->edit_veh->veh_number)
-              temp_veh->veh_number++;
-
-
-          /* free and replace old tables */
-          delete [] veh_proto;
-          delete [] veh_index;
-          veh_proto = new_veh_proto;
-          veh_index = new_veh_index;
         }
+        /* if we STILL haven't found it, means the vehicle was > than all
+         * the other vehicles.. so insert at end */
+        if (!found) {
+          new_veh_index[top_of_veht + 1].vnum = d->edit_number;
+          new_veh_index[top_of_veht + 1].number = 0;
+          new_veh_index[top_of_veht + 1].func = NULL;
 
-        send_to_char("Writing vehicle to disk..", d->character);
-        write_vehs_to_disk(d->character->player_specials->saved.zonenum);
-        // don't wanna nuke the strings, so we use ClearVehicle
-        if (d->edit_veh)
-          Mem->ClearVehicle(d->edit_veh);
-        d->edit_veh = NULL;
-        STATE(d) = CON_PLAYING;
-        PLR_FLAGS(d->character).RemoveBit(PLR_EDITING);
-        send_to_char("Done.\r\n", d->character);
-    }
-      break;
+          clear_vehicle(new_veh_proto + top_of_veht + 1);
+          new_veh_proto[top_of_veht + 1] = *(d->edit_veh);
+          new_veh_proto[top_of_veht + 1].in_room = NULL;
+          new_veh_proto[top_of_veht + 1].veh_number = top_of_veht + 1;
+          /* it is now safe (and necessary!) to assign real number to
+           * the edit_veh, which has been -1 all this time */
+          d->edit_veh->veh_number = top_of_veht + 1;
+        }
+        top_of_veht++;
+
+        /* we also have to renumber all the vehicles currently
+           existing in the world. This is because when I start
+           extracting vehicles, bad things will happen! */
+        for (temp_veh = veh_list; temp_veh; temp_veh = temp_veh->next)
+          if (temp_veh->veh_number >= d->edit_veh->veh_number)
+            temp_veh->veh_number++;
+
+        /* free and replace old tables */
+        delete[] veh_proto;
+        delete[] veh_index;
+        veh_proto = new_veh_proto;
+        veh_index = new_veh_index;
+      }
+
+      send_to_char("Writing vehicle to disk..", d->character);
+      write_vehs_to_disk(d->character->player_specials->saved.zonenum);
+      // don't wanna nuke the strings, so we use ClearVehicle
+      if (d->edit_veh)
+        Mem->ClearVehicle(d->edit_veh);
+      d->edit_veh = NULL;
+      STATE(d) = CON_PLAYING;
+      PLR_FLAGS(d->character).RemoveBit(PLR_EDITING);
+      send_to_char("Done.\r\n", d->character);
+    } break;
     case 'n':
     case 'N':
       send_to_char("Vehicle not saved, aborting.\r\n", d->character);
@@ -315,10 +314,11 @@ if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_
       break;
     default:
       send_to_char("Invalid choice!\r\n", d->character);
-      send_to_char("Do you wish to save this vehicle internally?\r\n", d->character);
+      send_to_char("Do you wish to save this vehicle internally?\r\n",
+                   d->character);
       break;
     }
-    break;                      /* end of VEDIT_CONFIRM_SAVESTRING */
+    break; /* end of VEDIT_CONFIRM_SAVESTRING */
 
   case VEDIT_MAIN_MENU:
     /* throw us out to whichever edit mode based on user input */
@@ -390,7 +390,7 @@ if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_
       d->edit_mode = VEDIT_TYPE;
       break;
     case 'c':
-      for (number = 1; number <= ENGINE_DIESEL; number ++)
+      for (number = 1; number <= ENGINE_DIESEL; number++)
         send_to_char(CH, "  %d) %s\r\n", number, engine_type[number]);
       send_to_char("Enter default engine type: ", CH);
       d->edit_mode = VEDIT_ENGINE;
@@ -400,9 +400,9 @@ if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_
       vedit_disp_menu(d);
       break;
     }
-    break;                      /* end of IEDIT_MAIN_MENU */
+    break; /* end of IEDIT_MAIN_MENU */
   case VEDIT_TYPE:
-    switch(*arg) {
+    switch (*arg) {
     case '1':
       d->edit_veh->type = VEH_CAR;
       vedit_disp_menu(d);
@@ -451,7 +451,7 @@ if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_
     }
     break;
   case VEDIT_ATT:
-    switch(*arg) {
+    switch (*arg) {
     case '1':
       send_to_char(CH, "Enter Handling Attribute: ");
       d->edit_mode = VEDIT_HAND;
@@ -624,31 +624,31 @@ if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_
 
   case VEDIT_EDIT_NAMELIST:
     if (d->edit_veh->name)
-      delete [] d->edit_veh->name;
+      delete[] d->edit_veh->name;
     d->edit_veh->name = str_dup(arg);
     vedit_disp_menu(d);
     break;
   case VEDIT_SHORTDESC:
     if (d->edit_veh->short_description)
-      delete [] d->edit_veh->short_description;
+      delete[] d->edit_veh->short_description;
     d->edit_veh->short_description = str_dup(arg);
     vedit_disp_menu(d);
     break;
   case VEDIT_DESC:
     if (d->edit_veh->description)
-      delete [] d->edit_veh->description;
+      delete[] d->edit_veh->description;
     d->edit_veh->description = str_dup(arg);
     vedit_disp_menu(d);
     break;
   case VEDIT_ARRIVE:
     if (d->edit_veh->arrive)
-      delete [] d->edit_veh->arrive;
+      delete[] d->edit_veh->arrive;
     d->edit_veh->arrive = str_dup(arg);
     vedit_disp_menu(d);
     break;
   case VEDIT_LEAVE:
     if (d->edit_veh->leave)
-      delete [] d->edit_veh->leave;
+      delete[] d->edit_veh->leave;
     d->edit_veh->leave = str_dup(arg);
     vedit_disp_menu(d);
     break;
@@ -677,8 +677,7 @@ if (d->edit_veh->ITEM && veh_proto[veh_number].ITEM && d->edit_veh->ITEM != veh_
 }
 #undef VEH
 
-void write_vehs_to_disk(int zone)
-{
+void write_vehs_to_disk(int zone) {
   long counter, realcounter;
   FILE *fp;
   struct veh_data *veh;
@@ -691,7 +690,8 @@ void write_vehs_to_disk(int zone)
   fp = fopen(buf, "w+");
 
   /* start running through all vehicles in this zone */
-  for (counter = zone_table[zone].number * 100; counter <= zone_table[zone].top; counter++) {
+  for (counter = zone_table[zone].number * 100; counter <= zone_table[zone].top;
+       counter++) {
     /* write vehicle to disk */
     realcounter = real_vehicle(counter);
     if (realcounter >= 0) {
@@ -700,21 +700,39 @@ void write_vehs_to_disk(int zone)
         continue;
       fprintf(fp, "#%ld\n", veh_index[veh->veh_number].vnum);
       fprintf(fp, "Name:\t%s\n", veh->name ? veh->name : "unnamed");
-      fprintf(fp, "ShortDesc:\t%s\n", veh->short_description ? veh->short_description : "an unnamed vehicle");
-      fprintf(fp, "RoomDesc:\t%s\n", veh->description ? veh->description : "An unnamed vehicle sits here");
-      fprintf(fp, "LongDesc:$\n%s~\n", cleanup(buf2, veh->long_description ? veh->long_description : "You see an uncreative vehicle."));
-      fprintf(fp, "Inside:$\n%s~\n", cleanup(buf2, veh->inside_description ? veh->inside_description: "You see an uncreative vehicle."));
-      fprintf(fp, "InsideRear:$\n%s~\n", cleanup(buf2, veh->rear_description ? veh->rear_description: "You see an uncreative vehicle."));
-      fprintf(fp, "Leaving:\t%s\n", cleanup(buf2, veh->leave ? veh->leave : "leaves"));
-      fprintf(fp, "Arriving:\t%s\n", cleanup(buf2, veh->arrive ? veh->arrive : "arrives"));
-      fprintf(fp, "Handling:\t%d\n"
+      fprintf(fp, "ShortDesc:\t%s\n",
+              veh->short_description ? veh->short_description
+                                     : "an unnamed vehicle");
+      fprintf(fp, "RoomDesc:\t%s\n",
+              veh->description ? veh->description
+                               : "An unnamed vehicle sits here");
+      fprintf(fp, "LongDesc:$\n%s~\n",
+              cleanup(buf2, veh->long_description
+                                ? veh->long_description
+                                : "You see an uncreative vehicle."));
+      fprintf(fp, "Inside:$\n%s~\n",
+              cleanup(buf2, veh->inside_description
+                                ? veh->inside_description
+                                : "You see an uncreative vehicle."));
+      fprintf(fp, "InsideRear:$\n%s~\n",
+              cleanup(buf2, veh->rear_description
+                                ? veh->rear_description
+                                : "You see an uncreative vehicle."));
+      fprintf(fp, "Leaving:\t%s\n",
+              cleanup(buf2, veh->leave ? veh->leave : "leaves"));
+      fprintf(fp, "Arriving:\t%s\n",
+              cleanup(buf2, veh->arrive ? veh->arrive : "arrives"));
+      fprintf(fp,
+              "Handling:\t%d\n"
               "Speed:\t%d\n"
               "Accel:\t%d\n"
               "Body:\t%d\n"
               "Armour:\t%d\n"
               "Pilot:\t%d\n",
-              veh->handling, veh->speed, veh->accel, veh->body, veh->armor, veh->pilot);
-      fprintf(fp, "Sig:\t%d\n"
+              veh->handling, veh->speed, veh->accel, veh->body, veh->armor,
+              veh->pilot);
+      fprintf(fp,
+              "Sig:\t%d\n"
               "Autonav:\t%d\n"
               "Seating:\t%d\n"
               "SeatingBack:\t%d\n"
@@ -723,8 +741,9 @@ void write_vehs_to_disk(int zone)
               "Type:\t%d\n"
               "Flags:\t%s\n"
               "Engine:\t%d\n",
-              veh->sig, veh->autonav, veh->seating[1], veh->seating[0], (int)veh->load, veh->cost, veh->type,
-              veh->flags.ToString(), veh->engine);
+              veh->sig, veh->autonav, veh->seating[1], veh->seating[0],
+              (int)veh->load, veh->cost, veh->type, veh->flags.ToString(),
+              veh->engine);
       fprintf(fp, "BREAK\n");
     }
   }

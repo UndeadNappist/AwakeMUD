@@ -5,10 +5,9 @@
 #ifndef __file_h__
 #define __file_h__
 
-//struct FILE;
+// struct FILE;
 
-class File
-{
+class File {
   static const int MAX_FILE_LENGTH = 128;
 
   FILE *fl;
@@ -23,23 +22,14 @@ public:
 
   // access/query functions
   //
-  const char *Filename() const
-  {
-    return filename;
-  }
-  const char *Mode() const
-  {
-    return mode;
-  }
-  int LineNumber() const  // only working for reading
+  const char *Filename() const { return filename; }
+  const char *Mode() const { return mode; }
+  int LineNumber() const // only working for reading
   {
     return line_num;
   }
 
-  bool IsOpen() const
-  {
-    return (fl != NULL);
-  }
+  bool IsOpen() const { return (fl != NULL); }
   inline bool IsWriteable() const;
 
   bool EoF() const;
@@ -50,7 +40,7 @@ public:
   bool Close();
 
   void Rewind();
-  inline int  Seek(long offset, int origin);
+  inline int Seek(long offset, int origin);
 
   // '*' at the beginning of a line marks it as a comment,
   // strips the newline,
@@ -63,7 +53,7 @@ public:
   // only works if vfprintf is defined
   // Note: this DOESN'T work on my slack8 machine, so I'd advise avoiding it
   //     : altogether for now.  Maybe sooner or later (maybe).
-  int  Print(const char *format, ...);
+  int Print(const char *format, ...);
 };
 
 #endif // ifndef __file_h__

@@ -1,11 +1,10 @@
 /* *************************************************************
-*    file: olc.cc                                              *
-*    function: Main routines for AwakeOLC, a component of      *
-*    AwakeMUD                                                  *
-*    (c)1996-2000 Christopher J. Dickey, Andrew Hynek, and     *
-*    Nick Robertson, (c)2001 The AwakeMUD Consortium           *
-************************************************************* */
-
+ *    file: olc.cc                                              *
+ *    function: Main routines for AwakeOLC, a component of      *
+ *    AwakeMUD                                                  *
+ *    (c)1996-2000 Christopher J. Dickey, Andrew Hynek, and     *
+ *    Nick Robertson, (c)2001 The AwakeMUD Consortium           *
+ ************************************************************* */
 
 #include <ctype.h>
 #include <stdlib.h>
@@ -36,7 +35,7 @@ extern sh_int mortal_start_room;
 extern sh_int immort_start_room;
 extern sh_int frozen_start_room;
 extern vnum_t newbie_start_room;
-extern void char_from_room(struct char_data * ch);
+extern void char_from_room(struct char_data *ch);
 extern void write_mobs_to_disk(int zone);
 extern void write_objs_to_disk(int zone);
 extern void write_shops_to_disk(int zone);
@@ -49,23 +48,28 @@ extern void shedit_disp_menu(struct descriptor_data *d);
 extern void qedit_disp_menu(struct descriptor_data *d);
 extern void zedit_disp_command_menu(struct descriptor_data *d);
 extern void zedit_disp_data_menu(struct descriptor_data *d);
-extern void vedit_disp_menu(struct descriptor_data * d);
+extern void vedit_disp_menu(struct descriptor_data *d);
 extern void hedit_disp_data_menu(struct descriptor_data *d);
 extern void icedit_disp_menu(struct descriptor_data *d);
 
 // mem class
 extern class memoryClass *Mem;
 
-// Checks for OLC availability and advises you on how to fix it, assuming you're capable.
+// Checks for OLC availability and advises you on how to fix it, assuming you're
+// capable.
 bool is_olc_available(struct char_data *ch) {
   if (!olc_state) {
     if (GET_LEVEL(ch) >= LVL_DEVELOPER) {
-      send_to_char("OLC has been disabled. You have the power to use the OLC command to re-enable it.\r\n", ch);
+      send_to_char("OLC has been disabled. You have the power to use the OLC "
+                   "command to re-enable it.\r\n",
+                   ch);
     } else {
-      send_to_char("OLC has been disabled. Ask a higher-level staff member to re-enable it with their OLC command.\r\n", ch);
+      send_to_char("OLC has been disabled. Ask a higher-level staff member to "
+                   "re-enable it with their OLC command.\r\n",
+                   ch);
     }
   }
-  
+
   return olc_state;
 }
 
@@ -76,14 +80,13 @@ bool can_edit_zone(struct char_data *ch, int zone) {
   return access_level(ch, LVL_ADMIN);
 }
 
-void write_index_file(const char *suffix)
-{
+void write_index_file(const char *suffix) {
   FILE *fp;
   int i, found, j;
 
   if (*suffix == 'h')
     sprintf(buf, "world/mtx/index");
-  else if ( *suffix == 'i')
+  else if (*suffix == 'i')
     sprintf(buf, "world/mtx/index.ic");
   else
     sprintf(buf, "world/%s/index", suffix);
@@ -94,49 +97,56 @@ void write_index_file(const char *suffix)
     switch (*suffix) {
     case 'm':
       for (j = 0; !found && j <= top_of_mobt; j++)
-        if (MOB_VNUM_RNUM(j) >= (zone_table[i].number * 100) && MOB_VNUM_RNUM(j) <= zone_table[i].top) {
+        if (MOB_VNUM_RNUM(j) >= (zone_table[i].number * 100) &&
+            MOB_VNUM_RNUM(j) <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
       break;
     case 'v':
       for (j = 0; !found && j <= top_of_veht; j++)
-        if (veh_index[j].vnum >= (zone_table[i].number * 100) && veh_index[j].vnum <= zone_table[i].top) {
+        if (veh_index[j].vnum >= (zone_table[i].number * 100) &&
+            veh_index[j].vnum <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
       break;
     case 'o':
       for (j = 0; !found && j <= top_of_objt; j++)
-        if (OBJ_VNUM_RNUM(j) >= (zone_table[i].number * 100) && OBJ_VNUM_RNUM(j) <= zone_table[i].top) {
+        if (OBJ_VNUM_RNUM(j) >= (zone_table[i].number * 100) &&
+            OBJ_VNUM_RNUM(j) <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
       break;
     case 'w':
       for (j = 0; !found && j <= top_of_world; j++)
-        if (world[j].number >= (zone_table[i].number * 100) && world[j].number <= zone_table[i].top) {
+        if (world[j].number >= (zone_table[i].number * 100) &&
+            world[j].number <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
       break;
     case 'h':
       for (j = 0; !found && j <= top_of_matrix; j++)
-        if (matrix[j].vnum >= (zone_table[i].number * 100) && matrix[j].vnum <= zone_table[i].top) {
+        if (matrix[j].vnum >= (zone_table[i].number * 100) &&
+            matrix[j].vnum <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
       break;
     case 'i':
       for (j = 0; !found && j <= top_of_ic; j++)
-        if (ic_index[j].vnum >= (zone_table[i].number * 100) && ic_index[j].vnum <= zone_table[i].top) {
+        if (ic_index[j].vnum >= (zone_table[i].number * 100) &&
+            ic_index[j].vnum <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
       break;
     case 's':
       for (j = 0; !found && j <= top_of_shopt; j++)
-        if (shop_table[j].vnum >= (zone_table[i].number * 100) && shop_table[j].vnum <= zone_table[i].top) {
+        if (shop_table[j].vnum >= (zone_table[i].number * 100) &&
+            shop_table[j].vnum <= zone_table[i].top) {
           found = 1;
           fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
         }
@@ -145,7 +155,8 @@ void write_index_file(const char *suffix)
       fprintf(fp, "%d.%s\n", zone_table[i].number, suffix);
       break;
     default:
-      mudlog("Incorrect suffix sent to write_index_file.", NULL, LOG_SYSLOG, TRUE);
+      mudlog("Incorrect suffix sent to write_index_file.", NULL, LOG_SYSLOG,
+             TRUE);
       fprintf(fp, "$\n");
       fclose(fp);
       return;
@@ -160,8 +171,7 @@ void write_index_file(const char *suffix)
 /*
  * the redit ACMD function
  */
-ACMD (do_redit)
-{
+ACMD(do_redit) {
   int number;
   int room_num;
   struct descriptor_data *d;
@@ -178,31 +188,33 @@ ACMD (do_redit)
     return;
   }
 
-  one_argument (argument, arg1);
+  one_argument(argument, arg1);
   if (!*argument) {
     if (!ch->in_room) {
-      send_to_char("You'd better leave your vehicle before trying that.\r\n", ch);
+      send_to_char("You'd better leave your vehicle before trying that.\r\n",
+                   ch);
       return;
     }
     number = ch->in_room->number;
     room_num = real_room(ch->in_room->number);
   } else {
-    if (!isdigit (*arg1)) {
-      send_to_char ("Please supply a valid number.\r\n", ch);
+    if (!isdigit(*arg1)) {
+      send_to_char("Please supply a valid number.\r\n", ch);
       return;
     }
     number = atoi(arg1);
-    room_num = real_room (number);
+    room_num = real_room(number);
   }
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if ((number >= (zone_table[counter].number * 100)) && (number <= (zone_table[counter].top))) {
+    if ((number >= (zone_table[counter].number * 100)) &&
+        (number <= (zone_table[counter].top))) {
       ch->desc->edit_zone = counter;
       found = 1;
       break;
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone!\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone!\r\n", ch);
     return;
   }
 
@@ -211,7 +223,8 @@ ACMD (do_redit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit rooms from a connected zone.\r\n", ch);
     return;
   }
@@ -229,13 +242,13 @@ ACMD (do_redit)
     *room = world[room_num];
     /* allocate space for all strings  */
     if (world[room_num].name)
-      room->name = str_dup (world[room_num].name);
+      room->name = str_dup(world[room_num].name);
     if (world[room_num].description)
-      room->description = str_dup (world[room_num].description);
+      room->description = str_dup(world[room_num].description);
     if (world[room_num].night_desc)
-      room->night_desc = str_dup (world[room_num].night_desc);
+      room->night_desc = str_dup(world[room_num].night_desc);
     if (world[room_num].address)
-      room->address = str_dup (world[room_num].address);
+      room->address = str_dup(world[room_num].address);
     room->zone = world[room_num].zone;
     /* exits - alloc only if necessary */
     for (counter = 0; counter < NUM_OF_DIRS; counter++) {
@@ -246,10 +259,10 @@ ACMD (do_redit)
         /* malloc strings */
         if (world[room_num].dir_option[counter]->general_description)
           room->dir_option[counter]->general_description =
-            str_dup(world[room_num].dir_option[counter]->general_description);
+              str_dup(world[room_num].dir_option[counter]->general_description);
         if (world[room_num].dir_option[counter]->keyword)
           room->dir_option[counter]->keyword =
-            str_dup(world[room_num].dir_option[counter]->keyword);
+              str_dup(world[room_num].dir_option[counter]->keyword);
       }
     }
     if (world[room_num].ex_description) {
@@ -257,12 +270,11 @@ ACMD (do_redit)
 
       temp = new extra_descr_data;
       room->ex_description = temp;
-      for (This = world[room_num].ex_description;
-           This; This = This->next) {
+      for (This = world[room_num].ex_description; This; This = This->next) {
         if (This->keyword)
-          temp->keyword = str_dup (This->keyword);
+          temp->keyword = str_dup(This->keyword);
         if (This->description)
-          temp->description = str_dup (This->description);
+          temp->description = str_dup(This->description);
         if (This->next) {
           temp2 = new extra_descr_data;
 
@@ -275,7 +287,9 @@ ACMD (do_redit)
     d->edit_room = room;
 #ifdef CONFIRM_EXISTING
 
-    send_to_char ("A room already exists at that number. Do you wish to edit it?\r\n", ch);
+    send_to_char(
+        "A room already exists at that number. Do you wish to edit it?\r\n",
+        ch);
     d->edit_mode = REDIT_CONFIRM_EDIT;
 #else
 
@@ -284,12 +298,12 @@ ACMD (do_redit)
 
     return;
   } else {
-    send_to_char ("That room does not exist, create it?\r\n", ch);
+    send_to_char("That room does not exist, create it?\r\n", ch);
     /*
      * create dummy room
      */
     d->edit_room = Mem->GetRoom();
-    //memset((char *) d->edit_room, 0, sizeof(struct room_data));
+    // memset((char *) d->edit_room, 0, sizeof(struct room_data));
     d->edit_room->name = str_dup("An unfinished room");
     d->edit_room->description = str_dup("You are in an unfinished room.\r\n");
     d->edit_room->address = str_dup("An undisclosed location");
@@ -303,8 +317,7 @@ ACMD (do_redit)
   }
 }
 
-ACMD(do_rclone)
-{
+ACMD(do_rclone) {
   if (!access_level(ch, LVL_PRESIDENT) && !PLR_FLAGGED(ch, PLR_OLC)) {
     send_to_char(YOU_NEED_OLC_FOR_THAT, ch);
     return;
@@ -323,9 +336,11 @@ ACMD(do_rclone)
   arg2 = atoi(buf1);
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if (arg1 >= (zone_table[counter].number * 100) && arg1 <= zone_table[counter].top)
+    if (arg1 >= (zone_table[counter].number * 100) &&
+        arg1 <= zone_table[counter].top)
       zone1 = counter;
-    if (arg2 >= (zone_table[counter].number * 100) && arg2 <= zone_table[counter].top)
+    if (arg2 >= (zone_table[counter].number * 100) &&
+        arg2 <= zone_table[counter].top)
       zone2 = counter;
   }
 
@@ -344,11 +359,11 @@ ACMD(do_rclone)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't clone rooms to a connected zone.\r\n", ch);
     return;
   }
-
 
   num1 = real_room(arg1);
   num2 = real_room(arg2);
@@ -371,11 +386,11 @@ ACMD(do_rclone)
   *room = world[num1];
   /* allocate space for all strings  */
   if (world[num1].name)
-    room->name = str_dup (world[num1].name);
+    room->name = str_dup(world[num1].name);
   if (world[num1].description)
-    room->description = str_dup (world[num1].description);
+    room->description = str_dup(world[num1].description);
   if (world[num1].address)
-    room->address = str_dup (world[num1].address);
+    room->address = str_dup(world[num1].address);
   room->zone = world[num1].zone;
   /* exits - alloc only if necessary */
   for (counter = 0; counter < NUM_OF_DIRS; counter++) {
@@ -386,10 +401,10 @@ ACMD(do_rclone)
       /* malloc strings */
       if (world[num1].dir_option[counter]->general_description)
         room->dir_option[counter]->general_description =
-          str_dup(world[num1].dir_option[counter]->general_description);
+            str_dup(world[num1].dir_option[counter]->general_description);
       if (world[num1].dir_option[counter]->keyword)
         room->dir_option[counter]->keyword =
-          str_dup(world[num1].dir_option[counter]->keyword);
+            str_dup(world[num1].dir_option[counter]->keyword);
     }
   }
   // now do any extra descriptions
@@ -400,9 +415,9 @@ ACMD(do_rclone)
     room->ex_description = temp;
     for (This = world[num1].ex_description; This; This = This->next) {
       if (This->keyword)
-        temp->keyword = str_dup (This->keyword);
+        temp->keyword = str_dup(This->keyword);
       if (This->description)
-        temp->description = str_dup (This->description);
+        temp->description = str_dup(This->description);
       if (This->next) {
         temp2 = new extra_descr_data;
 
@@ -417,18 +432,17 @@ ACMD(do_rclone)
   room->contents = NULL;
   room->people = NULL;
   // put them in the editing state
-  PLR_FLAGS (ch).SetBit(PLR_EDITING);
+  PLR_FLAGS(ch).SetBit(PLR_EDITING);
   GET_WAS_IN(ch) = ch->in_room;
   char_from_room(ch);
-  STATE (ch->desc) = CON_REDIT;
+  STATE(ch->desc) = CON_REDIT;
   ch->desc->edit_room = room;
   send_to_char("Are you sure you want to clone this room?\r\n", ch);
   ch->desc->edit_mode = REDIT_CONFIRM_SAVESTRING;
   ch->desc->edit_number = atoi(buf1);
 }
 
-ACMD(do_dig)
-{
+ACMD(do_dig) {
   int counter, dir, room, zone1 = 0, zone2 = 0;
   struct room_data *in_room = get_ch_in_room(ch);
 
@@ -442,8 +456,7 @@ ACMD(do_dig)
   if (subcmd == SCMD_DIG && (!*arg || !*buf)) {
     send_to_char("Usage: dig <direction> <vnum>\r\n", ch);
     return;
-  }
-  else if (subcmd == SCMD_UNDIG && !*arg) {
+  } else if (subcmd == SCMD_UNDIG && !*arg) {
     send_to_char("Usage: undig <direction>\r\n", ch);
     return;
   }
@@ -490,19 +503,21 @@ ACMD(do_dig)
     return;
   }
 
-  if (subcmd == SCMD_DIG && (in_room->dir_option[dir] || world[room].dir_option[rev_dir[dir]])) {
+  if (subcmd == SCMD_DIG &&
+      (in_room->dir_option[dir] || world[room].dir_option[rev_dir[dir]])) {
     send_to_char("You can't dig over an existing exit.\r\n", ch);
     return;
   }
-  
-  if (subcmd == SCMD_UNDIG && !in_room->dir_option[dir]){
+
+  if (subcmd == SCMD_UNDIG && !in_room->dir_option[dir]) {
     send_to_char("There's no exit in that direction to undig.\r\n", ch);
     return;
   }
 
   if (subcmd == SCMD_DIG) {
     in_room->dir_option[dir] = new room_direction_data;
-    memset((char *) in_room->dir_option[dir], 0, sizeof (struct room_direction_data));
+    memset((char *)in_room->dir_option[dir], 0,
+           sizeof(struct room_direction_data));
     in_room->dir_option[dir]->to_room = &world[room];
     in_room->dir_option[dir]->barrier = 4;
     in_room->dir_option[dir]->material = 5;
@@ -510,7 +525,8 @@ ACMD(do_dig)
     in_room->dir_option[dir]->to_room_vnum = world[room].number;
     dir = rev_dir[dir];
     world[room].dir_option[dir] = new room_direction_data;
-    memset((char *) world[room].dir_option[dir], 0, sizeof (struct room_direction_data));
+    memset((char *)world[room].dir_option[dir], 0,
+           sizeof(struct room_direction_data));
     world[room].dir_option[dir]->to_room = in_room;
     world[room].dir_option[dir]->barrier = 4;
     world[room].dir_option[dir]->material = 5;
@@ -524,13 +540,17 @@ ACMD(do_dig)
     }
   } else {
     // Delete the reverse exit, if it exists.
-    if (in_room->dir_option[dir]->to_room && in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]]) {
-      DELETE_IF_EXTANT(in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]]->keyword);
-      DELETE_IF_EXTANT(in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]]->general_description);
+    if (in_room->dir_option[dir]->to_room &&
+        in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]]) {
+      DELETE_IF_EXTANT(
+          in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]]->keyword);
+      DELETE_IF_EXTANT(in_room->dir_option[dir]
+                           ->to_room->dir_option[rev_dir[dir]]
+                           ->general_description);
       delete in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]];
       in_room->dir_option[dir]->to_room->dir_option[rev_dir[dir]] = NULL;
     }
-    
+
     // Delete this room's exit.
     DELETE_IF_EXTANT(in_room->dir_option[dir]->keyword);
     DELETE_IF_EXTANT(in_room->dir_option[dir]->general_description);
@@ -540,8 +560,7 @@ ACMD(do_dig)
   send_to_char("Done.\r\n", ch);
 }
 
-ACMD(do_rdelete)
-{
+ACMD(do_rdelete) {
   int num, counter, found = 0;
 
   if (!access_level(ch, LVL_PRESIDENT) && !PLR_FLAGGED(ch, PLR_OLC)) {
@@ -558,8 +577,8 @@ ACMD(do_rdelete)
 
   num = atoi(buf);
 
-  if ((num == mortal_start_room) || (num == immort_start_room) || (num == newbie_start_room) ||
-      (num == frozen_start_room)) {
+  if ((num == mortal_start_room) || (num == immort_start_room) ||
+      (num == newbie_start_room) || (num == frozen_start_room)) {
     send_to_char("Deleting the start rooms would not be a good idea.\r\n", ch);
     return;
   }
@@ -570,13 +589,14 @@ ACMD(do_rdelete)
   }
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if ((num >= (zone_table[counter].number * 100)) && (num <= (zone_table[counter].top))) {
+    if ((num >= (zone_table[counter].number * 100)) &&
+        (num <= (zone_table[counter].top))) {
       found = 1;
       break;
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -585,7 +605,8 @@ ACMD(do_rdelete)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't delete rooms from a connected zone.\r\n", ch);
     return;
   }
@@ -602,15 +623,15 @@ ACMD(do_rdelete)
 
   // now Free the room
   if (world[num].name)
-    delete [] world[num].name;
+    delete[] world[num].name;
   if (world[num].description)
-    delete [] world[num].description;
+    delete[] world[num].description;
   for (counter = 0; counter < NUM_OF_DIRS; counter++) {
     if (world[num].dir_option[counter]) {
       if (world[num].dir_option[counter]->general_description)
-        delete [] world[num].dir_option[counter]->general_description;
+        delete[] world[num].dir_option[counter]->general_description;
       if (world[num].dir_option[counter]->keyword)
-        delete [] world[num].dir_option[counter]->keyword;
+        delete[] world[num].dir_option[counter]->keyword;
       delete world[num].dir_option[counter];
       world[num].dir_option[counter] = NULL;
     }
@@ -621,21 +642,23 @@ ACMD(do_rdelete)
     for (This = world[num].ex_description; This; This = next_one) {
       next_one = This->next;
       if (This->keyword)
-        delete [] This->keyword;
+        delete[] This->keyword;
       if (This->description)
-        delete [] This->description;
+        delete[] This->description;
       delete This;
     }
-  
+
   int dir;
-  // go through the world and fix the exits; do this before copying everything down to preserve nums
+  // go through the world and fix the exits; do this before copying everything
+  // down to preserve nums
   for (counter = 0; counter <= top_of_world; counter++)
     for (dir = 0; dir < NUM_OF_DIRS; dir++) {
       /* if exit exists */
       if (world[counter].dir_option[dir]) {
         /* increment r_nums for rooms bigger than or equal to new one
          * because we deleted a room */
-        vnum_t rnum = real_room(world[counter].dir_option[dir]->to_room->number);
+        vnum_t rnum =
+            real_room(world[counter].dir_option[dir]->to_room->number);
         if (rnum > num)
           world[counter].dir_option[dir]->to_room = &world[rnum - 1];
         else if (rnum == num)
@@ -651,15 +674,18 @@ ACMD(do_rdelete)
   for (counter = num; counter <= top_of_world; counter++) {
     world[counter] = world[counter + 1];
     /* move characters */
-    for (temp_ch = world[counter].people; temp_ch; temp_ch = temp_ch->next_in_room)
+    for (temp_ch = world[counter].people; temp_ch;
+         temp_ch = temp_ch->next_in_room)
       if (temp_ch->in_room)
         temp_ch->in_room = &world[counter];
     /* move objects */
-    for (temp_obj = world[counter].contents; temp_obj; temp_obj = temp_obj->next_content)
+    for (temp_obj = world[counter].contents; temp_obj;
+         temp_obj = temp_obj->next_content)
       if (temp_obj->in_room)
         temp_obj->in_room = &world[counter];
     /* move vehicles */
-    for (temp_veh = world[counter].vehicles; temp_veh; temp_veh = temp_veh->next_veh)
+    for (temp_veh = world[counter].vehicles; temp_veh;
+         temp_veh = temp_veh->next_veh)
       if (temp_veh->in_room)
         temp_veh->in_room = &world[counter];
   }
@@ -712,8 +738,7 @@ ACMD(do_rdelete)
 /*
  * the vedit ACMD function
  */
-ACMD (do_vedit)
-{
+ACMD(do_vedit) {
   int number;
   int veh_num;
   struct descriptor_data *d;
@@ -729,19 +754,19 @@ ACMD (do_vedit)
     return;
   }
 
-  one_argument (argument, arg1);
+  one_argument(argument, arg1);
 
   if (!*argument) {
-    send_to_char ("Specify an vehicle number to edit.\r\n", ch);
+    send_to_char("Specify an vehicle number to edit.\r\n", ch);
     return;
   }
-  if (!isdigit (*arg1)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+  if (!isdigit(*arg1)) {
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
-  number = atoi (arg1);
-  veh_num = real_vehicle (number);
+  number = atoi(arg1);
+  veh_num = real_vehicle(number);
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
     if ((number >= (zone_table[counter].number * 100)) &&
@@ -752,7 +777,7 @@ ACMD (do_vedit)
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -761,7 +786,8 @@ ACMD (do_vedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit objects from a connected zone.\r\n", ch);
     return;
   }
@@ -776,19 +802,19 @@ ACMD (do_vedit)
    * now start playing with the descriptor
    */
   d = ch->desc;
-  STATE (d) = CON_VEDIT;
-  d->edit_number = number;      /*
-                                                           * the VNUM not the REAL NUMBER
-                                                           */
+  STATE(d) = CON_VEDIT;
+  d->edit_number = number; /*
+                            * the VNUM not the REAL NUMBER
+                            */
 
   if (veh_num >= 0) {
     /*
      * allocate object
      */
     veh = Mem->GetVehicle();
-    *veh = veh_proto[veh_num];        /*
-                                                                                             * the RNUM
-                                                                                             */
+    *veh = veh_proto[veh_num]; /*
+                                * the RNUM
+                                */
     /*
      * copy all strings over
      */
@@ -808,11 +834,13 @@ ACMD (do_vedit)
       veh->arrive = str_dup(veh_proto[veh_num].arrive);
     if (veh_proto[veh_num].leave)
       veh->leave = str_dup(veh_proto[veh_num].leave);
-    
+
     d->edit_veh = veh;
 #ifdef CONFIRM_EXISTING
 
-    send_to_char ("An vehicle already exists at that number. Do you wish to edit it?\r\n", ch);
+    send_to_char(
+        "An vehicle already exists at that number. Do you wish to edit it?\r\n",
+        ch);
     d->edit_mode = VEDIT_CONFIRM_EDIT;
 #else
 
@@ -821,15 +849,16 @@ ACMD (do_vedit)
 
     return;
   } else {
-    send_to_char ("That vehicle does not exist, create it?\r\n", ch);
+    send_to_char("That vehicle does not exist, create it?\r\n", ch);
     /*
      * create dummy object!
      */
     d->edit_veh = Mem->GetVehicle();
-    d->edit_veh->name = str_dup ("unfinished object");
-    d->edit_veh->description = str_dup ("An unfinished object is lying here.");
-    d->edit_veh->short_description = str_dup ("an unfinished object");
-    d->edit_veh->long_description = str_dup ("It looks pretty much like an unfinished object");
+    d->edit_veh->name = str_dup("unfinished object");
+    d->edit_veh->description = str_dup("An unfinished object is lying here.");
+    d->edit_veh->short_description = str_dup("an unfinished object");
+    d->edit_veh->long_description =
+        str_dup("It looks pretty much like an unfinished object");
     d->edit_mode = VEDIT_CONFIRM_EDIT;
     return;
   }
@@ -838,8 +867,7 @@ ACMD (do_vedit)
 /*
  * the iedit ACMD function
  */
-ACMD (do_iedit)
-{
+ACMD(do_iedit) {
   vnum_t number;
   vnum_t obj_num;
   struct descriptor_data *d;
@@ -856,19 +884,19 @@ ACMD (do_iedit)
     return;
   }
 
-  one_argument (argument, arg1);
+  one_argument(argument, arg1);
 
   if (!*argument) {
-    send_to_char ("Specify an object number to edit.\r\n", ch);
+    send_to_char("Specify an object number to edit.\r\n", ch);
     return;
   }
-  if (!isdigit (*arg1)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+  if (!isdigit(*arg1)) {
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
-  number = atoi (arg1);
-  obj_num = real_object (number);
+  number = atoi(arg1);
+  obj_num = real_object(number);
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
     if ((number >= (zone_table[counter].number * 100)) &&
@@ -879,7 +907,7 @@ ACMD (do_iedit)
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -888,7 +916,8 @@ ACMD (do_iedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit objects from a connected zone.\r\n", ch);
     return;
   }
@@ -903,11 +932,11 @@ ACMD (do_iedit)
    * now start playing with the descriptor
    */
   d = ch->desc;
-  STATE (d) = CON_IEDIT;
+  STATE(d) = CON_IEDIT;
 
-  d->edit_number = number;      /*
-                                                           * the VNUM not the REAL NUMBER
-                                                           */
+  d->edit_number = number; /*
+                            * the VNUM not the REAL NUMBER
+                            */
 
   if (obj_num >= 0) {
     struct extra_descr_data *This, *temp, *temp2;
@@ -915,10 +944,10 @@ ACMD (do_iedit)
      * allocate object
      */
     obj = Mem->GetObject();
-    //clear_object (obj);
-    *obj = obj_proto[obj_num];        /*
-                                                                                             * the RNUM
-                                                                                             */
+    // clear_object (obj);
+    *obj = obj_proto[obj_num]; /*
+                                * the RNUM
+                                */
     /*
      * copy all strings over
      */
@@ -937,12 +966,11 @@ ACMD (do_iedit)
        */
       temp = new extra_descr_data;
       obj->ex_description = temp;
-      for (This = obj_proto[obj_num].ex_description;
-           This; This = This->next) {
+      for (This = obj_proto[obj_num].ex_description; This; This = This->next) {
         if (This->keyword)
-          temp->keyword = str_dup (This->keyword);
+          temp->keyword = str_dup(This->keyword);
         if (This->description)
-          temp->description = str_dup (This->description);
+          temp->description = str_dup(This->description);
         if (This->next) {
           temp2 = new extra_descr_data;
 
@@ -956,7 +984,9 @@ ACMD (do_iedit)
     d->edit_obj = obj;
 #ifdef CONFIRM_EXISTING
 
-    send_to_char ("An object already exists at that number. Do you wish to edit it?\r\n", ch);
+    send_to_char(
+        "An object already exists at that number. Do you wish to edit it?\r\n",
+        ch);
     d->edit_mode = IEDIT_CONFIRM_EDIT;
 #else
 
@@ -965,18 +995,18 @@ ACMD (do_iedit)
 
     return;
   } else {
-    send_to_char ("That object does not exist, create it?\r\n", ch);
+    send_to_char("That object does not exist, create it?\r\n", ch);
     /*
      * create dummy object!
      */
     d->edit_obj = Mem->GetObject();
-    //clear_object (d->edit_obj);
+    // clear_object (d->edit_obj);
     d->edit_obj->text.keywords = str_dup("object unfinished");
     d->edit_obj->text.name = str_dup("an unfinished object");
     d->edit_obj->text.room_desc =
-      str_dup("An unfinished object is lying here.");
+        str_dup("An unfinished object is lying here.");
     d->edit_obj->text.look_desc =
-      str_dup("It looks pretty much like an unfinished object");
+        str_dup("It looks pretty much like an unfinished object");
 
     d->edit_obj->obj_flags.wear_flags.SetBit(ITEM_WEAR_TAKE);
 
@@ -988,8 +1018,7 @@ ACMD (do_iedit)
   }
 }
 
-ACMD(do_iclone)
-{
+ACMD(do_iclone) {
 
   if (!access_level(ch, LVL_PRESIDENT) && !PLR_FLAGGED(ch, PLR_OLC)) {
     send_to_char(YOU_NEED_OLC_FOR_THAT, ch);
@@ -1020,9 +1049,11 @@ ACMD(do_iclone)
   }
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if (arg1 >= (zone_table[counter].number * 100) && arg1 <= zone_table[counter].top)
+    if (arg1 >= (zone_table[counter].number * 100) &&
+        arg1 <= zone_table[counter].top)
       zone1 = counter;
-    if (arg2 >= (zone_table[counter].number * 100) && arg2 <= zone_table[counter].top)
+    if (arg2 >= (zone_table[counter].number * 100) &&
+        arg2 <= zone_table[counter].top)
       zone2 = counter;
   }
 
@@ -1036,7 +1067,8 @@ ACMD(do_iclone)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't clone objects into a connected zone.\r\n", ch);
     return;
   }
@@ -1046,7 +1078,7 @@ ACMD(do_iclone)
   struct extra_descr_data *This, *temp, *temp2;
   struct obj_data *obj;
   obj = Mem->GetObject();
-  //clear_object (obj);
+  // clear_object (obj);
   *obj = obj_proto[obj_num1];
 
   // copy the strings over
@@ -1066,9 +1098,9 @@ ACMD(do_iclone)
     obj->ex_description = temp;
     for (This = obj_proto[obj_num1].ex_description; This; This = This->next) {
       if (This->keyword)
-        temp->keyword = str_dup (This->keyword);
+        temp->keyword = str_dup(This->keyword);
       if (This->description)
-        temp->description = str_dup (This->description);
+        temp->description = str_dup(This->description);
       if (This->next) {
         temp2 = new extra_descr_data;
 
@@ -1086,11 +1118,9 @@ ACMD(do_iclone)
   ch->desc->edit_number = arg2; // the vnum
   ch->desc->edit_obj = obj;
   ch->desc->edit_mode = IEDIT_CONFIRM_SAVESTRING;
-
 }
 
-ACMD(do_idelete)
-{
+ACMD(do_idelete) {
   int num, counter, found = 0;
   if (!access_level(ch, LVL_PRESIDENT) && !PLR_FLAGGED(ch, PLR_OLC)) {
     send_to_char(YOU_NEED_OLC_FOR_THAT, ch);
@@ -1112,42 +1142,47 @@ ACMD(do_idelete)
   }
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if ((atoi(buf) >= (zone_table[counter].number * 100)) && (atoi(buf) <=
-        (zone_table[counter].top))) {
+    if ((atoi(buf) >= (zone_table[counter].number * 100)) &&
+        (atoi(buf) <= (zone_table[counter].top))) {
       found = 1;
       break;
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
-  
+
   if (!can_edit_zone(ch, counter)) {
     send_to_char("Sorry, you don't have access to edit this zone.\r\n", ch);
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't delete objects from a connected zone.\r\n", ch);
     return;
   }
 
   num = real_object(num);
-  
+
   if (num < 0) {
     send_to_char("No object was found with that vnum.\r\n", ch);
     return;
   }
-  
+
   // Wipe it from saved database tables.
-  sprintf(buf, "DELETE FROM pfiles_cyberware WHERE Vnum=%ld", obj_proto[num].item_number);
+  sprintf(buf, "DELETE FROM pfiles_cyberware WHERE Vnum=%ld",
+          obj_proto[num].item_number);
   mysql_wrapper(mysql, buf);
-  sprintf(buf, "DELETE FROM pfiles_bioware WHERE Vnum=%ld", obj_proto[num].item_number);
+  sprintf(buf, "DELETE FROM pfiles_bioware WHERE Vnum=%ld",
+          obj_proto[num].item_number);
   mysql_wrapper(mysql, buf);
-  sprintf(buf, "DELETE FROM pfiles_inv WHERE Vnum=%ld", obj_proto[num].item_number);
+  sprintf(buf, "DELETE FROM pfiles_inv WHERE Vnum=%ld",
+          obj_proto[num].item_number);
   mysql_wrapper(mysql, buf);
-  sprintf(buf, "DELETE FROM pfiles_worn WHERE Vnum=%ld", obj_proto[num].item_number);
+  sprintf(buf, "DELETE FROM pfiles_worn WHERE Vnum=%ld",
+          obj_proto[num].item_number);
   mysql_wrapper(mysql, buf);
 
   // Wipe the object from the game.
@@ -1163,65 +1198,69 @@ ACMD(do_idelete)
     obj_proto[counter].item_number = counter;
   }
 
-  // Wipe the object from zone commands, and decrement rnums that are higher than the one we nuked.
+  // Wipe the object from zone commands, and decrement rnums that are higher
+  // than the one we nuked.
   int zone, cmd_no;
   for (zone = 0; zone <= top_of_zone_table; zone++) {
     bool zone_dirty = FALSE;
     for (cmd_no = 0; cmd_no < zone_table[zone].num_cmds; cmd_no++) {
       switch (ZCMD.command) {
-        case 'E':
-        case 'G':
-        case 'O':
-        case 'C':
-        case 'N':
-        case 'U':
-        case 'I':
-        case 'H':
-          if (ZCMD.arg1 == num) {
-            sprintf(buf, "Wiping zcmd %d in %d (%c: %ld %ld %ld).",
-                    cmd_no, zone_table[zone].number, ZCMD.command, ZCMD.arg1, ZCMD.arg2, ZCMD.arg3);
-            mudlog(buf, NULL, LOG_SYSLOG, TRUE);
-            ZCMD.command = '*';
-            ZCMD.if_flag = 0;
-            ZCMD.arg1 = 0;
-            ZCMD.arg2 = 0;
-            ZCMD.arg3 = 0;
-            zone_dirty = TRUE;
-          } else if (ZCMD.arg1 > num)
+      case 'E':
+      case 'G':
+      case 'O':
+      case 'C':
+      case 'N':
+      case 'U':
+      case 'I':
+      case 'H':
+        if (ZCMD.arg1 == num) {
+          sprintf(buf, "Wiping zcmd %d in %d (%c: %ld %ld %ld).", cmd_no,
+                  zone_table[zone].number, ZCMD.command, ZCMD.arg1, ZCMD.arg2,
+                  ZCMD.arg3);
+          mudlog(buf, NULL, LOG_SYSLOG, TRUE);
+          ZCMD.command = '*';
+          ZCMD.if_flag = 0;
+          ZCMD.arg1 = 0;
+          ZCMD.arg2 = 0;
+          ZCMD.arg3 = 0;
+          zone_dirty = TRUE;
+        } else if (ZCMD.arg1 > num)
+          ZCMD.arg1--;
+        break;
+      case 'R':
+        if (ZCMD.arg2 == num) {
+          sprintf(buf, "Wiping zcmd %d in %d (%c: %ld %ld %ld).", cmd_no,
+                  zone_table[zone].number, ZCMD.command, ZCMD.arg1, ZCMD.arg2,
+                  ZCMD.arg3);
+          mudlog(buf, NULL, LOG_SYSLOG, TRUE);
+          ZCMD.command = '*';
+          ZCMD.if_flag = 0;
+          ZCMD.arg1 = 0;
+          ZCMD.arg2 = 0;
+          ZCMD.arg3 = 0;
+          zone_dirty = TRUE;
+        } else if (ZCMD.arg2 > num)
+          ZCMD.arg2--;
+        break;
+      case 'P':
+        if (ZCMD.arg3 == num || ZCMD.arg1 == num) {
+          sprintf(buf, "Wiping zcmd %d in %d (%c: %ld %ld %ld).", cmd_no,
+                  zone_table[zone].number, ZCMD.command, ZCMD.arg1, ZCMD.arg2,
+                  ZCMD.arg3);
+          mudlog(buf, NULL, LOG_SYSLOG, TRUE);
+          ZCMD.command = '*';
+          ZCMD.if_flag = 0;
+          ZCMD.arg1 = 0;
+          ZCMD.arg2 = 0;
+          ZCMD.arg3 = 0;
+          zone_dirty = TRUE;
+        } else {
+          if (ZCMD.arg3 > num)
+            ZCMD.arg3--;
+          if (ZCMD.arg1 > num)
             ZCMD.arg1--;
-          break;
-        case 'R':
-          if (ZCMD.arg2 == num) {
-            sprintf(buf, "Wiping zcmd %d in %d (%c: %ld %ld %ld).",
-                    cmd_no, zone_table[zone].number, ZCMD.command, ZCMD.arg1, ZCMD.arg2, ZCMD.arg3);
-            mudlog(buf, NULL, LOG_SYSLOG, TRUE);
-            ZCMD.command = '*';
-            ZCMD.if_flag = 0;
-            ZCMD.arg1 = 0;
-            ZCMD.arg2 = 0;
-            ZCMD.arg3 = 0;
-            zone_dirty = TRUE;
-          } else if (ZCMD.arg2 > num)
-            ZCMD.arg2--;
-          break;
-        case 'P':
-          if (ZCMD.arg3 == num || ZCMD.arg1 == num) {
-            sprintf(buf, "Wiping zcmd %d in %d (%c: %ld %ld %ld).",
-                    cmd_no, zone_table[zone].number, ZCMD.command, ZCMD.arg1, ZCMD.arg2, ZCMD.arg3);
-            mudlog(buf, NULL, LOG_SYSLOG, TRUE);
-            ZCMD.command = '*';
-            ZCMD.if_flag = 0;
-            ZCMD.arg1 = 0;
-            ZCMD.arg2 = 0;
-            ZCMD.arg3 = 0;
-            zone_dirty = TRUE;
-          } else {
-            if (ZCMD.arg3 > num)
-              ZCMD.arg3--;
-            if (ZCMD.arg1 > num)
-              ZCMD.arg1--;
-          }
-          break;
+        }
+        break;
       }
       if (zone_dirty)
         write_zone_to_disk(zone_table[zone].number);
@@ -1235,8 +1274,7 @@ ACMD(do_idelete)
 
 #define MOB d->edit_mob
 // medit command
-ACMD(do_medit)
-{
+ACMD(do_medit) {
   int number;
   int mob_num;
   struct descriptor_data *d;
@@ -1254,33 +1292,34 @@ ACMD(do_medit)
     return;
   }
 
-  one_argument (argument, arg1);
+  one_argument(argument, arg1);
 
   // if no argument return
   if (!*argument) {
-    send_to_char ("Specify a mob number to edit.\r\n", ch);
+    send_to_char("Specify a mob number to edit.\r\n", ch);
     return;
   }
   // is argument a number?
-  if (!isdigit (*arg1)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+  if (!isdigit(*arg1)) {
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
-  number = atoi (arg1);
+  number = atoi(arg1);
   // check if number already exists
   mob_num = real_mobile(number);
 
-  //check zone numbers
+  // check zone numbers
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if ((number >= (zone_table[counter].number * 100)) && (number <= (zone_table[counter].top))) {
+    if ((number >= (zone_table[counter].number * 100)) &&
+        (number <= (zone_table[counter].top))) {
       ch->desc->edit_zone = counter;
       found = 1;
       break;
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
   // only allow them to edit their zone
@@ -1289,23 +1328,23 @@ ACMD(do_medit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit mobiles from a connected zone.\r\n", ch);
     return;
   }
 
   ch->player_specials->saved.zonenum = zone_table[counter].number;
 
-
   // put person into editing mode
   PLR_FLAGS(ch).SetBit(PLR_EDITING);
-  //now start playing with the descriptor
+  // now start playing with the descriptor
   d = ch->desc;
-  STATE (d) = CON_MEDIT;
+  STATE(d) = CON_MEDIT;
 
-  d->edit_number = number;      /*
-                                                           * the VNUM not the REAL NUMBER
-                                                           */
+  d->edit_number = number; /*
+                            * the VNUM not the REAL NUMBER
+                            */
 
   if (mob_num >= 0) {
     // allocate mobile
@@ -1316,28 +1355,31 @@ ACMD(do_medit)
     // copy all strings over
     if (mob_proto[mob_num].player.physical_text.keywords)
       mob->player.physical_text.keywords =
-        str_dup(mob_proto[mob_num].player.physical_text.keywords);
+          str_dup(mob_proto[mob_num].player.physical_text.keywords);
     if (mob_proto[mob_num].player.physical_text.name)
       mob->player.physical_text.name =
-        str_dup(mob_proto[mob_num].player.physical_text.name);
+          str_dup(mob_proto[mob_num].player.physical_text.name);
     if (mob_proto[mob_num].player.physical_text.room_desc)
       mob->player.physical_text.room_desc =
-        str_dup(mob_proto[mob_num].player.physical_text.room_desc);
+          str_dup(mob_proto[mob_num].player.physical_text.room_desc);
     if (mob_proto[mob_num].player.physical_text.look_desc)
       mob->player.physical_text.look_desc =
-        str_dup(mob_proto[mob_num].player.physical_text.look_desc);
+          str_dup(mob_proto[mob_num].player.physical_text.look_desc);
 
     if (mob_proto[mob_num].char_specials.arrive)
-      mob->char_specials.arrive = str_dup(mob_proto[mob_num].char_specials.arrive);
+      mob->char_specials.arrive =
+          str_dup(mob_proto[mob_num].char_specials.arrive);
     if (mob_proto[mob_num].char_specials.leave)
-      mob->char_specials.leave = str_dup(mob_proto[mob_num].char_specials.leave);
+      mob->char_specials.leave =
+          str_dup(mob_proto[mob_num].char_specials.leave);
     if (mob_proto[mob_num].player_specials)
       mob->player_specials = &dummy_mob;
 
     d->edit_mob = mob;
 #ifdef CONFIRM_EXISTING
 
-    send_to_char ("A mob already exists at that number. Do you wish to edit it?\r\n", ch);
+    send_to_char(
+        "A mob already exists at that number. Do you wish to edit it?\r\n", ch);
     d->edit_mode = MEDIT_CONFIRM_EDIT;
 #else
 
@@ -1354,9 +1396,10 @@ ACMD(do_medit)
 
     d->edit_mob->player.physical_text.keywords = str_dup("mob unfinished");
     d->edit_mob->player.physical_text.name = str_dup("an unfinished mob");
-    d->edit_mob->player.physical_text.room_desc = str_dup("An unfinished mob stands here.");
+    d->edit_mob->player.physical_text.room_desc =
+        str_dup("An unfinished mob stands here.");
     d->edit_mob->player.physical_text.look_desc =
-      str_dup("It looks barely coherent as it waits to be created.\r\n");
+        str_dup("It looks barely coherent as it waits to be created.\r\n");
 
     d->edit_mob->player.title = NULL;
     d->edit_mob->char_specials.arrive = str_dup("arrives from");
@@ -1381,8 +1424,7 @@ ACMD(do_medit)
   }
 }
 
-ACMD(do_mclone)
-{
+ACMD(do_mclone) {
 
   if (!access_level(ch, LVL_PRESIDENT) && !PLR_FLAGGED(ch, PLR_OLC)) {
     send_to_char(YOU_NEED_OLC_FOR_THAT, ch);
@@ -1401,9 +1443,11 @@ ACMD(do_mclone)
   arg2 = atoi(buf1);
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if (arg1 >= (zone_table[counter].number * 100) && arg1 <= zone_table[counter].top)
+    if (arg1 >= (zone_table[counter].number * 100) &&
+        arg1 <= zone_table[counter].top)
       zone1 = counter;
-    if (arg2 >= (zone_table[counter].number * 100) && arg2 <= zone_table[counter].top)
+    if (arg2 >= (zone_table[counter].number * 100) &&
+        arg2 <= zone_table[counter].top)
       zone2 = counter;
   }
 
@@ -1417,7 +1461,8 @@ ACMD(do_mclone)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't clone mobiles to a connected zone.\r\n", ch);
     return;
   }
@@ -1444,15 +1489,20 @@ ACMD(do_mclone)
 
   // copy all strings over
   if (mob_proto[mob_num1].player.physical_text.keywords)
-    mob->player.physical_text.keywords = str_dup(mob_proto[mob_num1].player.physical_text.keywords);
+    mob->player.physical_text.keywords =
+        str_dup(mob_proto[mob_num1].player.physical_text.keywords);
   if (mob_proto[mob_num1].player.physical_text.name)
-    mob->player.physical_text.name = str_dup(mob_proto[mob_num1].player.physical_text.name);
+    mob->player.physical_text.name =
+        str_dup(mob_proto[mob_num1].player.physical_text.name);
   if (mob_proto[mob_num1].player.physical_text.room_desc)
-    mob->player.physical_text.room_desc = str_dup(mob_proto[mob_num1].player.physical_text.room_desc);
+    mob->player.physical_text.room_desc =
+        str_dup(mob_proto[mob_num1].player.physical_text.room_desc);
   if (mob_proto[mob_num1].player.physical_text.look_desc)
-    mob->player.physical_text.look_desc = str_dup(mob_proto[mob_num1].player.physical_text.look_desc);
+    mob->player.physical_text.look_desc =
+        str_dup(mob_proto[mob_num1].player.physical_text.look_desc);
   if (mob_proto[mob_num1].char_specials.arrive)
-    mob->char_specials.arrive = str_dup(mob_proto[mob_num1].char_specials.arrive);
+    mob->char_specials.arrive =
+        str_dup(mob_proto[mob_num1].char_specials.arrive);
   if (mob_proto[mob_num1].char_specials.leave)
     mob->char_specials.leave = str_dup(mob_proto[mob_num1].char_specials.leave);
 
@@ -1461,15 +1511,14 @@ ACMD(do_mclone)
 
   // put guy into editing mode
   PLR_FLAGS(ch).SetBit(PLR_EDITING);
-  STATE (ch->desc) = CON_MEDIT;
+  STATE(ch->desc) = CON_MEDIT;
   send_to_char("Do you wish to clone this mob?\r\n", ch);
   ch->desc->edit_number = arg2;
   ch->desc->edit_mob = mob;
   ch->desc->edit_mode = MEDIT_CONFIRM_SAVESTRING;
 }
 
-ACMD(do_mdelete)
-{
+ACMD(do_mdelete) {
   int num, counter, found = 0;
 
   one_argument(argument, buf);
@@ -1492,13 +1541,14 @@ ACMD(do_mdelete)
   }
 
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if ((atoi(buf) >= (zone_table[counter].number * 100)) && (atoi(buf) <= (zone_table[counter].top))) {
+    if ((atoi(buf) >= (zone_table[counter].number * 100)) &&
+        (atoi(buf) <= (zone_table[counter].top))) {
       found = 1;
       break;
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -1507,19 +1557,21 @@ ACMD(do_mdelete)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't delete mobiles from a connected zone.\r\n", ch);
     return;
   }
 
   ch->player_specials->saved.zonenum = zone_table[counter].number;
   num = real_mobile(num);
-  
+
   if (num < 0) {
     send_to_char("No such mob.\r\n", ch);
     return;
   } else {
-    sprintf(buf3, "NPC '%s' (%ld) deleted.\r\n", GET_NAME(&mob_proto[num]), GET_MOB_VNUM(&mob_proto[num]));
+    sprintf(buf3, "NPC '%s' (%ld) deleted.\r\n", GET_NAME(&mob_proto[num]),
+            GET_MOB_VNUM(&mob_proto[num]));
   }
 
   struct char_data *j, *temp, *next_char;
@@ -1538,7 +1590,7 @@ ACMD(do_mdelete)
     mob_index[counter] = mob_index[counter + 1];
     mob_proto[counter] = mob_proto[counter + 1];
     mob_proto[counter].nr = counter;
-    
+
     for (j = character_list; j; j = j->next) {
       if (IS_NPC(j) && j->nr == counter) {
         temp = Mem->GetCh();
@@ -1550,7 +1602,8 @@ ACMD(do_mdelete)
       }
     }
   }
-  // Wipe out the top entry of the table (it's not needed), then shrink the table.
+  // Wipe out the top entry of the table (it's not needed), then shrink the
+  // table.
   memset(&mob_proto[top_of_mobt], 0, sizeof(struct char_data));
   memset(&mob_index[top_of_mobt], 0, sizeof(struct index_data));
   top_of_mobt--;
@@ -1560,30 +1613,30 @@ ACMD(do_mdelete)
   for (zone = 0; zone <= top_of_zone_table; zone++) {
     for (cmd_no = 0; cmd_no < zone_table[zone].num_cmds; cmd_no++)
       switch (ZCMD.command) {
-        case 'S':
-        case 'M':
-          last = ZCMD.arg1;
-          if (ZCMD.arg1 == num) {
-            ZCMD.command = '*';
-            ZCMD.if_flag = 0;
-            ZCMD.arg1 = 0;
-            ZCMD.arg2 = 0;
-            ZCMD.arg3 = 0;
-          } else
-            ZCMD.arg1 = (ZCMD.arg1 > num ? ZCMD.arg1 - 1 : ZCMD.arg1);
-          break;
-        case 'E':
-        case 'G':
-        case 'C':
-        case 'N':
-          if (last == num) {
-            ZCMD.command = '*';
-            ZCMD.if_flag = 0;
-            ZCMD.arg1 = 0;
-            ZCMD.arg2 = 0;
-            ZCMD.arg3 = 0;
-          }
-          break;
+      case 'S':
+      case 'M':
+        last = ZCMD.arg1;
+        if (ZCMD.arg1 == num) {
+          ZCMD.command = '*';
+          ZCMD.if_flag = 0;
+          ZCMD.arg1 = 0;
+          ZCMD.arg2 = 0;
+          ZCMD.arg3 = 0;
+        } else
+          ZCMD.arg1 = (ZCMD.arg1 > num ? ZCMD.arg1 - 1 : ZCMD.arg1);
+        break;
+      case 'E':
+      case 'G':
+      case 'C':
+      case 'N':
+        if (last == num) {
+          ZCMD.command = '*';
+          ZCMD.if_flag = 0;
+          ZCMD.arg1 = 0;
+          ZCMD.arg2 = 0;
+          ZCMD.arg3 = 0;
+        }
+        break;
       }
   }
 
@@ -1592,8 +1645,7 @@ ACMD(do_mdelete)
   send_to_char(buf3, ch);
 }
 
-ACMD(do_qedit)
-{
+ACMD(do_qedit) {
   int number, rnum, counter, found = 0, i;
   char arg1[MAX_INPUT_LENGTH];
   struct descriptor_data *d;
@@ -1611,12 +1663,12 @@ ACMD(do_qedit)
   any_one_arg(argument, arg1);
 
   if (!*argument) {
-    send_to_char ("Specify a quest number to edit.\r\n", ch);
+    send_to_char("Specify a quest number to edit.\r\n", ch);
     return;
   }
 
   if (!isdigit(*arg1)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
@@ -1633,7 +1685,7 @@ ACMD(do_qedit)
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -1642,7 +1694,8 @@ ACMD(do_qedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit quests from a connected zone.\r\n", ch);
     return;
   }
@@ -1691,7 +1744,8 @@ ACMD(do_qedit)
 
     d->edit_mode = QEDIT_CONFIRM_EDIT;
     send_to_char("A quest already exists at that number.  "
-                 "Do you wish to edit it?\r\n", ch);
+                 "Do you wish to edit it?\r\n",
+                 ch);
 #else
 
     qedit_disp_menu(d);
@@ -1708,18 +1762,17 @@ ACMD(do_qedit)
     d->edit_quest->intro = str_dup("I've got an incomplete quest for you.");
     d->edit_quest->decline = str_dup("That's too bad...later, chummer.");
     d->edit_quest->quit =
-      str_dup("Null sweat, chummer.  Someone else'll finish the job");
+        str_dup("Null sweat, chummer.  Someone else'll finish the job");
     d->edit_quest->finish = str_dup("Well done.");
     d->edit_quest->info =
-      str_dup("Well you see, this quest is rather incomplete, "
-              "so I've got no info on it.");
+        str_dup("Well you see, this quest is rather incomplete, "
+                "so I've got no info on it.");
 
     d->edit_mode = QEDIT_CONFIRM_EDIT;
   }
 }
 
-ACMD(do_shedit)
-{
+ACMD(do_shedit) {
   int number = 0, counter, found = 0;
   struct shop_data *shop = NULL;
   struct descriptor_data *d;
@@ -1736,24 +1789,25 @@ ACMD(do_shedit)
   one_argument(argument, arg);
 
   if (!*arg) {
-    send_to_char ("Specify a shop number to edit.\r\n", ch);
+    send_to_char("Specify a shop number to edit.\r\n", ch);
     return;
   }
 
   if (!isdigit(*arg)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
   number = atoi(arg);
   for (counter = 0; counter <= top_of_zone_table; counter++) {
-    if ((number >= (zone_table[counter].number * 100)) && (number <= (zone_table[counter].top))) {
+    if ((number >= (zone_table[counter].number * 100)) &&
+        (number <= (zone_table[counter].top))) {
       found = 1;
       break;
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -1762,7 +1816,8 @@ ACMD(do_shedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit shops from a connected zone.\r\n", ch);
     return;
   }
@@ -1833,7 +1888,7 @@ ACMD(do_shedit)
   } else {
     send_to_char("That shop does not exist...create it?\r\n", ch);
     d->edit_shop = new shop_data;
-    memset((char *) d->edit_shop, 0, sizeof(struct shop_data));
+    memset((char *)d->edit_shop, 0, sizeof(struct shop_data));
     d->edit_shop->vnum = d->edit_number;
     d->edit_shop->profit_buy = 1.0;
     d->edit_shop->profit_sell = 1.0;
@@ -1852,8 +1907,7 @@ ACMD(do_shedit)
   }
 }
 
-ACMD(do_zswitch)
-{
+ACMD(do_zswitch) {
   int counter = 0, number, zonenum;
   char arg1[MAX_INPUT_LENGTH];
 
@@ -1881,7 +1935,8 @@ ACMD(do_zswitch)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't switch to a connected zone.\r\n", ch);
     return;
   }
@@ -1890,13 +1945,11 @@ ACMD(do_zswitch)
   ch->player_specials->saved.zonenum = number;
 }
 
-ACMD(do_zedit)
-{
+ACMD(do_zedit) {
   struct descriptor_data *d = ch->desc;
   int counter = 0, number, zonenum;
 
-  bool add
-    = FALSE;
+  bool add = FALSE;
   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
   d = ch->desc;
@@ -1923,7 +1976,8 @@ ACMD(do_zedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit rooms from a connected zone.\r\n", ch);
     return;
   }
@@ -1937,8 +1991,8 @@ ACMD(do_zedit)
       d->edit_number = zonenum; // assign this rnum as the edit number
       d->edit_mode = ZEDIT_CONFIRM_EDIT_DATA;
     } else {
-      send_to_char("The zone data does not exist for that zone.  Create it?\r\n",
-                   ch);
+      send_to_char(
+          "The zone data does not exist for that zone.  Create it?\r\n", ch);
       d->edit_mode = ZEDIT_CONFIRM_CREATE_DATA;
       d->edit_number = zonenum;
     }
@@ -1946,17 +2000,14 @@ ACMD(do_zedit)
   } else {
     // they have to use 'zedit' first
     if (zonenum < 0) {
-      send_to_char("You must create the zone with 'zedit' first.\r\n",
-                   ch);
+      send_to_char("You must create the zone with 'zedit' first.\r\n", ch);
       return;
     }
     if (is_abbrev(arg1, "add"))
-      add
-        = TRUE; // might as well use the same variable
+      add = TRUE; // might as well use the same variable
 
     // this time, send em to the right place to add a new command
-    if (add
-       ) {
+    if (add) {
       PLR_FLAGS(ch).SetBit(PLR_EDITING);
       STATE(d) = CON_ZEDIT;
       // the edit number = command number in array
@@ -1976,8 +2027,7 @@ ACMD(do_zedit)
     }
 
     if (is_abbrev(arg1, "insert")) {
-      add
-        = TRUE;
+      add = TRUE;
       number = atoi(arg2);
     } else
       // finally, we check for the number
@@ -2009,12 +2059,10 @@ ACMD(do_zedit)
 
     d->edit_number = number;
     d->edit_number2 = 0;
-    if (add
-       ) {
+    if (add) {
       send_to_char(ch, "Insert a command at %d?\r\n", number);
       d->edit_mode = ZEDIT_CONFIRM_INSERT_CMD;
-    }
-    else {
+    } else {
       send_to_char("That command exists, edit it?\r\n", ch);
       d->edit_mode = ZEDIT_CONFIRM_EDIT_CMD;
     }
@@ -2022,11 +2070,9 @@ ACMD(do_zedit)
   return;
 }
 
-ACMD(do_zdelete)
-{}
+ACMD(do_zdelete) {}
 
-ACMD(do_hedit)
-{
+ACMD(do_hedit) {
   struct descriptor_data *d;
   char arg1[MAX_INPUT_LENGTH];
   struct host_data *host;
@@ -2041,14 +2087,14 @@ ACMD(do_hedit)
     return;
   }
 
-  one_argument (argument, arg1);
+  one_argument(argument, arg1);
 
   if (!*argument) {
-    send_to_char ("Specify a host number to edit.\r\n", ch);
+    send_to_char("Specify a host number to edit.\r\n", ch);
     return;
   }
-  if (!isdigit (*arg1)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+  if (!isdigit(*arg1)) {
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
@@ -2064,7 +2110,7 @@ ACMD(do_hedit)
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -2073,7 +2119,8 @@ ACMD(do_hedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit hosts from a connected zone.\r\n", ch);
     return;
   }
@@ -2082,7 +2129,7 @@ ACMD(do_hedit)
 
   PLR_FLAGS(ch).SetBit(PLR_EDITING);
   d = ch->desc;
-  STATE (d) = CON_HEDIT;
+  STATE(d) = CON_HEDIT;
   d->edit_number = number;
   if (host_num >= 0) {
     host = Mem->GetHost();
@@ -2136,7 +2183,9 @@ ACMD(do_hedit)
     d->edit_host = host;
 #ifdef CONFIRM_EXISTING
 
-    send_to_char ("An matrix host already exists at that number. Do you wish to edit it?\r\n", ch);
+    send_to_char("An matrix host already exists at that number. Do you wish to "
+                 "edit it?\r\n",
+                 ch);
     d->edit_mode = HEDIT_CONFIRM_EDIT;
 #else
 
@@ -2145,20 +2194,21 @@ ACMD(do_hedit)
 
     return;
   } else {
-    send_to_char ("That host does not exist, create it?\r\n", ch);
+    send_to_char("That host does not exist, create it?\r\n", ch);
     d->edit_host = Mem->GetHost();
     d->edit_host->name = str_dup("An unfinished host");
     d->edit_host->keywords = str_dup("unfinished host");
     d->edit_host->desc = str_dup("This host is unfinished.");
-    d->edit_host->shutdown_start = str_dup("A deep echoing voice announces a host shutdown.\r\n");
-    d->edit_host->shutdown_stop = str_dup("A deep echoing voice announces the shutdown has been aborted.\r\n");
+    d->edit_host->shutdown_start =
+        str_dup("A deep echoing voice announces a host shutdown.\r\n");
+    d->edit_host->shutdown_stop = str_dup(
+        "A deep echoing voice announces the shutdown has been aborted.\r\n");
     d->edit_mode = HEDIT_CONFIRM_EDIT;
     return;
   }
 }
 
-ACMD(do_icedit)
-{
+ACMD(do_icedit) {
   struct descriptor_data *d;
   char arg1[MAX_INPUT_LENGTH];
   struct matrix_icon *icon;
@@ -2173,14 +2223,14 @@ ACMD(do_icedit)
     return;
   }
 
-  one_argument (argument, arg1);
+  one_argument(argument, arg1);
 
   if (!*argument) {
-    send_to_char ("Specify a IC number to edit.\r\n", ch);
+    send_to_char("Specify a IC number to edit.\r\n", ch);
     return;
   }
-  if (!isdigit (*arg1)) {
-    send_to_char ("Please supply a valid number.\r\n", ch);
+  if (!isdigit(*arg1)) {
+    send_to_char("Please supply a valid number.\r\n", ch);
     return;
   }
 
@@ -2196,7 +2246,7 @@ ACMD(do_icedit)
     }
   }
   if (!found) {
-    send_to_char ("Sorry, that number is not part of any zone.\r\n", ch);
+    send_to_char("Sorry, that number is not part of any zone.\r\n", ch);
     return;
   }
 
@@ -2205,7 +2255,8 @@ ACMD(do_icedit)
     return;
   }
 
-  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) && zone_table[counter].connected) {
+  if (!(access_level(ch, LVL_EXECUTIVE) || PLR_FLAGGED(ch, PLR_EDCON)) &&
+      zone_table[counter].connected) {
     send_to_char("You can't edit hosts from a connected zone.\r\n", ch);
     return;
   }
@@ -2214,7 +2265,7 @@ ACMD(do_icedit)
 
   PLR_FLAGS(ch).SetBit(PLR_EDITING);
   d = ch->desc;
-  STATE (d) = CON_ICEDIT;
+  STATE(d) = CON_ICEDIT;
   d->edit_number = number;
   if (ic_num >= 0) {
     icon = Mem->GetIcon();
@@ -2228,7 +2279,8 @@ ACMD(do_icedit)
       d->edit_icon->long_desc = str_dup(ic_proto[ic_num].long_desc);
 #ifdef CONFIRM_EXISTING
 
-    send_to_char ("An IC already exists at that number. Do you wish to edit it?\r\n", ch);
+    send_to_char(
+        "An IC already exists at that number. Do you wish to edit it?\r\n", ch);
     d->edit_mode = ICEDIT_CONFIRM_EDIT;
 #else
 
@@ -2237,7 +2289,7 @@ ACMD(do_icedit)
 
     return;
   } else {
-    send_to_char ("That IC does not exist, create it?\r\n", ch);
+    send_to_char("That IC does not exist, create it?\r\n", ch);
     d->edit_icon = Mem->GetIcon();
     d->edit_icon->name = str_dup("An unfinished IC");
     d->edit_icon->look_desc = str_dup("An unfinished IC guards the node.");

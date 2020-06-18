@@ -7,43 +7,39 @@
 
 class File;
 
-class VTable
-{
+class VTable {
   static const int MAX_SECTION_LENGTH = 32;
   static const int MAX_FIELD_LENGTH = 32;
   static const int MAX_LINE_LENGTH = 256;
 
-  struct field
-  {
+  struct field {
     char name[MAX_FIELD_LENGTH];
     char line[MAX_LINE_LENGTH];
     char *multiline;
 
-    field() : multiline(NULL)
-    {
+    field() : multiline(NULL) {
       *name = '\0';
       *line = '\0';
     }
 
     ~field();
 
-    field &operator=(const field &two)
-    {
+    field &operator=(const field &two) {
       // do a deep copy
       strcpy(name, two.name);
       strcpy(line, two.line);
 
       if (two.multiline) {
         if (!multiline) {
-          multiline = new char[strlen(two.multiline)+1];
+          multiline = new char[strlen(two.multiline) + 1];
           strcpy(multiline, two.multiline);
         } else if (strcmp(multiline, two.multiline)) {
-          delete [] multiline;
-          multiline = new char[strlen(two.multiline)+1];
+          delete[] multiline;
+          multiline = new char[strlen(two.multiline) + 1];
           strcpy(multiline, two.multiline);
         }
       } else if (multiline) {
-        delete [] multiline;
+        delete[] multiline;
         multiline = NULL;
       }
 
@@ -51,8 +47,7 @@ class VTable
     }
   };
 
-  struct section
-  {
+  struct section {
     char name[MAX_SECTION_LENGTH]; // NULL for top
     section *parent;
 
@@ -64,17 +59,15 @@ class VTable
     int field_cnt;
     int field_size;
 
-    section() : parent(NULL),
-        sub_tab(NULL), sub_cnt(0), sub_size(0),
-        field_tab(NULL), field_cnt(0), field_size(0)
-    {
+    section()
+        : parent(NULL), sub_tab(NULL), sub_cnt(0), sub_size(0), field_tab(NULL),
+          field_cnt(0), field_size(0) {
       *name = '\0';
     }
 
     ~section();
 
-    section &operator=(const section &two)
-    {
+    section &operator=(const section &two) {
       strcpy(name, two.name);
 
       parent = two.parent;
@@ -84,7 +77,7 @@ class VTable
         sub_cnt = two.sub_cnt;
 
         if (sub_tab)
-          delete [] sub_tab;
+          delete[] sub_tab;
 
         sub_tab = new section[sub_size];
 
@@ -95,7 +88,7 @@ class VTable
         sub_size = 0;
 
         if (sub_tab) {
-          delete [] sub_tab;
+          delete[] sub_tab;
           sub_tab = NULL;
         }
       }
@@ -105,7 +98,7 @@ class VTable
         field_cnt = two.field_cnt;
 
         if (field_tab)
-          delete [] field_tab;
+          delete[] field_tab;
 
         field_tab = new field[field_size];
 
@@ -116,7 +109,7 @@ class VTable
         field_size = 0;
 
         if (field_tab) {
-          delete [] field_tab;
+          delete[] field_tab;
           field_tab = NULL;
         }
       }
@@ -128,9 +121,9 @@ class VTable
   section top;
 
 public:
-  int  NumSections() const;
-  int  NumSubsections(const char *sect);
-  int  NumFields(const char *sect_name);
+  int NumSections() const;
+  int NumSubsections(const char *sect);
+  int NumFields(const char *sect_name);
 
   bool DoesSectionExist(const char *sect);
   bool DoesFieldExist(const char *where);
@@ -157,8 +150,7 @@ public:
   // returns the int of the nth field in section
   int GetIndexInt(const char *sect_name, int n, int defawlt);
 
-  const char *GetIndexString(const char *sect_name, int n,
-                             const char *defawlt);
+  const char *GetIndexString(const char *sect_name, int n, const char *defawlt);
   // float GetIndexFloat();
 
   // bool AddInt(const char *where, int n);
@@ -166,8 +158,7 @@ public:
   // bool AddFloat(const char *where, float f);
 
 private:
-  static void separate(const char *where,
-                       char section[MAX_SECTION_LENGTH],
+  static void separate(const char *where, char section[MAX_SECTION_LENGTH],
                        char field[MAX_FIELD_LENGTH]);
 
   void resize_subsection_tab(section *ptr, int empty = 5);

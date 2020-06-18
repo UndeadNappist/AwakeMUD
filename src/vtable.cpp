@@ -8,43 +8,37 @@
 
 #include "file.h"
 #include "vtable.h"
-#include "utils.h"    // for str_cmp(), log()
+#include "utils.h" // for str_cmp(), log()
 
-VTable::field::~field()
-{
+VTable::field::~field() {
   if (multiline) {
-    delete [] multiline;
+    delete[] multiline;
     multiline = NULL;
   }
 }
 
-VTable::section::~section()
-{
+VTable::section::~section() {
   *name = '\0';
   parent = NULL;
 
   if (sub_tab) {
-    delete [] sub_tab;
+    delete[] sub_tab;
     sub_tab = NULL;
   }
   sub_cnt = 0;
   sub_size = 0;
 
   if (field_tab) {
-    delete [] field_tab;
+    delete[] field_tab;
     field_tab = NULL;
   }
   field_cnt = 0;
   field_size = 0;
 }
 
-int  VTable::NumSections() const
-{
-  return (count_subsections(&top)+1);
-}
+int VTable::NumSections() const { return (count_subsections(&top) + 1); }
 
-int  VTable::NumSubsections(const char *sect)
-{
+int VTable::NumSubsections(const char *sect) {
   section *ptr = find_section(sect);
 
   if (!ptr)
@@ -53,8 +47,7 @@ int  VTable::NumSubsections(const char *sect)
   return ptr->sub_cnt;
 }
 
-int  VTable::NumFields(const char *sect)
-{
+int VTable::NumFields(const char *sect) {
   section *ptr = find_section(sect);
 
   if (!ptr)
@@ -63,25 +56,26 @@ int  VTable::NumFields(const char *sect)
   return ptr->field_cnt;
 }
 
-bool VTable::DoesSectionExist(const char *sect)
-{
+bool VTable::DoesSectionExist(const char *sect) {
   return (find_section(sect) != NULL);
 }
 
-bool VTable::DoesFieldExist(const char *where)
-{
+bool VTable::DoesFieldExist(const char *where) {
   return (find_field(where) != NULL);
 }
 
-#define SKIP { in->GetLine(line, MAX_LINE_LENGTH*2, FALSE); continue; }
+#define SKIP                                                                   \
+  {                                                                            \
+    in->GetLine(line, MAX_LINE_LENGTH * 2, FALSE);                             \
+    continue;                                                                  \
+  }
 
-int  VTable::Parse(File *in)
-{
-  char line[MAX_LINE_LENGTH*2];
+int VTable::Parse(File *in) {
+  char line[MAX_LINE_LENGTH * 2];
   int depth = 0, total_fields = 0;
   section *sec_ptr = &top;
 
-  in->GetLine(line, MAX_LINE_LENGTH*2, FALSE);
+  in->GetLine(line, MAX_LINE_LENGTH * 2, FALSE);
   while (!in->EoF() && str_cmp(line, "BREAK")) {
     char *line_ptr = line;
     int d;
@@ -101,7 +95,8 @@ int  VTable::Parse(File *in)
     //    printf("depth=%d, d=%d, line_ptr=%s\n", depth, d, line_ptr);
 
     if (d > depth) {
-      log_vfprintf("Warning: depth doesn't match field depth (%d != %d) (%s, line %d)",
+      log_vfprintf(
+          "Warning: depth doesn't match field depth (%d != %d) (%s, line %d)",
           d, depth, in->Filename(), in->LineNumber());
       SKIP;
     } else
@@ -122,13 +117,13 @@ int  VTable::Parse(File *in)
         if (!sec_ptr->sub_tab || sec_ptr->sub_cnt >= sec_ptr->sub_size)
           resize_subsection_tab(sec_ptr);
 
-        section *new_sec = sec_ptr->sub_tab+sec_ptr->sub_cnt;
+        section *new_sec = sec_ptr->sub_tab + sec_ptr->sub_cnt;
         sec_ptr->sub_cnt++;
 
         // set the data:
         new_sec->parent = sec_ptr;
 
-        char *src = open+1, *dst = new_sec->name;
+        char *src = open + 1, *dst = new_sec->name;
         while (*src != ']') { // we know ']' is there, for sure
           *(dst++) = *(src++);
         }
@@ -138,7 +133,7 @@ int  VTable::Parse(File *in)
         sec_ptr = new_sec;
         depth++;
 
-        //printf("read section title %s, inc'ing depth\n", sec_ptr->name);
+        // printf("read section title %s, inc'ing depth\n", sec_ptr->name);
 
         SKIP;
       }
@@ -150,16 +145,16 @@ int  VTable::Parse(File *in)
       resize_field_tab(sec_ptr);
 
     // then get the next field entry
-    field *field_ptr = sec_ptr->field_tab+sec_ptr->field_cnt;
+    field *field_ptr = sec_ptr->field_tab + sec_ptr->field_cnt;
     char *name_ptr = field_ptr->name;
 
     // copy the field name, until ":\t" or ":$"
     while (*line_ptr) {
       if (*line_ptr == ':' &&
-          (*(line_ptr+1) == '\t' || *(line_ptr+1) == '$'))
+          (*(line_ptr + 1) == '\t' || *(line_ptr + 1) == '$'))
         break;
 
-      if((name_ptr-field_ptr->name) > MAX_FIELD_LENGTH)
+      if ((name_ptr - field_ptr->name) > MAX_FIELD_LENGTH)
         field_ptr->name[MAX_FIELD_LENGTH - 1] = '\0';
 
       *(name_ptr++) = *(line_ptr++);
@@ -168,12 +163,12 @@ int  VTable::Parse(File *in)
 
     // make sure we've got a field name
     if (!*line_ptr) {
-      log_vfprintf("Invalid field: '%s' (%s, line %d)",
-          line, in->Filename(), in->LineNumber());
+      log_vfprintf("Invalid field: '%s' (%s, line %d)", line, in->Filename(),
+                   in->LineNumber());
       SKIP;
     }
 
-    //printf("continuing with field %s\n", field_ptr->name);
+    // printf("continuing with field %s\n", field_ptr->name);
 
     // and if we do, advance the field_cnt and continue
     sec_ptr->field_cnt++;
@@ -181,10 +176,10 @@ int  VTable::Parse(File *in)
 
     // advance line_ptr past the ":\t" or ":$", and skip the spaces
     if (*line_ptr == ':') {
-      if (*(line_ptr+1) == '$') {
+      if (*(line_ptr + 1) == '$') {
         multiline_input = true;
         line_ptr += 2;
-      } else if (*(line_ptr+1) == '\t')
+      } else if (*(line_ptr + 1) == '\t')
         line_ptr += 2;
 
       while (*line_ptr && (*line_ptr == ' ' || *line_ptr == '\t'))
@@ -200,7 +195,7 @@ int  VTable::Parse(File *in)
       field_ptr->multiline = in->ReadString();
     }
 
-    in->GetLine(line, MAX_LINE_LENGTH*2, FALSE);
+    in->GetLine(line, MAX_LINE_LENGTH * 2, FALSE);
   }
 
   return total_fields;
@@ -208,8 +203,7 @@ int  VTable::Parse(File *in)
 
 #undef SKIP
 
-int  VTable::GetInt(const char *where, int defawlt)
-{
+int VTable::GetInt(const char *where, int defawlt) {
   field *ptr = find_field(where);
 
   if (!ptr)
@@ -218,8 +212,7 @@ int  VTable::GetInt(const char *where, int defawlt)
   return atoi(ptr->line);
 }
 
-long VTable::GetLong(const char *where, long defawlt)
-{
+long VTable::GetLong(const char *where, long defawlt) {
   field *ptr = find_field(where);
 
   if (!ptr)
@@ -228,9 +221,7 @@ long VTable::GetLong(const char *where, long defawlt)
   return atol(ptr->line);
 }
 
-int  VTable::LookupInt(const char *where,
-                       const char **lookup_tab, int defawlt)
-{
+int VTable::LookupInt(const char *where, const char **lookup_tab, int defawlt) {
   field *ptr = find_field(where);
 
   if (!ptr)
@@ -244,19 +235,17 @@ int  VTable::LookupInt(const char *where,
   return defawlt;
 }
 
-const char *VTable::GetString(const char *where, const char *defawlt)
-{
+const char *VTable::GetString(const char *where, const char *defawlt) {
   field *ptr = find_field(where);
 
   if (!ptr) {
     return defawlt;
   }
 
-  return (ptr->multiline? ptr->multiline : ptr->line);
+  return (ptr->multiline ? ptr->multiline : ptr->line);
 }
 
-float VTable::GetFloat(const char *where, float defawlt)
-{
+float VTable::GetFloat(const char *where, float defawlt) {
   field *ptr = find_field(where);
 
   if (!ptr)
@@ -265,8 +254,7 @@ float VTable::GetFloat(const char *where, float defawlt)
   return (float)atof(ptr->line);
 }
 
-const char *VTable::GetIndexField(const char *sect_name, int n)
-{
+const char *VTable::GetIndexField(const char *sect_name, int n) {
   section *ptr = find_section(sect_name);
 
   if (!ptr)
@@ -275,8 +263,7 @@ const char *VTable::GetIndexField(const char *sect_name, int n)
   return ptr->field_tab[n].name;
 }
 
-const char *VTable::GetIndexSection(const char *sect_name, int n)
-{
+const char *VTable::GetIndexSection(const char *sect_name, int n) {
   section *ptr = find_section(sect_name);
 
   if (!ptr)
@@ -285,8 +272,7 @@ const char *VTable::GetIndexSection(const char *sect_name, int n)
   return ptr->sub_tab[n].name;
 }
 
-int  VTable::GetIndexInt(const char *sect_name, int n, int defawlt)
-{
+int VTable::GetIndexInt(const char *sect_name, int n, int defawlt) {
   section *ptr = find_section(sect_name);
 
   if (!ptr)
@@ -296,21 +282,18 @@ int  VTable::GetIndexInt(const char *sect_name, int n, int defawlt)
 }
 
 const char *VTable::GetIndexString(const char *sect_name, int n,
-                                   const char *defawlt)
-{
+                                   const char *defawlt) {
   section *ptr = find_section(sect_name);
 
   if (!ptr)
     return defawlt;
 
-  return (ptr->field_tab[n].multiline? ptr->field_tab[n].multiline
-          : ptr->field_tab[n].line);
+  return (ptr->field_tab[n].multiline ? ptr->field_tab[n].multiline
+                                      : ptr->field_tab[n].line);
 }
 
-void VTable::separate(const char *where,
-                      char sect_name[MAX_SECTION_LENGTH],
-                      char field_name[MAX_FIELD_LENGTH])
-{
+void VTable::separate(const char *where, char sect_name[MAX_SECTION_LENGTH],
+                      char field_name[MAX_FIELD_LENGTH]) {
   const char *src_ptr = where;
   char *sec_ptr = sect_name, *field_ptr = field_name;
 
@@ -325,21 +308,20 @@ void VTable::separate(const char *where,
     strncpy(field_name, src_ptr, MAX_FIELD_LENGTH);
     *(field_name + MAX_FIELD_LENGTH - 1) = '\0';
   } else {
-    if ((delim-src_ptr) < MAX_SECTION_LENGTH) {
-      strncpy(sect_name, src_ptr, delim-src_ptr);
-      *(sect_name + (delim-src_ptr)) = '\0';
+    if ((delim - src_ptr) < MAX_SECTION_LENGTH) {
+      strncpy(sect_name, src_ptr, delim - src_ptr);
+      *(sect_name + (delim - src_ptr)) = '\0';
     } else {
       strncpy(sect_name, src_ptr, MAX_SECTION_LENGTH);
       *(sect_name + MAX_SECTION_LENGTH - 1) = '\0';
     }
 
-    strncpy(field_name, delim+1, MAX_FIELD_LENGTH);
+    strncpy(field_name, delim + 1, MAX_FIELD_LENGTH);
     *(field_name + MAX_FIELD_LENGTH - 1) = '\0';
   }
 }
 
-void VTable::resize_subsection_tab(section *ptr, int empty)
-{
+void VTable::resize_subsection_tab(section *ptr, int empty) {
   if (ptr->sub_tab && ptr->sub_cnt < ptr->sub_size)
     return;
 
@@ -350,14 +332,13 @@ void VTable::resize_subsection_tab(section *ptr, int empty)
     for (int k = 0; k < ptr->sub_cnt; k++)
       new_tab[k] = ptr->sub_tab[k];
 
-    delete [] ptr->sub_tab;
+    delete[] ptr->sub_tab;
   }
 
   ptr->sub_tab = new_tab;
 }
 
-void VTable::resize_field_tab(section *ptr, int empty)
-{
+void VTable::resize_field_tab(section *ptr, int empty) {
   if (ptr->field_tab && ptr->field_cnt < ptr->field_size)
     return;
 
@@ -368,14 +349,13 @@ void VTable::resize_field_tab(section *ptr, int empty)
     for (int k = 0; k < ptr->field_cnt; k++)
       new_tab[k] = ptr->field_tab[k];
 
-    delete [] ptr->field_tab;
+    delete[] ptr->field_tab;
   }
 
   ptr->field_tab = new_tab;
 }
 
-VTable::field *VTable::find_field(const char *where)
-{
+VTable::field *VTable::find_field(const char *where) {
   char sect[MAX_SECTION_LENGTH], field_name[MAX_FIELD_LENGTH];
 
   separate(where, sect, field_name);
@@ -387,22 +367,19 @@ VTable::field *VTable::find_field(const char *where)
 
   for (int i = 0; i < ptr->field_cnt; i++)
     if (!str_cmp(ptr->field_tab[i].name, field_name))
-      return (ptr->field_tab+i);
+      return (ptr->field_tab + i);
 
   return NULL;
 }
 
-VTable::section *VTable::find_section(const char *sect)
-{
+VTable::section *VTable::find_section(const char *sect) {
   if (!sect || !*sect)
     return &top;
 
   return (look_for_section(&top, sect));
 }
 
-VTable::section *VTable::look_for_section(section *ptr,
-    const char *name)
-{
+VTable::section *VTable::look_for_section(section *ptr, const char *name) {
   if (!ptr)
     return NULL;
 
@@ -410,7 +387,7 @@ VTable::section *VTable::look_for_section(section *ptr,
     return ptr;
 
   for (int i = 0; i < ptr->sub_cnt; i++) {
-    section *ret = look_for_section(ptr->sub_tab+i, name);
+    section *ret = look_for_section(ptr->sub_tab + i, name);
 
     if (ret)
       return ret;
@@ -419,15 +396,14 @@ VTable::section *VTable::look_for_section(section *ptr,
   return NULL;
 }
 
-int  VTable::count_subsections(const section *ptr) const
-{
+int VTable::count_subsections(const section *ptr) const {
   if (!ptr)
     return 0;
 
   int count = 0;
 
   for (int i = 0; i < ptr->sub_cnt; i++)
-    count += count_subsections(ptr->sub_tab+i);
+    count += count_subsections(ptr->sub_tab + i);
 
   return count;
 }

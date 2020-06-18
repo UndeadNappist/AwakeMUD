@@ -1,9 +1,9 @@
 /* ***************************************************
-*   file: zedit.cc                                   *
-*   (c) 1996-2000 Christopher J. Dickey, Andrew      *
-*   Hynek, and Nick Robertson (c) 2001 The AwakeMUD  *
-*   Consortium                                       *
-*************************************************** */
+ *   file: zedit.cc                                   *
+ *   (c) 1996-2000 Christopher J. Dickey, Andrew      *
+ *   Hynek, and Nick Robertson (c) 2001 The AwakeMUD  *
+ *   Consortium                                       *
+ *************************************************** */
 
 #include <stdio.h>
 #include <string.h>
@@ -24,13 +24,8 @@
 extern const char *dirs[];
 extern const char *short_where[];
 
-const char *reset_mode[] =
-  {
-    "Don't reset",
-    "Reset if no PCs are in zone",
-    "Always reset",
-    "\n"
-  };
+const char *reset_mode[] = {"Don't reset", "Reset if no PCs are in zone",
+                            "Always reset", "\n"};
 
 #define COM d->edit_cmd
 #define ZONENUM d->character->player_specials->saved.zonenum
@@ -43,8 +38,7 @@ const char *reset_mode[] =
 
 #define ZONE zone_table[zonenum]
 #define Zcmd zone_table[zonenum].cmd[i]
-void write_zone_to_disk(int vnum)
-{
+void write_zone_to_disk(int vnum) {
 
   int zonenum = real_zone(vnum);
 
@@ -53,7 +47,7 @@ void write_zone_to_disk(int vnum)
     return;
   }
 
-  FILE  *fp;
+  FILE *fp;
   int i;
 
   sprintf(buf, "%s/%d.zon", ZON_PREFIX, vnum);
@@ -62,110 +56,65 @@ void write_zone_to_disk(int vnum)
   // write it out!
   fprintf(fp, "#%d\n", vnum);
   fprintf(fp, "%s~\n", ZONE.name);
-  fprintf(fp, "%d %d %d %d %d %d\n", ZONE.top, ZONE.lifespan, ZONE.reset_mode, ZONE.security, ZONE.connected, ZONE.jurisdiction);
+  fprintf(fp, "%d %d %d %d %d %d\n", ZONE.top, ZONE.lifespan, ZONE.reset_mode,
+          ZONE.security, ZONE.connected, ZONE.jurisdiction);
   fprintf(fp, "%d %d %d %d %d\n", ZONE.editor_ids[0], ZONE.editor_ids[1],
           ZONE.editor_ids[2], ZONE.editor_ids[3], ZONE.editor_ids[4]);
   for (i = 0; i < ZONE.num_cmds; ++i) {
     switch (ZONE.cmd[i].command) {
     case 'M':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              MOB(Zcmd.arg1),
-              Zcmd.arg2,
-              ROOM(Zcmd.arg3));
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              MOB(Zcmd.arg1), Zcmd.arg2, ROOM(Zcmd.arg3));
       break;
     case 'V':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              VEH(Zcmd.arg1),
-              Zcmd.arg2,
-              ROOM(Zcmd.arg3));
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              VEH(Zcmd.arg1), Zcmd.arg2, ROOM(Zcmd.arg3));
 
       break;
     case 'S':
-      fprintf(fp, "%c %d %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              MOB(Zcmd.arg1),
+      fprintf(fp, "%c %d %ld %ld\n", Zcmd.command, Zcmd.if_flag, MOB(Zcmd.arg1),
               Zcmd.arg2);
       break;
     case 'U':
-      fprintf(fp, "%c %d %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
+      fprintf(fp, "%c %d %ld %ld\n", Zcmd.command, Zcmd.if_flag, OBJ(Zcmd.arg1),
               Zcmd.arg2);
       break;
     case 'I':
-      fprintf(fp, "%c %d %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
+      fprintf(fp, "%c %d %ld %ld\n", Zcmd.command, Zcmd.if_flag, OBJ(Zcmd.arg1),
               Zcmd.arg2);
       break;
     case 'O':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
-              Zcmd.arg2,
-              ROOM(Zcmd.arg3));
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              OBJ(Zcmd.arg1), Zcmd.arg2, ROOM(Zcmd.arg3));
       break;
     case 'H':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
-              Zcmd.arg2,
-              HOST(Zcmd.arg3));
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              OBJ(Zcmd.arg1), Zcmd.arg2, HOST(Zcmd.arg3));
       break;
     case 'P':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
-              Zcmd.arg2,
-              OBJ(Zcmd.arg3));
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              OBJ(Zcmd.arg1), Zcmd.arg2, OBJ(Zcmd.arg3));
       break;
     case 'D':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              ROOM(Zcmd.arg1),
-              Zcmd.arg2,
-              Zcmd.arg3);
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              ROOM(Zcmd.arg1), Zcmd.arg2, Zcmd.arg3);
       break;
     case 'E':
-      fprintf(fp, "L %d %ld %ld %ld\n",
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
-              Zcmd.arg2,
+      fprintf(fp, "L %d %ld %ld %ld\n", Zcmd.if_flag, OBJ(Zcmd.arg1), Zcmd.arg2,
               Zcmd.arg3);
       break;
     case 'N':
-      fprintf(fp, "%c %d %ld %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
-              Zcmd.arg2,
-              Zcmd.arg3);
+      fprintf(fp, "%c %d %ld %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              OBJ(Zcmd.arg1), Zcmd.arg2, Zcmd.arg3);
       break;
     case 'G':
     case 'C':
-      fprintf(fp, "%c %d %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              OBJ(Zcmd.arg1),
+      fprintf(fp, "%c %d %ld %ld\n", Zcmd.command, Zcmd.if_flag, OBJ(Zcmd.arg1),
               Zcmd.arg2);
       break;
     case 'R':
-      fprintf(fp, "%c %d %ld %ld\n",
-              Zcmd.command,
-              Zcmd.if_flag,
-              ROOM(Zcmd.arg1),
-              OBJ(Zcmd.arg2));
+      fprintf(fp, "%c %d %ld %ld\n", Zcmd.command, Zcmd.if_flag,
+              ROOM(Zcmd.arg1), OBJ(Zcmd.arg2));
       break;
     }
   }
@@ -175,39 +124,40 @@ void write_zone_to_disk(int vnum)
 #undef ZONE
 #undef Zcmd
 
-void zedit_disp_wear_menu(struct descriptor_data *d)
-{
+void zedit_disp_wear_menu(struct descriptor_data *d) {
   CLS(CH);
   int counter;
 
   for (counter = 0; counter < (NUM_WEARS - 1); counter += 2)
-    send_to_char(CH, "^G%2d^Y) ^W%-20s    ^G%2d^Y) ^W%-20s\r\n",
-                 counter + 1, short_where[counter],
-                 counter + 2, counter + 1 < (NUM_WEARS - 1) ?
-                 short_where[counter + 1] : "");
+    send_to_char(CH, "^G%2d^Y) ^W%-20s    ^G%2d^Y) ^W%-20s\r\n", counter + 1,
+                 short_where[counter], counter + 2,
+                 counter + 1 < (NUM_WEARS - 1) ? short_where[counter + 1] : "");
 
   send_to_char("^wEnter wear position ^Y(^G0 ^Wto quit^Y)^w: ", CH);
 }
 
-void zedit_disp_state_menu(struct descriptor_data *d)
-{
-  send_to_char("\r\n^G1^Y) ^WOpen\r\n^G2^Y) ^WClosed\r\n^G3^Y) ^WClosed and locked\r\n"
-               "^G0^Y) ^WQuit\r\n^wEnter a selection: ", CH);
+void zedit_disp_state_menu(struct descriptor_data *d) {
+  send_to_char(
+      "\r\n^G1^Y) ^WOpen\r\n^G2^Y) ^WClosed\r\n^G3^Y) ^WClosed and locked\r\n"
+      "^G0^Y) ^WQuit\r\n^wEnter a selection: ",
+      CH);
 }
 
-void zedit_disp_data_menu(struct descriptor_data *d)
-{
+void zedit_disp_data_menu(struct descriptor_data *d) {
   CLS(CH);
-  send_to_char(CH, "^WZone: ^c%d^n\r\n", ZON->number );
-  send_to_char(CH, "^G1^Y) ^WName: ^c%s^n\r\n", ZON->name );
-  send_to_char(CH, "^G2^Y) ^WTop of zone: ^c%d^n\r\n", ZON->top );
-  send_to_char(CH, "^G3^Y) ^WLifespan: ^c%d^n\r\n", ZON->lifespan );
-  send_to_char(CH, "^G4^Y) ^WReset mode: ^c%s^n\r\n", reset_mode[ZON->reset_mode] );
-  send_to_char(CH, "^G5^Y) ^WSecurity level: ^c%d^n\r\n", ZON->security );
-  send_to_char(CH, "^G6^Y) ^WJurisdiction: ^c%s^n\r\n", jurid[ZON->jurisdiction]);
-  if (access_level(CH, LVL_VICEPRES))
-  {
-    send_to_char(CH, "^G7^Y) ^WEditor's ID Numbers: ^c%d^w, ^c%d^w, ^c%d^w, ^c%d^w, ^c%d^n\r\n",
+  send_to_char(CH, "^WZone: ^c%d^n\r\n", ZON->number);
+  send_to_char(CH, "^G1^Y) ^WName: ^c%s^n\r\n", ZON->name);
+  send_to_char(CH, "^G2^Y) ^WTop of zone: ^c%d^n\r\n", ZON->top);
+  send_to_char(CH, "^G3^Y) ^WLifespan: ^c%d^n\r\n", ZON->lifespan);
+  send_to_char(CH, "^G4^Y) ^WReset mode: ^c%s^n\r\n",
+               reset_mode[ZON->reset_mode]);
+  send_to_char(CH, "^G5^Y) ^WSecurity level: ^c%d^n\r\n", ZON->security);
+  send_to_char(CH, "^G6^Y) ^WJurisdiction: ^c%s^n\r\n",
+               jurid[ZON->jurisdiction]);
+  if (access_level(CH, LVL_VICEPRES)) {
+    send_to_char(CH,
+                 "^G7^Y) ^WEditor's ID Numbers: ^c%d^w, ^c%d^w, ^c%d^w, "
+                 "^c%d^w, ^c%d^n\r\n",
                  ZON->editor_ids[0], ZON->editor_ids[1], ZON->editor_ids[2],
                  ZON->editor_ids[3], ZON->editor_ids[4]);
     send_to_char(CH, "^G8^Y) ^WConnected: ^c%d^n\r\n", ZON->connected);
@@ -218,8 +168,7 @@ void zedit_disp_data_menu(struct descriptor_data *d)
   d->edit_mode = ZEDIT_DATA_MENU;
 }
 
-const char *get_type(char c)
-{
+const char *get_type(char c) {
   switch (c) {
   case 'M':
     return "MOB";
@@ -254,8 +203,7 @@ const char *get_type(char c)
   }
 }
 
-char get_real_type(const char *i)
-{
+char get_real_type(const char *i) {
   switch (*i) {
   case '1':
     return 'M';
@@ -296,9 +244,7 @@ char get_real_type(const char *i)
   }
 }
 
-
-void zedit_disp_type_cmd(struct descriptor_data *d)
-{
+void zedit_disp_type_cmd(struct descriptor_data *d) {
   CLS(CH);
   send_to_char("^G1^Y) ^WMOB\r\n"
                "^G2^Y) ^WOBJECT\r\n"
@@ -315,11 +261,11 @@ void zedit_disp_type_cmd(struct descriptor_data *d)
                "^GC^Y) ^WCARRIED\r\n"
                "^GD^Y) ^WHOST\r\n"
                "^Rn^Y) ^WNOTHING\r\n"
-               "^wEnter command type: ", CH);
+               "^wEnter command type: ",
+               CH);
 }
 
-void zedit_disp_direction_menu(struct descriptor_data *d)
-{
+void zedit_disp_direction_menu(struct descriptor_data *d) {
   CLS(CH);
   send_to_char("^G 1^Y) ^Wnorth\r\n"
                "^G 2^Y) ^Wnortheast\r\n"
@@ -331,165 +277,145 @@ void zedit_disp_direction_menu(struct descriptor_data *d)
                "^G 8^Y) ^Wnorthwest\r\n"
                "^G 9^Y) ^Wup\r\n"
                "^G10^Y) ^Wdown\r\n"
-               "^wEnter selection: ", CH);
+               "^wEnter selection: ",
+               CH);
 }
 
 const char *get_zedit_maximum_info_string(int amount) {
   if (amount < -1)
     return " (invalid quantity - this will never load!)";
-  
+
   if (amount == -1)
     return " (ignore limit and load infinitely)";
-  
+
   if (amount == 0)
     return " (loads exactly once at game startup, then never again)";
-  
+
   if (amount > 0) {
     return " (loads until this many are in game)";
   }
-  
+
   return " (error: report this message to administration)";
 }
 
-void zedit_disp_command_menu(struct descriptor_data *d)
-{
+void zedit_disp_command_menu(struct descriptor_data *d) {
   CLS(CH);
-  send_to_char(CH, "^WCommand: ^c%d^n\r\n", d->edit_number );
-  send_to_char(CH, "^G1^Y) ^WType: ^c%s^n\r\n", get_type(COM->command) );
+  send_to_char(CH, "^WCommand: ^c%d^n\r\n", d->edit_number);
+  send_to_char(CH, "^G1^Y) ^WType: ^c%s^n\r\n", get_type(COM->command));
   send_to_char(CH, "^G2^Y) ^WConditional: ^c%s^n\r\n",
-               (!COM->if_flag ? "Always execute this command (aka: Always)" : "Only execute this command if previous command succeeds (aka: If Last)") );
-  switch (COM->command)
-  {
+               (!COM->if_flag ? "Always execute this command (aka: Always)"
+                              : "Only execute this command if previous command "
+                                "succeeds (aka: If Last)"));
+  switch (COM->command) {
   case 'M':
     send_to_char(CH, "^G3^Y) ^WLoad mob: ^c%s ^y(^B%d)^n\r\n",
-                 GET_NAME(mob_proto+COM->arg1),
-                 MOB(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 GET_NAME(mob_proto + COM->arg1), MOB(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     send_to_char(CH, "^G5^Y) ^WLoad in room: ^c%s ^y(^B%d^y)^n\r\n",
-                 world[COM->arg3].name,
-                 ROOM(COM->arg3) );
+                 world[COM->arg3].name, ROOM(COM->arg3));
     break;
   case 'S':
     send_to_char(CH, "^G3^Y) ^WLoad mob: ^c%s ^y(^B%d)^n\r\n",
-                 GET_NAME(mob_proto+COM->arg1),
-                 MOB(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 GET_NAME(mob_proto + COM->arg1), MOB(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     break;
   case 'U':
     send_to_char(CH, "^G3^Y) ^WAttach obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     break;
   case 'I':
     send_to_char(CH, "^G3^Y) ^WCarry obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     break;
   case 'O':
     send_to_char(CH, "^G3^Y) ^WLoad obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     send_to_char(CH, "^G5^Y) ^WLoad in room: ^c%s ^y(^B%d^y)^n\r\n",
-                 world[COM->arg3].name, ROOM(COM->arg3) );
+                 world[COM->arg3].name, ROOM(COM->arg3));
     break;
   case 'H':
     send_to_char(CH, "^G3^Y) ^WLoad obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     send_to_char(CH, "^G5^Y) ^WLoad in host: ^c%s ^y(^B%d^y)^n\r\n",
-                 matrix[COM->arg3].name, HOST(COM->arg3) );
+                 matrix[COM->arg3].name, HOST(COM->arg3));
     break;
   case 'V':
     send_to_char(CH, "^G3^Y) ^WLoad Veh: ^c%s ^y(^B%d^y)^n\r\n",
-                 veh_proto[COM->arg1].short_description,
-                 VEH(COM->arg1));
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 veh_proto[COM->arg1].short_description, VEH(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     send_to_char(CH, "^G5^Y) ^WLoad in room: ^c%s ^y(^B%d^y)^n\r\n",
-                 world[COM->arg3].name, ROOM(COM->arg3) );
+                 world[COM->arg3].name, ROOM(COM->arg3));
     break;
   case 'P':
     send_to_char(CH, "^G3^Y) ^WPut obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     send_to_char(CH, "^G5^Y) ^WInto obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg3].text.name,
-                 OBJ(COM->arg3) );
+                 obj_proto[COM->arg3].text.name, OBJ(COM->arg3));
     break;
   case 'G':
     send_to_char(CH, "^G3^Y) ^WGive obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
     break;
   case 'E':
     send_to_char(CH, "^G3^Y) ^WEquip obj: ^c%s (%d)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1));
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
-    send_to_char(CH, "^G5^Y) ^WAt ^c%s^W position\r\n",
-                 short_where[COM->arg3] );
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
+    send_to_char(CH, "^G5^Y) ^WAt ^c%s^W position\r\n", short_where[COM->arg3]);
     break;
   case 'N':
     send_to_char(CH, "^G3^Y) ^WGive obj: ^c%s (%d)^n\r\n",
-                 obj_proto[COM->arg1].text.name,
-                 OBJ(COM->arg1));
-    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n",
-                 COM->arg2, get_zedit_maximum_info_string(COM->arg2));
-    send_to_char(CH, "^G5^Y) ^WTotal number to give: ^c%d^n\r\n",
-                 COM->arg3);
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WMaximum number in game: ^c%d%s^n\r\n", COM->arg2,
+                 get_zedit_maximum_info_string(COM->arg2));
+    send_to_char(CH, "^G5^Y) ^WTotal number to give: ^c%d^n\r\n", COM->arg3);
     break;
   case 'R':
     send_to_char(CH, "^G3^Y) ^WRemove obj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg2].text.name,
-                 OBJ(COM->arg2) );
+                 obj_proto[COM->arg2].text.name, OBJ(COM->arg2));
     send_to_char(CH, "^G4^Y) ^WFrom room: ^c%s ^y(^B%d^y)^n\r\n",
-                 world[COM->arg1].name,
-                 ROOM(COM->arg1) );
+                 world[COM->arg1].name, ROOM(COM->arg1));
     break;
   case 'D':
-    send_to_char(CH, "^G3^Y) ^WSet door: ^c%s^n\r\n",
-                 dirs[COM->arg2] );
+    send_to_char(CH, "^G3^Y) ^WSet door: ^c%s^n\r\n", dirs[COM->arg2]);
     send_to_char(CH, "^G4^Y) ^WIn room: ^c%s ^y(^B%d^y)^n\r\n",
-                 world[COM->arg1].name,
-                 ROOM(COM->arg1) );
+                 world[COM->arg1].name, ROOM(COM->arg1));
     send_to_char(CH, "^G5^Y) ^WTo state: ^c%s^n\r\n",
-                 (COM->arg3 == 0 ? "open"
-                  : (COM->arg3 == 1 ? "closed" :
-                     "closed and locked")) );
+                 (COM->arg3 == 0
+                      ? "open"
+                      : (COM->arg3 == 1 ? "closed" : "closed and locked")));
     break;
   case 'C':
     send_to_char(CH, "^G3^Y) ^WObj: ^c%s ^y(^B%d^y)^n\r\n",
-                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1) );
-    send_to_char(CH, "^G4^Y) ^WTo: ^c%s^n\r\n", (COM->arg2 == 1 ? "bioware" : "cyberware") );
+                 obj_proto[COM->arg1].text.name, OBJ(COM->arg1));
+    send_to_char(CH, "^G4^Y) ^WTo: ^c%s^n\r\n",
+                 (COM->arg2 == 1 ? "bioware" : "cyberware"));
     break;
   }
   send_to_char("^Gq^Y) ^WQuit\r\n^wEnter your selection: ", CH);
   d->edit_mode = ZEDIT_COMMAND_MENU;
 }
 
-
 // MAIN LOOP!
-void zedit_parse(struct descriptor_data *d, const char *arg)
-{
+void zedit_parse(struct descriptor_data *d, const char *arg) {
   int number, i = 0, zone;
 
-  switch (d->edit_mode)
-  {
+  switch (d->edit_mode) {
   case ZEDIT_CONFIRM_EDIT_DATA:
     switch (*arg) {
     case 'y':
@@ -497,7 +423,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       DELETE_IF_EXTANT(d->edit_zon);
       d->edit_zon = new zone_data;
       // we do need to zero it out since we are accessing its elements
-      memset((char *) ZON, 0, sizeof(struct zone_data));
+      memset((char *)ZON, 0, sizeof(struct zone_data));
 
       *d->edit_zon = zone_table[d->edit_number];
       if (zone_table[d->edit_number].name)
@@ -522,7 +448,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       DELETE_IF_EXTANT(d->edit_zon);
       d->edit_zon = new zone_data;
       // we do need to zero it out since we are accessing its elements
-      memset((char *) ZON, 0, sizeof(struct zone_data));
+      memset((char *)ZON, 0, sizeof(struct zone_data));
 
       // set a few vars
       ZON->name = str_dup("an unfinished zone");
@@ -547,13 +473,14 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     case 'y':
     case 'Y':
       zone_num = real_zone(ZON->number);
-      sprintf(buf,"%s wrote new zcmd %ld in zone %d",
-              GET_CHAR_NAME(d->character), d->edit_number, zone_table[zone_num].number);
+      sprintf(buf, "%s wrote new zcmd %ld in zone %d",
+              GET_CHAR_NAME(d->character), d->edit_number,
+              zone_table[zone_num].number);
       mudlog(buf, d->character, LOG_WIZLOG, TRUE);
       // first we insert into memory
       if (zone_num > -1) { // ie, it already exists
         ZON->cmd = zone_table[zone_num].cmd;
-        delete [] zone_table[zone_num].name;
+        delete[] zone_table[zone_num].name;
         zone_table[zone_num] = *ZON;
       } else { // here we got to add a new spot
         int counter;
@@ -564,7 +491,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
 
         for (counter = 0; counter <= top_of_zone_table; counter++) {
           if (!found) {
-            if (zone_table[counter].number > CH->player_specials->saved.zonenum) {
+            if (zone_table[counter].number >
+                CH->player_specials->saved.zonenum) {
               new_z_table[counter] = *(ZON);
               found = 1;
               new_z_table[counter + 1] = zone_table[counter];
@@ -576,7 +504,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
         if (!found)
           new_z_table[top_of_zone_table + 1] = *(ZON);
         top_of_zone_table++;
-        delete [] zone_table;
+        delete[] zone_table;
         zone_table = new_z_table;
       }
       write_zone_to_disk(ZONENUM);
@@ -593,7 +521,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     case 'N':
       if (ZON) {
         if (ZON->name)
-          delete [] ZON->name;
+          delete[] ZON->name;
         delete ZON;
       }
       STATE(d) = CON_PLAYING;
@@ -603,7 +531,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       break; // end of 'n' case in confirm savestring
     default:
       send_to_char("Please enter yes or no.\r\n"
-                   "Do you wish to save this zone internally?\r\n", CH);
+                   "Do you wish to save this zone internally?\r\n",
+                   CH);
       break;
     }
     break; // end of confirm savestring
@@ -695,7 +624,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
                    "2) Reset only if no PCs are in the zone\r\n"
                    "3) Always reset\r\n"
                    "0) Quit\r\n"
-                   "Enter reset mode: ", CH);
+                   "Enter reset mode: ",
+                   CH);
       d->edit_mode = ZEDIT_RESET_MODE;
       break;
     case '5':
@@ -707,7 +637,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
                    "1) Portland\r\n"
                    "2) Carribean\r\n"
                    "3) Ocean\r\n"
-                   "Enter jurisdiction: ", CH);
+                   "Enter jurisdiction: ",
+                   CH);
       d->edit_mode = ZEDIT_JURID;
       break;
     case '7':
@@ -745,8 +676,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       d->edit_mode = ZEDIT_CMD_TYPE;
       break;
     case '2':
-      send_to_char("\r\n1) Always\r\n2) If Last\r\nEnter your selection: ",
-                   CH);
+      send_to_char("\r\n1) Always\r\n2) If Last\r\nEnter your selection: ", CH);
       d->edit_mode = ZEDIT_IF_FLAG_CMD;
       break;
     case '3':
@@ -804,7 +734,9 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
         d->edit_mode = ZEDIT_REMOVE_ROOM;
         break;
       case 'C':
-        send_to_char(" 0) Cyberware\r\n 1) Bioware\r\nEnter location to place obj: ", CH);
+        send_to_char(
+            " 0) Cyberware\r\n 1) Bioware\r\nEnter location to place obj: ",
+            CH);
         d->edit_mode = ZEDIT_ARG2;
         break;
       default:
@@ -855,8 +787,9 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     case 'Y':
       zone_num = real_zone(ZONENUM);
       top_of_cmds = zone_table[zone_num].num_cmds;
-      sprintf(buf,"%s wrote new zcmd %ld in zone %d",
-              GET_CHAR_NAME(d->character), d->edit_number, zone_table[zone_num].number);
+      sprintf(buf, "%s wrote new zcmd %ld in zone %d",
+              GET_CHAR_NAME(d->character), d->edit_number,
+              zone_table[zone_num].number);
       mudlog(buf, d->character, LOG_WIZLOG, TRUE);
       // first, determine if you are adding or replacing
       if (d->edit_number < top_of_cmds) {
@@ -870,19 +803,18 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
             // first count your way up
             for (counter = 0; counter < d->edit_number; counter++)
               new_cmds[counter] = zone_table[zone_num].cmd[counter];
-            for (counter = top_of_cmds; counter > d->edit_number;
-                 counter--)
-              new_cmds[counter] = zone_table[zone_num].cmd[counter-1];
+            for (counter = top_of_cmds; counter > d->edit_number; counter--)
+              new_cmds[counter] = zone_table[zone_num].cmd[counter - 1];
             new_cmds[d->edit_number] = *(COM);
             zone_table[zone_num].num_cmds++;
-            delete [] zone_table[zone_num].cmd;
+            delete[] zone_table[zone_num].cmd;
             zone_table[zone_num].cmd = new_cmds;
           } else {
             new_cmds[1] = zone_table[zone_num].cmd[0];
             new_cmds[0] = *(COM);
             zone_table[zone_num].num_cmds++;
             if (zone_table[zone_num].cmd)
-              delete [] zone_table[zone_num].cmd;
+              delete[] zone_table[zone_num].cmd;
             zone_table[zone_num].cmd = new_cmds;
           }
         }
@@ -896,15 +828,15 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
           for (counter = 0; counter < top_of_cmds; counter++)
             new_cmds[counter] = zone_table[zone_num].cmd[counter];
           // tada, here it goes now, do not increase counter, for loop
-          new_cmds[counter] = *(COM);          // already did!
+          new_cmds[counter] = *(COM); // already did!
           zone_table[zone_num].num_cmds++;
-          delete [] zone_table[zone_num].cmd;
+          delete[] zone_table[zone_num].cmd;
           zone_table[zone_num].cmd = new_cmds;
         } else {
           new_cmds[0] = *(COM);
           zone_table[zone_num].num_cmds++;
           if (zone_table[zone_num].cmd)
-            delete [] zone_table[zone_num].cmd;
+            delete[] zone_table[zone_num].cmd;
           zone_table[zone_num].cmd = new_cmds;
         }
       } // end else
@@ -929,7 +861,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       send_to_char("That's not a valid choice.\r\n", CH);
       send_to_char("Do you wish to save this zone command internally?\r\n", CH);
       break;
-    } // for switch in confirm save cmds
+    }      // for switch in confirm save cmds
     break; // for ZEDIT_CONFIRM_SAVECMDS
 
   case ZEDIT_ARG3:
@@ -942,15 +874,17 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     case 'V':
     case 'O':
       COM->arg3 = MAX(0, real_room(number));
-      if (!access_level(CH, LVL_ADMIN) && !(number >= (ZONENUM * 100) &&
-                                            number <= zone_table[real_zone(ZONENUM)].top))
+      if (!access_level(CH, LVL_ADMIN) &&
+          !(number >= (ZONENUM * 100) &&
+            number <= zone_table[real_zone(ZONENUM)].top))
         COM->arg3 = 0;
       break;
     case 'P':
       COM->arg3 = MAX(0, real_object(number));
       if (!access_level(CH, LVL_ADMIN) && (number < 600 || number > 699)) {
         for (zone = 0; zone <= top_of_zone_table; zone++)
-          if (number >= (zone_table[zone].number * 100) && number <= zone_table[zone].top)
+          if (number >= (zone_table[zone].number * 100) &&
+              number <= zone_table[zone].top)
             break;
         if (zone <= top_of_zone_table) {
           for (i = 0; i < 5; i++)
@@ -974,9 +908,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     if ((number < 0) || (number > 3)) {
       zedit_disp_state_menu(d);
       return;
-    } else
-      if (number != 0)
-        COM->arg3 = number - 1;
+    } else if (number != 0)
+      COM->arg3 = number - 1;
     zedit_disp_command_menu(d);
     break;
 
@@ -993,8 +926,9 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
   case ZEDIT_REMOVE_ROOM:
     number = atoi(arg);
     COM->arg1 = MAX(0, real_room(number));
-    if (!access_level(CH, LVL_ADMIN) && !(number >= (ZONENUM * 100) &&
-                                          number <= zone_table[real_zone(ZONENUM)].top))
+    if (!access_level(CH, LVL_ADMIN) &&
+        !(number >= (ZONENUM * 100) &&
+          number <= zone_table[real_zone(ZONENUM)].top))
       COM->arg1 = 0;
     zedit_disp_command_menu(d);
     break;
@@ -1003,11 +937,13 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     number = atoi(arg);
     if (COM->command == 'C' && (number < 0 || number > 1)) {
       send_to_char("Value must be either 0 (cyberware) or 1 (bioware).\r\n"
-                   "Enter location to place obj: ", CH);
+                   "Enter location to place obj: ",
+                   CH);
       return;
     } else if ((number < -1) || (number > 1000)) {
       send_to_char("Value must be between -1 and 1000.\r\n"
-                   "Enter max allowed to exist in game: ", CH);
+                   "Enter max allowed to exist in game: ",
+                   CH);
       return;
     }
     COM->arg2 = number;
@@ -1019,9 +955,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     if (number < 0 || number > 10) {
       zedit_disp_direction_menu(d);
       return;
-    } else
-      if (number != 0)
-        COM->arg2 = number - 1;
+    } else if (number != 0)
+      COM->arg2 = number - 1;
     zedit_disp_command_menu(d);
     break;
 
@@ -1034,7 +969,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
         COM->arg1 = MAX(0, real_mobile(number));
         if (!access_level(CH, LVL_ADMIN)) {
           for (zone = 0; zone <= top_of_zone_table; zone++)
-            if (number >= (zone_table[zone].number * 100) && number <= zone_table[zone].top)
+            if (number >= (zone_table[zone].number * 100) &&
+                number <= zone_table[zone].top)
               break;
           if (zone <= top_of_zone_table) {
             for (i = 0; i < 5; i++)
@@ -1050,9 +986,11 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
           COM->arg2 = MAX(0, real_object(number));
         else
           COM->arg1 = MAX(0, real_object(number));
-        if (!access_level(CH, LVL_ADMIN) && (number < 300 || number > 699 || (number > 499 && number < 600))) {
+        if (!access_level(CH, LVL_ADMIN) &&
+            (number < 300 || number > 699 || (number > 499 && number < 600))) {
           for (zone = 0; zone <= top_of_zone_table; zone++)
-            if (number >= (zone_table[zone].number * 100) && number <= zone_table[zone].top)
+            if (number >= (zone_table[zone].number * 100) &&
+                number <= zone_table[zone].top)
               break;
           if (zone <= top_of_zone_table) {
             for (i = 0; i < 5; i++)
@@ -1081,7 +1019,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     } else {
       COM->command = get_real_type(arg);
       if ((COM->command == 'E') || (COM->command == 'G') ||
-          (COM->command == 'P') || (COM->command == 'N') || (COM->command == 'C'))
+          (COM->command == 'P') || (COM->command == 'N') ||
+          (COM->command == 'C'))
         COM->if_flag = 1;
       else
         COM->if_flag = 0;
@@ -1097,14 +1036,19 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     number = atoi(arg);
     if ((number < 1) || (number > 2)) {
       send_to_char("Invalid selection.\r\n1) Always\r\n2) If last\r\n"
-                   "Enter your selection: ", CH);
+                   "Enter your selection: ",
+                   CH);
     } else {
       if (number == 1) {
         COM->if_flag = FALSE;
-        send_to_char("OK, this command will execute regardless of whether the previous command succeeded or not.\r\n", CH);
+        send_to_char("OK, this command will execute regardless of whether the "
+                     "previous command succeeded or not.\r\n",
+                     CH);
       } else {
         COM->if_flag = TRUE;
-        send_to_char("OK, this command will only execute if the previous zone command succeeds.\r\n", CH);
+        send_to_char("OK, this command will only execute if the previous zone "
+                     "command succeeds.\r\n",
+                     CH);
       }
       zedit_disp_command_menu(d);
     }
@@ -1112,7 +1056,7 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
 
   case ZEDIT_ZONE_NAME:
     if (ZON->name)
-      delete [] ZON->name;
+      delete[] ZON->name;
     ZON->name = str_dup(arg);
     zedit_disp_data_menu(d);
     break;
@@ -1120,7 +1064,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
   case ZEDIT_SECURITY:
     number = atoi(arg);
     if (number < 1 || number > 15) {
-      send_to_char("Security rating must range from 1 to 15.\r\nZone security: ", CH);
+      send_to_char(
+          "Security rating must range from 1 to 15.\r\nZone security: ", CH);
       return;
     }
     ZON->security = number;
@@ -1128,19 +1073,21 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
     break;
 
   case ZEDIT_ID_LIST: {
-      int t[5] = {0, 0, 0, 0, 0};
-      if (sscanf(arg, "%d %d %d %d %d\n", &t[0], &t[1], &t[2], &t[3], &t[4]) == 5) {
-        ZON->editor_ids[0] = t[0];
-        ZON->editor_ids[1] = t[1];
-        ZON->editor_ids[2] = t[2];
-        ZON->editor_ids[3] = t[3];
-        ZON->editor_ids[4] = t[4];
-      } else {
-        send_to_char("That field requires five separate integers. Example: 9 123 4 0 0\r\n", CH);
-      }
-      zedit_disp_data_menu(d);
+    int t[5] = {0, 0, 0, 0, 0};
+    if (sscanf(arg, "%d %d %d %d %d\n", &t[0], &t[1], &t[2], &t[3], &t[4]) ==
+        5) {
+      ZON->editor_ids[0] = t[0];
+      ZON->editor_ids[1] = t[1];
+      ZON->editor_ids[2] = t[2];
+      ZON->editor_ids[3] = t[3];
+      ZON->editor_ids[4] = t[4];
+    } else {
+      send_to_char("That field requires five separate integers. Example: 9 123 "
+                   "4 0 0\r\n",
+                   CH);
     }
-    break;
+    zedit_disp_data_menu(d);
+  } break;
   case ZEDIT_CONNECTED:
     number = atoi(arg);
     if (number != 0 && number != 1) {
@@ -1148,8 +1095,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       return;
     }
 
-    sprintf(buf, "%s set zone %d to connected %d (was %d)",
-            GET_CHAR_NAME( CH ), ZON->number, number, ZON->connected );
+    sprintf(buf, "%s set zone %d to connected %d (was %d)", GET_CHAR_NAME(CH),
+            ZON->number, number, ZON->connected);
     mudlog(buf, CH, LOG_WIZLOG, TRUE);
 
     ZON->connected = number;
@@ -1158,22 +1105,22 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
   case ZEDIT_TOP_OF_ZONE:
     number = atoi(arg);
     if ((d->edit_number == top_of_zone_table) || (d->edit_number == -1))
-      if ((number < ZON->number * 100) || (number > (ZON->number * 100 + 499))) {
-        send_to_char(CH, "Value must range from %d to %d\r\n", ZON->number * 100,
-                     (ZON->number * 100 + 499));
-        send_to_char("Enter top of zone: ", CH);
-        return;
-      } else
-        ZON->top = number;
-    else
       if ((number < ZON->number * 100) ||
-          (number > zone_table[d->edit_number + 1].number * 100 - 1)) {
-        send_to_char(CH, "Value must range from %d to %d\r\n", ZON->number * 100,
-                     zone_table[d->edit_number + 1].number * 100 - 1);
+          (number > (ZON->number * 100 + 499))) {
+        send_to_char(CH, "Value must range from %d to %d\r\n",
+                     ZON->number * 100, (ZON->number * 100 + 499));
         send_to_char("Enter top of zone: ", CH);
         return;
       } else
         ZON->top = number;
+    else if ((number < ZON->number * 100) ||
+             (number > zone_table[d->edit_number + 1].number * 100 - 1)) {
+      send_to_char(CH, "Value must range from %d to %d\r\n", ZON->number * 100,
+                   zone_table[d->edit_number + 1].number * 100 - 1);
+      send_to_char("Enter top of zone: ", CH);
+      return;
+    } else
+      ZON->top = number;
     zedit_disp_data_menu(d);
     break;
 
@@ -1194,9 +1141,8 @@ void zedit_parse(struct descriptor_data *d, const char *arg)
       send_to_char("Invalid choice.  Please enter from 0 to 3.\r\n", CH);
       send_to_char("Enter reset mode: ", CH);
       return;
-    } else
-      if (number != 0)
-        ZON->reset_mode = number - 1;
+    } else if (number != 0)
+      ZON->reset_mode = number - 1;
     zedit_disp_data_menu(d);
     break;
   case ZEDIT_JURID:

@@ -1,12 +1,12 @@
 /* ************************************************************************
-*   File: ban.c                                         Part of CircleMUD *
-*  Usage: banning/unbanning/checking sites and player names               *
-*                                                                         *
-*  All rights reserved.  See license.doc for complete information.        *
-*                                                                         *
-*  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
-*  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
-************************************************************************ */
+ *   File: ban.c                                         Part of CircleMUD *
+ *  Usage: banning/unbanning/checking sites and player names               *
+ *                                                                         *
+ *  All rights reserved.  See license.doc for complete information.        *
+ *                                                                         *
+ *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
+ *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
+ ************************************************************************ */
 
 #include <errno.h>
 #include <stdio.h>
@@ -26,16 +26,9 @@
 
 struct ban_list_element *ban_list = NULL;
 
-const char *ban_types[] = {
-                      "no",
-                      "new",
-                      "select",
-                      "all",
-                      "ERROR"
-                    };
+const char *ban_types[] = {"no", "new", "select", "all", "ERROR"};
 
-void load_banned(void)
-{
+void load_banned(void) {
   FILE *fl;
   int i, date;
   char site_name[BANNED_SITE_LENGTH + 1], ban_type[100];
@@ -67,8 +60,7 @@ void load_banned(void)
   fclose(fl);
 }
 
-int isbanned(char *hostname)
-{
+int isbanned(char *hostname) {
   int i;
   struct ban_list_element *banned_node;
   char *nextchar;
@@ -81,39 +73,36 @@ int isbanned(char *hostname)
     *nextchar = LOWER(*nextchar);
 
   for (banned_node = ban_list; banned_node; banned_node = banned_node->next)
-    if (strstr((const char *)hostname, banned_node->site))      /* if hostname is a substring */
+    if (strstr((const char *)hostname,
+               banned_node->site)) /* if hostname is a substring */
       i = MAX(i, banned_node->type);
 
   return i;
 }
 
-void _write_one_node(FILE * fp, struct ban_list_element * node)
-{
-  if (node)
-  {
+void _write_one_node(FILE *fp, struct ban_list_element *node) {
+  if (node) {
     _write_one_node(fp, node->next);
-    fprintf(fp, "%s %s %ld %s\n", ban_types[node->type],
-            node->site, (long) node->date, node->name);
+    fprintf(fp, "%s %s %ld %s\n", ban_types[node->type], node->site,
+            (long)node->date, node->name);
   }
 }
 
-void write_ban_list(void)
-{
+void write_ban_list(void) {
   FILE *fl;
 
   if (!(fl = fopen(BAN_FILE, "w"))) {
     perror("write_ban_list");
     return;
   }
-  _write_one_node(fl, ban_list);/* recursively write from end to start */
+  _write_one_node(fl, ban_list); /* recursively write from end to start */
   fclose(fl);
   return;
 }
 
-ACMD(do_ban)
-{
-  char flag[MAX_INPUT_LENGTH], site[MAX_INPUT_LENGTH],
-  format[MAX_INPUT_LENGTH], *nextchar, *timestr;
+ACMD(do_ban) {
+  char flag[MAX_INPUT_LENGTH], site[MAX_INPUT_LENGTH], format[MAX_INPUT_LENGTH],
+      *nextchar, *timestr;
   int i;
   struct ban_list_element *ban_node;
 
@@ -125,14 +114,10 @@ ACMD(do_ban)
       return;
     }
     strcpy(format, "%-25.25s  %-8.8s  %-10.10s  %-16.16s\r\n");
-    sprintf(buf, format,
-            "Banned Site Name",
-            "Ban Type",
-            "Banned On",
+    sprintf(buf, format, "Banned Site Name", "Ban Type", "Banned On",
             "Banned By");
     send_to_char(buf, ch);
-    sprintf(buf, format,
-            "---------------------------------",
+    sprintf(buf, format, "---------------------------------",
             "---------------------------------",
             "---------------------------------",
             "---------------------------------");
@@ -156,13 +141,16 @@ ACMD(do_ban)
     send_to_char("Usage: ban {all | select | new} site_name\r\n", ch);
     return;
   }
-  if (!(!str_cmp(flag, "select") || !str_cmp(flag, "all") || !str_cmp(flag, "new"))) {
+  if (!(!str_cmp(flag, "select") || !str_cmp(flag, "all") ||
+        !str_cmp(flag, "new"))) {
     send_to_char("Flag must be ALL, SELECT, or NEW.\r\n", ch);
     return;
   }
   for (ban_node = ban_list; ban_node; ban_node = ban_node->next) {
     if (!str_cmp(ban_node->site, site)) {
-      send_to_char("That site has already been banned -- unban it to change the ban type.\r\n", ch);
+      send_to_char("That site has already been banned -- unban it to change "
+                   "the ban type.\r\n",
+                   ch);
       return;
     }
   }
@@ -190,8 +178,7 @@ ACMD(do_ban)
   write_ban_list();
 }
 
-ACMD(do_unban)
-{
+ACMD(do_unban) {
   char site[80];
   struct ban_list_element *ban_node, *temp;
   int found = 0;
@@ -215,11 +202,10 @@ ACMD(do_unban)
   }
   REMOVE_FROM_LIST(ban_node, ban_list, next);
   send_to_char("Site unbanned.\r\n", ch);
-  sprintf(buf, "%s removed the %s-player ban on %s.",
-          GET_CHAR_NAME(ch), ban_types[ban_node->type], ban_node->site);
+  sprintf(buf, "%s removed the %s-player ban on %s.", GET_CHAR_NAME(ch),
+          ban_types[ban_node->type], ban_node->site);
   mudlog(buf, ch, LOG_WIZLOG, TRUE);
 
   DELETE_AND_NULL(ban_node);
   write_ban_list();
 }
-

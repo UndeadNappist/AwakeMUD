@@ -4,8 +4,8 @@
 #define _helpedit_h_
 
 #define HELPEDIT_MAIN_MENU 1
-#define HELPEDIT_TITLE     2
-#define HELPEDIT_BODY      3
+#define HELPEDIT_TITLE 2
+#define HELPEDIT_BODY 3
 
 ACMD_DECLARE(do_helpedit);
 ACMD_DECLARE(do_helpexport);

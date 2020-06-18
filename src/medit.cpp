@@ -1,9 +1,8 @@
 /* ****************************************************
-* File: medit.cc                                      *
-* Mob Editor For AwakeOLC, a component of AwakeMUD    *
-* (c)2001 The AwakeMUD Consortium, and Andrew Hynek   *
-**************************************************** */
-
+ * File: medit.cc                                      *
+ * Mob Editor For AwakeOLC, a component of AwakeMUD    *
+ * (c)2001 The AwakeMUD Consortium, and Andrew Hynek   *
+ **************************************************** */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,11 +38,10 @@ extern class memoryClass *Mem;
 
 // local defines
 #define MOB d->edit_mob
-#define NUM_ATTACK_TYPES       28
-#define MAX_REG_DESC_LENGTH    160
+#define NUM_ATTACK_TYPES 28
+#define MAX_REG_DESC_LENGTH 160
 
-void medit_disp_menu(struct descriptor_data *d)
-{
+void medit_disp_menu(struct descriptor_data *d) {
   int base = calc_karma(NULL, MOB);
 
   CLS(CH);
@@ -54,22 +52,26 @@ void medit_disp_menu(struct descriptor_data *d)
   send_to_char(CH, "2) Name: %s%s%s\r\n", CCCYN(CH, C_CMP),
                MOB->player.physical_text.name, CCNRM(CH, C_CMP));
   send_to_char(CH, "3) Room description:\r\n%s%s%s\r\n", CCCYN(CH, C_CMP),
-               MOB->player.physical_text.room_desc,CCNRM(CH, C_CMP));
+               MOB->player.physical_text.room_desc, CCNRM(CH, C_CMP));
   send_to_char(CH, "4) Look description:\r\n%s\r\n",
                MOB->player.physical_text.look_desc);
   MOB_FLAGS(MOB).PrintBits(buf1, MAX_STRING_LENGTH, action_bits, MOB_MAX);
   send_to_char(CH, "5) Mob Flags: %s%s%s\r\n", CCCYN(CH, C_CMP), buf1,
                CCNRM(CH, C_CMP));
   MOB->char_specials.saved.affected_by.PrintBits(buf1, MAX_STRING_LENGTH,
-      affected_bits, AFF_MAX);
+                                                 affected_bits, AFF_MAX);
   send_to_char(CH, "6) Affected Flags: %s%s%s\r\n", CCCYN(CH, C_CMP), buf1,
                CCNRM(CH, C_CMP));
-  send_to_char(CH, "8) Avg. nuyen: %s%6d%s      Avg. credstick value: %s%6d%s\r\n", CCCYN(CH, C_CMP),
-               GET_NUYEN(MOB), CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               GET_BANK(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "9) Bonus karma points: %s%d%s    (Total karma points: %s%d%s)\r\n",
-               CCCYN(CH, C_CMP), GET_KARMA(MOB), CCNRM(CH, C_CMP), CCCYN(CH, C_CMP), base, CCNRM(CH, C_CMP));
-  send_to_char(CH, "a) Attributes: B(%s%d%s), Q(%s%d%s), S(%s%d%s), C(%s%d%s), "
+  send_to_char(CH,
+               "8) Avg. nuyen: %s%6d%s      Avg. credstick value: %s%6d%s\r\n",
+               CCCYN(CH, C_CMP), GET_NUYEN(MOB), CCNRM(CH, C_CMP),
+               CCCYN(CH, C_CMP), GET_BANK(MOB), CCNRM(CH, C_CMP));
+  send_to_char(
+      CH, "9) Bonus karma points: %s%d%s    (Total karma points: %s%d%s)\r\n",
+      CCCYN(CH, C_CMP), GET_KARMA(MOB), CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
+      base, CCNRM(CH, C_CMP));
+  send_to_char(CH,
+               "a) Attributes: B(%s%d%s), Q(%s%d%s), S(%s%d%s), C(%s%d%s), "
                "I(%s%d%s), W(%s%d%s), M(%s%d%s), R(%s%d%s)\r\n",
                CCCYN(CH, C_CMP), GET_REAL_BOD(MOB), CCNRM(CH, C_CMP),
                CCCYN(CH, C_CMP), GET_REAL_QUI(MOB), CCNRM(CH, C_CMP),
@@ -81,13 +83,14 @@ void medit_disp_menu(struct descriptor_data *d)
                CCCYN(CH, C_CMP), GET_REAL_REA(MOB), CCNRM(CH, C_CMP));
   send_to_char(CH, "b) Level: %s%d%s\r\n", CCCYN(CH, C_CMP), GET_LEVEL(MOB),
                CCNRM(CH, C_CMP));
-  send_to_char(CH, "c) Ballistic: %s%d%s, ", CCCYN(CH, C_CMP), GET_BALLISTIC(MOB),
-               CCNRM(CH, C_CMP));
+  send_to_char(CH, "c) Ballistic: %s%d%s, ", CCCYN(CH, C_CMP),
+               GET_BALLISTIC(MOB), CCNRM(CH, C_CMP));
   send_to_char(CH, "d) Impact: %s%d%s\r\n", CCCYN(CH, C_CMP), GET_IMPACT(MOB),
                CCNRM(CH, C_CMP));
-  send_to_char(CH, "e) Max physical points: %s%d%s, f) Max mental points: %s%d%s\r\n", CCCYN(CH, C_CMP),
-               (int)(GET_MAX_PHYSICAL(MOB) / 100), CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               (int)(GET_MAX_MENTAL(MOB) / 100), CCNRM(CH, C_CMP));
+  send_to_char(
+      CH, "e) Max physical points: %s%d%s, f) Max mental points: %s%d%s\r\n",
+      CCCYN(CH, C_CMP), (int)(GET_MAX_PHYSICAL(MOB) / 100), CCNRM(CH, C_CMP),
+      CCCYN(CH, C_CMP), (int)(GET_MAX_MENTAL(MOB) / 100), CCNRM(CH, C_CMP));
   sprinttype(GET_POS(MOB), position_types, buf1);
   send_to_char(CH, "g) Position: %s%s%s, ", CCCYN(CH, C_CMP), buf1,
                CCNRM(CH, C_CMP));
@@ -104,8 +107,10 @@ void medit_disp_menu(struct descriptor_data *d)
                CCNRM(CH, C_CMP));
   send_to_char(CH, "l) Race: ^c%s^n\r\n", pc_race_types[(int)GET_RACE(MOB)]);
   // gotta subtract TYPE_HIT to make it work properly
-  sprinttype(!(MOB->mob_specials.attack_type) ? 0 :
-             (MOB->mob_specials.attack_type - TYPE_HIT), attack_types, buf1);
+  sprinttype(!(MOB->mob_specials.attack_type)
+                 ? 0
+                 : (MOB->mob_specials.attack_type - TYPE_HIT),
+             attack_types, buf1);
   send_to_char(CH, "m) Attack Type: %s%s%s\r\n", CCCYN(CH, C_CMP), buf1,
                CCNRM(CH, C_CMP));
   send_to_char("n) Skill menu.\r\n", CH);
@@ -117,13 +122,11 @@ void medit_disp_menu(struct descriptor_data *d)
   d->edit_mode = MEDIT_MAIN_MENU;
 }
 
-void medit_disp_skills(struct descriptor_data *d)
-{
+void medit_disp_skills(struct descriptor_data *d) {
   int c, line = 0;
 
   CLS(CH);
-  for (c = 1; c < MAX_SKILLS; c++)
-  {
+  for (c = 1; c < MAX_SKILLS; c++) {
     line++;
     if ((line % 3) == 1)
       sprintf(buf, "%2d) %-20s ", c, skills[c].name);
@@ -134,89 +137,84 @@ void medit_disp_skills(struct descriptor_data *d)
       send_to_char(buf, CH);
     }
   }
-  if ((line % 3) != 0)
-  {
+  if ((line % 3) != 0) {
     sprintf(buf, "%s\r\nEnter a skill (0 to quit): ", buf);
     send_to_char(buf, CH);
   }
 }
 
-void medit_disp_attack_menu(struct descriptor_data *d)
-{
+void medit_disp_attack_menu(struct descriptor_data *d) {
   int c;
 
   CLS(CH);
-  for (c = 0; c < (NUM_ATTACK_TYPES - 1); c+= 2)
-    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n", c+1 , attack_types[c],
-                 c+2, c+1 < (NUM_ATTACK_TYPES - 1) ? attack_types[c+1] : "");
+  for (c = 0; c < (NUM_ATTACK_TYPES - 1); c += 2)
+    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n", c + 1, attack_types[c], c + 2,
+                 c + 1 < (NUM_ATTACK_TYPES - 1) ? attack_types[c + 1] : "");
 
   send_to_char("Enter attack type: ", CH);
 }
 
-void medit_disp_skill_menu(struct descriptor_data *d)
-{
+void medit_disp_skill_menu(struct descriptor_data *d) {
 
   CLS(CH);
   send_to_char(CH, "1) Skill: %s%s%s (%s%d%s)\r\n", CCCYN(CH, C_CMP),
-               skills[MOB->mob_specials.mob_skills[0]].name, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               MOB->mob_specials.mob_skills[1], CCNRM(CH, C_CMP));
+               skills[MOB->mob_specials.mob_skills[0]].name, CCNRM(CH, C_CMP),
+               CCCYN(CH, C_CMP), MOB->mob_specials.mob_skills[1],
+               CCNRM(CH, C_CMP));
   send_to_char(CH, "2) Skill: %s%s%s (%s%d%s)\r\n", CCCYN(CH, C_CMP),
-               skills[MOB->mob_specials.mob_skills[2]].name, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               MOB->mob_specials.mob_skills[3], CCNRM(CH, C_CMP));
+               skills[MOB->mob_specials.mob_skills[2]].name, CCNRM(CH, C_CMP),
+               CCCYN(CH, C_CMP), MOB->mob_specials.mob_skills[3],
+               CCNRM(CH, C_CMP));
   send_to_char(CH, "3) Skill: %s%s%s (%s%d%s)\r\n", CCCYN(CH, C_CMP),
-               skills[MOB->mob_specials.mob_skills[4]].name, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               MOB->mob_specials.mob_skills[5], CCNRM(CH, C_CMP));
+               skills[MOB->mob_specials.mob_skills[4]].name, CCNRM(CH, C_CMP),
+               CCCYN(CH, C_CMP), MOB->mob_specials.mob_skills[5],
+               CCNRM(CH, C_CMP));
   send_to_char(CH, "4) Skill: %s%s%s (%s%d%s)\r\n", CCCYN(CH, C_CMP),
-               skills[MOB->mob_specials.mob_skills[6]].name, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               MOB->mob_specials.mob_skills[7], CCNRM(CH, C_CMP));
+               skills[MOB->mob_specials.mob_skills[6]].name, CCNRM(CH, C_CMP),
+               CCCYN(CH, C_CMP), MOB->mob_specials.mob_skills[7],
+               CCNRM(CH, C_CMP));
   send_to_char(CH, "5) Skill: %s%s%s (%s%d%s)\r\n", CCCYN(CH, C_CMP),
-               skills[MOB->mob_specials.mob_skills[8]].name, CCNRM(CH, C_CMP), CCCYN(CH, C_CMP),
-               MOB->mob_specials.mob_skills[9], CCNRM(CH, C_CMP));
+               skills[MOB->mob_specials.mob_skills[8]].name, CCNRM(CH, C_CMP),
+               CCCYN(CH, C_CMP), MOB->mob_specials.mob_skills[9],
+               CCNRM(CH, C_CMP));
   send_to_char("0) Quit\r\n", CH);
 
   send_to_char("Enter your choice: ", CH);
 }
 
-void medit_disp_mobflags_menu(struct descriptor_data *d)
-{
+void medit_disp_mobflags_menu(struct descriptor_data *d) {
 
   int c;
 
   CLS(CH);
-  for (c = 0; c < MOB_MAX; c += 2)
-  {
-    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n",
-                 c + 1, action_bits[c],
-                 c + 2, c + 1 < MOB_MAX ?
-                 action_bits[c + 1] : "");
+  for (c = 0; c < MOB_MAX; c += 2) {
+    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n", c + 1, action_bits[c], c + 2,
+                 c + 1 < MOB_MAX ? action_bits[c + 1] : "");
   }
   MOB_FLAGS(MOB).PrintBits(buf1, MAX_STRING_LENGTH, action_bits, MOB_MAX);
-  send_to_char(CH, "Mob flags: %s%s%s\r\n"
-               "Enter mob flag, 0 to quit:", CCCYN(CH, C_CMP),
-               buf1, CCNRM(CH, C_CMP));
+  send_to_char(CH,
+               "Mob flags: %s%s%s\r\n"
+               "Enter mob flag, 0 to quit:",
+               CCCYN(CH, C_CMP), buf1, CCNRM(CH, C_CMP));
 }
 
-void medit_disp_affected_menu(struct descriptor_data *d)
-{
+void medit_disp_affected_menu(struct descriptor_data *d) {
 
   int c;
 
   CLS(CH);
-  for (c = 0; c < AFF_MAX; c += 2)
-  {
-    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n",
-                 c + 1, affected_bits[c],
-                 c + 2, c + 1 < AFF_MAX ?
-                 affected_bits[c + 1] : "");
+  for (c = 0; c < AFF_MAX; c += 2) {
+    send_to_char(CH, "%2d) %-20s %2d) %-20s\r\n", c + 1, affected_bits[c],
+                 c + 2, c + 1 < AFF_MAX ? affected_bits[c + 1] : "");
   }
   AFF_FLAGS(MOB).PrintBits(buf1, MAX_STRING_LENGTH, affected_bits, AFF_MAX);
-  send_to_char(CH, "Affected flags: %s%s%s\r\n"
-               "Enter affected flag, 0 to quit:", CCCYN(CH, C_CMP),
-               buf1, CCNRM(CH, C_CMP));
+  send_to_char(CH,
+               "Affected flags: %s%s%s\r\n"
+               "Enter affected flag, 0 to quit:",
+               CCCYN(CH, C_CMP), buf1, CCNRM(CH, C_CMP));
 }
 
-void medit_disp_pos_menu(struct descriptor_data *d)
-{
+void medit_disp_pos_menu(struct descriptor_data *d) {
   int c;
 
   CLS(CH);
@@ -224,52 +222,55 @@ void medit_disp_pos_menu(struct descriptor_data *d)
     send_to_char(CH, "%2d) %-20s\r\n", c, position_types[c]);
 }
 
-void medit_disp_gender_menu(struct descriptor_data *d)
-{
+void medit_disp_gender_menu(struct descriptor_data *d) {
   send_to_char("1) Neutral\r\n2) Male\r\n3) Female\r\n"
-               "\r\nEnter gender: ", CH);
+               "\r\nEnter gender: ",
+               CH);
 }
 
-void medit_disp_class_menu(struct descriptor_data *d)
-{
+void medit_disp_class_menu(struct descriptor_data *d) {
   CLS(CH);
   for (int c = 1; c < NUM_RACES; c++)
     send_to_char(CH, "%2d) %-20s\r\n", c, pc_race_types[c]);
-  send_to_char(CH, "Mob class: ^c%s^n\r\n"
-               "Enter mob class, 0 to quit: ", pc_race_types[(int)GET_RACE(MOB)]);
+  send_to_char(CH,
+               "Mob class: ^c%s^n\r\n"
+               "Enter mob class, 0 to quit: ",
+               pc_race_types[(int)GET_RACE(MOB)]);
 }
 
-void medit_disp_att_menu(struct descriptor_data *d)
-{
+void medit_disp_att_menu(struct descriptor_data *d) {
 
   CLS(CH);
-  send_to_char(CH, "1) Body:       %s%d%s\r\n", CCCYN(CH, C_CMP), GET_REAL_BOD(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "2) Quickness:  %s%d%s\r\n", CCCYN(CH, C_CMP), GET_REAL_QUI(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "3) Strength:   %s%d%s\r\n", CCCYN(CH, C_CMP), GET_REAL_STR(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "4) Charisma:   %s%d%s\r\n", CCCYN(CH, C_CMP), GET_REAL_CHA(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "5) Intel.:     %s%d%s\r\n", CCCYN(CH, C_CMP), GET_REAL_INT(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "6) Willpower:  %s%d%s\r\n", CCCYN(CH, C_CMP), GET_REAL_WIL(MOB), CCNRM(CH, C_CMP));
-  send_to_char(CH, "7) Magic:      %s%d%s\r\n", CCCYN(CH, C_CMP), MOB->real_abils.mag / 100,
-               CCNRM(CH, C_CMP));
+  send_to_char(CH, "1) Body:       %s%d%s\r\n", CCCYN(CH, C_CMP),
+               GET_REAL_BOD(MOB), CCNRM(CH, C_CMP));
+  send_to_char(CH, "2) Quickness:  %s%d%s\r\n", CCCYN(CH, C_CMP),
+               GET_REAL_QUI(MOB), CCNRM(CH, C_CMP));
+  send_to_char(CH, "3) Strength:   %s%d%s\r\n", CCCYN(CH, C_CMP),
+               GET_REAL_STR(MOB), CCNRM(CH, C_CMP));
+  send_to_char(CH, "4) Charisma:   %s%d%s\r\n", CCCYN(CH, C_CMP),
+               GET_REAL_CHA(MOB), CCNRM(CH, C_CMP));
+  send_to_char(CH, "5) Intel.:     %s%d%s\r\n", CCCYN(CH, C_CMP),
+               GET_REAL_INT(MOB), CCNRM(CH, C_CMP));
+  send_to_char(CH, "6) Willpower:  %s%d%s\r\n", CCCYN(CH, C_CMP),
+               GET_REAL_WIL(MOB), CCNRM(CH, C_CMP));
+  send_to_char(CH, "7) Magic:      %s%d%s\r\n", CCCYN(CH, C_CMP),
+               MOB->real_abils.mag / 100, CCNRM(CH, C_CMP));
   send_to_char(CH, "q) Quit\r\n");
 
   send_to_char("\r\nEnter your choice:\r\n", CH);
   d->edit_mode = MEDIT_ATTRIBUTES;
 }
 
-
 // **************************************************************************
 // *  Main Loop                                                            *
 // ***************************************************************************
 
-void medit_parse(struct descriptor_data *d, const char *arg)
-{
+void medit_parse(struct descriptor_data *d, const char *arg) {
 
   int number;
-  int mob_number;  // the RNUM
+  int mob_number; // the RNUM
 
-  switch(d->edit_mode)
-  {
+  switch (d->edit_mode) {
   case MEDIT_CONFIRM_EDIT:
     /* if player hits 'Y' then edit mob */
     switch (*arg) {
@@ -292,16 +293,16 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       send_to_char("Do you wish to edit it?\r\n", CH);
       break;
     }
-    break;                      /* end of MEDIT_CONFIRM_EDIT */
+    break; /* end of MEDIT_CONFIRM_EDIT */
 
   case MEDIT_CONFIRM_SAVESTRING:
-    switch(*arg) {
+    switch (*arg) {
     case 'y':
     case 'Y':
       // first write to the internal tables
       if (!vnum_from_non_connected_zone(d->edit_number)) {
-        sprintf(buf,"%s wrote new mob #%ld",
-                GET_CHAR_NAME(d->character), d->edit_number);
+        sprintf(buf, "%s wrote new mob #%ld", GET_CHAR_NAME(d->character),
+                d->edit_number);
         mudlog(buf, d->character, LOG_WIZLOG, TRUE);
       }
       mob_number = real_mobile(d->edit_number);
@@ -326,20 +327,23 @@ void medit_parse(struct descriptor_data *d, const char *arg)
         } // end for loop
 
         // now you can free the old prototype and put in the new one
-        DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].player.physical_text.keywords);
+        DELETE_ARRAY_IF_EXTANT(
+            mob_proto[mob_number].player.physical_text.keywords);
         DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].player.title);
         DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].player.physical_text.name);
-        DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].player.physical_text.room_desc);
-        DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].player.physical_text.look_desc);
+        DELETE_ARRAY_IF_EXTANT(
+            mob_proto[mob_number].player.physical_text.room_desc);
+        DELETE_ARRAY_IF_EXTANT(
+            mob_proto[mob_number].player.physical_text.look_desc);
         DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].char_specials.arrive);
         DELETE_ARRAY_IF_EXTANT(mob_proto[mob_number].char_specials.leave);
 
         mob_proto[mob_number] = *d->edit_mob;
         mob_proto[mob_number].nr = mob_number;
 
-      } else {  // if not, we need to make a new spot in the list
-        int             counter;
-        int             found = FALSE;
+      } else { // if not, we need to make a new spot in the list
+        int counter;
+        int found = FALSE;
 
         struct char_data *new_mob_proto;
         struct index_data *new_mob_index;
@@ -386,9 +390,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
           }
         } // for loop through list
 
-
         /* if we STILL haven't found it, means the mobile was > than all
-        * the other mobs.. so insert at end */
+         * the other mobs.. so insert at end */
         if (!found) {
           new_mob_index[top_of_mobt + 1].vnum = d->edit_number;
           new_mob_index[top_of_mobt + 1].number = 0;
@@ -405,30 +408,31 @@ void medit_parse(struct descriptor_data *d, const char *arg)
         top_of_mobt++;
 
         /* we also have to renumber all the mobiles currently    *
-        *  existing in the world. This is because when I start   *
-        * extracting mobiles, bad things will happen!           */
+         *  existing in the world. This is because when I start   *
+         * extracting mobiles, bad things will happen!           */
         for (temp_mob = character_list; temp_mob; temp_mob = temp_mob->next)
-          if (GET_MOB_RNUM (temp_mob) >= d->edit_mob->nr)
-            GET_MOB_RNUM (temp_mob)++;
+          if (GET_MOB_RNUM(temp_mob) >= d->edit_mob->nr)
+            GET_MOB_RNUM(temp_mob)++;
 
         /* free and replace old tables */
-        delete [] mob_proto;
-        delete [] mob_index;
+        delete[] mob_proto;
+        delete[] mob_index;
         mob_proto = new_mob_proto;
         mob_index = new_mob_index;
 
         /* RENUMBER ZONE TABLES HERE, only              *
-        *   because I ADDED a mobile!                   *
-        *   This code shamelessly ripped off from db.c */
+         *   because I ADDED a mobile!                   *
+         *   This code shamelessly ripped off from db.c */
 
         int zone, cmd_no;
         for (zone = 0; zone <= top_of_zone_table; zone++)
           for (cmd_no = 0; cmd_no < zone_table[zone].num_cmds; cmd_no++) {
             switch (ZCMD.command) {
-              case 'S':
-              case 'M':
-                ZCMD.arg1 = (ZCMD.arg1 >= d->edit_mob->nr ? ZCMD.arg1 + 1 : ZCMD.arg1);
-                break;
+            case 'S':
+            case 'M':
+              ZCMD.arg1 =
+                  (ZCMD.arg1 >= d->edit_mob->nr ? ZCMD.arg1 + 1 : ZCMD.arg1);
+              break;
             }
           }
 
@@ -460,7 +464,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       break;
     default:
       send_to_char("Invalid choice!\r\n", d->character);
-      send_to_char("Do you wish to save this mobile internally?\r\n", d->character);
+      send_to_char("Do you wish to save this mobile internally?\r\n",
+                   d->character);
       break;
     }
 
@@ -628,7 +633,7 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       if (number == 0) // 0 = quit
         medit_disp_menu(d);
       else {
-        MOB_FLAGS(MOB).ToggleBit(number-1);
+        MOB_FLAGS(MOB).ToggleBit(number - 1);
         medit_disp_mobflags_menu(d);
       }
     }
@@ -678,8 +683,10 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       send_to_char("Enter bonus karma points: ", CH);
     } else {
       int karma;
-      if (number > (karma=calc_karma(NULL, MOB))) {
-        send_to_char("Bonus karma may not be higher than actual karma.  Lowering.\r\n", CH);
+      if (number > (karma = calc_karma(NULL, MOB))) {
+        send_to_char(
+            "Bonus karma may not be higher than actual karma.  Lowering.\r\n",
+            CH);
         number = karma;
       }
       GET_KARMA(MOB) = number;
@@ -818,7 +825,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       medit_disp_skill_menu(d);
     } else {
       MOB->mob_specials.mob_skills[1] = number;
-      SET_SKILL(MOB, MOB->mob_specials.mob_skills[0], MOB->mob_specials.mob_skills[1]);
+      SET_SKILL(MOB, MOB->mob_specials.mob_skills[0],
+                MOB->mob_specials.mob_skills[1]);
       d->edit_mode = MEDIT_SKILLS;
       medit_disp_skill_menu(d);
     }
@@ -836,7 +844,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       medit_disp_skill_menu(d);
     } else {
       MOB->mob_specials.mob_skills[3] = number;
-      SET_SKILL(MOB, MOB->mob_specials.mob_skills[2], MOB->mob_specials.mob_skills[3]);
+      SET_SKILL(MOB, MOB->mob_specials.mob_skills[2],
+                MOB->mob_specials.mob_skills[3]);
       d->edit_mode = MEDIT_SKILLS;
       medit_disp_skill_menu(d);
     }
@@ -854,7 +863,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       medit_disp_skill_menu(d);
     } else {
       MOB->mob_specials.mob_skills[5] = number;
-      SET_SKILL(MOB, MOB->mob_specials.mob_skills[4], MOB->mob_specials.mob_skills[5]);
+      SET_SKILL(MOB, MOB->mob_specials.mob_skills[4],
+                MOB->mob_specials.mob_skills[5]);
       d->edit_mode = MEDIT_SKILLS;
       medit_disp_skill_menu(d);
     }
@@ -872,7 +882,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       medit_disp_skill_menu(d);
     } else {
       MOB->mob_specials.mob_skills[7] = number;
-      SET_SKILL(MOB, MOB->mob_specials.mob_skills[6], MOB->mob_specials.mob_skills[7]);
+      SET_SKILL(MOB, MOB->mob_specials.mob_skills[6],
+                MOB->mob_specials.mob_skills[7]);
       d->edit_mode = MEDIT_SKILLS;
       medit_disp_skill_menu(d);
     }
@@ -890,12 +901,12 @@ void medit_parse(struct descriptor_data *d, const char *arg)
       medit_disp_skill_menu(d);
     } else {
       MOB->mob_specials.mob_skills[9] = number;
-      SET_SKILL(MOB, MOB->mob_specials.mob_skills[8], MOB->mob_specials.mob_skills[9]);
+      SET_SKILL(MOB, MOB->mob_specials.mob_skills[8],
+                MOB->mob_specials.mob_skills[9]);
       d->edit_mode = MEDIT_SKILLS;
       medit_disp_skill_menu(d);
     }
     break;
-
 
   case MEDIT_ATTRIBUTES:
     switch (*arg) {
@@ -1133,9 +1144,8 @@ void medit_parse(struct descriptor_data *d, const char *arg)
     if ((number < 0) || (number > 3)) {
       send_to_char("Invalid choice.\r\n", CH);
       medit_disp_gender_menu(d);
-    } else
-      if (number != 0) // 0 = quit
-        GET_SEX(MOB) = (number - 1);
+    } else if (number != 0) // 0 = quit
+      GET_SEX(MOB) = (number - 1);
     medit_disp_menu(d);
     break;
 
@@ -1144,17 +1154,14 @@ void medit_parse(struct descriptor_data *d, const char *arg)
     if ((number < 0) || (number > NUM_ATTACK_TYPES)) {
       send_to_char("Invalid choice.\r\n", CH);
       medit_disp_attack_menu(d);
-    } else
-      if (number != 0) // 0 = quit
-        MOB->mob_specials.attack_type = number-1 + TYPE_HIT;
+    } else if (number != 0) // 0 = quit
+      MOB->mob_specials.attack_type = number - 1 + TYPE_HIT;
     medit_disp_menu(d);
     break;
-
   }
 }
 
-void write_mobs_to_disk(int zone)
-{
+void write_mobs_to_disk(int zone) {
   int counter, realcounter;
   FILE *fp;
   struct char_data *mob;
@@ -1167,14 +1174,13 @@ void write_mobs_to_disk(int zone)
   fp = fopen(buf, "w+");
 
   /* start running through all mobiles in this zone */
-  for (counter = zone_table[zone].number * 100;
-       counter <= zone_table[zone].top;
+  for (counter = zone_table[zone].number * 100; counter <= zone_table[zone].top;
        counter++) {
     /* write mobile to disk */
     realcounter = real_mobile(counter);
 
     if (realcounter >= 0) {
-      mob = mob_proto+realcounter;
+      mob = mob_proto + realcounter;
       if (!strcmp("an unfinished mob", GET_NAME(mob)))
         continue;
       fprintf(fp, "#%ld\n", GET_MOB_VNUM(mob));
@@ -1183,17 +1189,18 @@ void write_mobs_to_disk(int zone)
               "Keywords:\t%s\n"
               "Name:\t%s\n"
               "RoomDesc:$\n%s\n~\n",
-              mob->player.physical_text.keywords?
-              mob->player.physical_text.keywords : "mob unnamed",
-              mob->player.physical_text.name?
-              mob->player.physical_text.name : "An unnamed mob",
-              cleanup(buf2, mob->player.physical_text.room_desc?
-                      mob->player.physical_text.room_desc : "An unnamed mob is here."));
+              mob->player.physical_text.keywords
+                  ? mob->player.physical_text.keywords
+                  : "mob unnamed",
+              mob->player.physical_text.name ? mob->player.physical_text.name
+                                             : "An unnamed mob",
+              cleanup(buf2, mob->player.physical_text.room_desc
+                                ? mob->player.physical_text.room_desc
+                                : "An unnamed mob is here."));
       fprintf(fp, "LookDesc:$\n%s~\n",
-              cleanup(buf2,
-                      mob->player.physical_text.look_desc?
-                      mob->player.physical_text.look_desc
-                      : "An unnamed mob is here."));
+              cleanup(buf2, mob->player.physical_text.look_desc
+                                ? mob->player.physical_text.look_desc
+                                : "An unnamed mob is here."));
 
       if (mob->char_specials.arrive)
         fprintf(fp, "ArriveMsg:\t%s\n", mob->char_specials.arrive);
@@ -1205,8 +1212,7 @@ void write_mobs_to_disk(int zone)
               "AffFlags:\t%s\n"
               "Race:\t%s\n"
               "Gender:\t%s\n",
-              MOB_FLAGS(mob).ToString(),
-              AFF_FLAGS(mob).ToString(),
+              MOB_FLAGS(mob).ToString(), AFF_FLAGS(mob).ToString(),
               pc_race_types[(int)mob->player.race],
               genders[(int)mob->player.sex]);
 
@@ -1219,7 +1225,7 @@ void write_mobs_to_disk(int zone)
 
       if (mob->mob_specials.attack_type != TYPE_HIT)
         fprintf(fp, "AttackType:\t%s\n",
-                attack_types[mob->mob_specials.attack_type-TYPE_HIT]);
+                attack_types[mob->mob_specials.attack_type - TYPE_HIT]);
 
       fprintf(fp,
               "[ATTRIBUTES]\n"
@@ -1257,20 +1263,18 @@ void write_mobs_to_disk(int zone)
         fprintf(fp, "\tKarma:\t%d\n", GET_KARMA(mob));
       fprintf(fp, "[SKILLS]\n");
 
-      for (i = 0; i <= 8; i = i +2)
+      for (i = 0; i <= 8; i = i + 2)
         if (mob->mob_specials.mob_skills[i])
-          fprintf(fp, "\t%s:\t%d\n", skills[mob->mob_specials.mob_skills[i]].name,
-                  mob->mob_specials.mob_skills[i+1]);
-
-
+          fprintf(fp, "\t%s:\t%d\n",
+                  skills[mob->mob_specials.mob_skills[i]].name,
+                  mob->mob_specials.mob_skills[i + 1]);
 
       fprintf(fp, "BREAK\n");
     } // close if statement
-  } // close for loop
+  }   // close for loop
 
   fprintf(fp, "END\n");
   fclose(fp);
 
   write_index_file("mob");
 }
-

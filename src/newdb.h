@@ -11,31 +11,20 @@
 
 class File;
 
-class DBIndex
-{
+class DBIndex {
 public:
   typedef long vnum_t;
   typedef long rnum_t;
 
-  virtual ~DBIndex()
-  {}
+  virtual ~DBIndex() {}
 
-  static bool IsValidR(rnum_t idx)
-  {
-    return (idx >= 0);
-  }
-  static bool IsValidV(vnum_t virt)
-  {
-    return (virt >= 0);
-  }
-
+  static bool IsValidR(rnum_t idx) { return (idx >= 0); }
+  static bool IsValidV(vnum_t virt) { return (virt >= 0); }
 };
 
-class PCIndex : public DBIndex
-{
+class PCIndex : public DBIndex {
 private:
-  struct entry
-  {
+  struct entry {
     char name[MAX_NAME_LENGTH];
     vnum_t id;
     int level;
@@ -44,8 +33,7 @@ private:
     char_data *active_data;
     int instance_cnt;
 
-    entry &operator=(const entry &two)
-    {
+    entry &operator=(const entry &two) {
       strcpy(name, two.name);
       id = two.id;
       level = two.level;
@@ -56,8 +44,7 @@ private:
 
       return *this;
     }
-  }
-  *tab;
+  } * tab;
 
   // TODO: a tree structure
 
@@ -65,26 +52,18 @@ private:
   int entry_size;
   bool needs_save;
 
-  enum {
-    NODELETE = (1 << 12)
-  };
+  enum { NODELETE = (1 << 12) };
 
 public:
   PCIndex();
   ~PCIndex();
 
-  bool Load()
-  {
-    return load();
-  }
+  bool Load() { return load(); }
   bool Save();
 
   // lookup/access functions
   //
-  int NumPlayers()
-  {
-    return entry_cnt;
-  }
+  int NumPlayers() { return entry_cnt; }
 
   // mutation functions
   //
@@ -107,7 +86,7 @@ public:
 private:
   void reset();
   bool load();
-  int  count_entries(File *index);
+  int count_entries(File *index);
   void sort_by_id();
   void resize_table(int empty_slots = 100);
   void sorted_insert(const entry *info);
