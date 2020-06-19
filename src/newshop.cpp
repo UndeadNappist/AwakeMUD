@@ -490,7 +490,8 @@ void shop_buy(char *arg, struct char_data *ch, struct char_data *keeper,
     
     // How about, instead of silently penalizing someone for too large of an order, you just deny it?
     if (buynum > 50) {
-      do_say(keeper, "Orders that big draw too much attention.", GET_CHAR_NAME(ch));
+      sprintf(buf, "%s Orders that big draw too much attention.", GET_CHAR_NAME(ch));
+      do_say(keeper, buf, cmd_say, SCMD_SAYTO);
       return;
     }
     int target = GET_OBJ_AVAILTN(obj) - GET_AVAIL_OFFSET(ch);
